@@ -66,10 +66,10 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 | Function               | Description                                                                                     | Role   |
 |------------------------|-------------------------------------------------------------------------------------------------|--------|
 | **Get-StorageAccounts**    | Gets all storage accounts                                                                       | Reader |
-| **Get-StorageAccountKeys** | Gets the account keys for a storage account                                                     | Reader |
+| **Get-StorageAccountKeys** | Gets the account keys for a storage account                                                     | Contributor |
 | **Get-StorageContents**    | Gets the contents of a storage container or file share                                          | Reader |
 | **Get-Runbooks**           | Lists all the Runbooks                                                                          | Reader |
 | **Get-Runbook**            | Reads content of a specific Runbook                                                             | Reader |
 | **Get-AvailableVMDisks**   | Lists the VM disks available.                                                                   | Reader |
-| **Get-VMDisk**             | Generates a link to download a Virtual Machiche's disk. The link is only available for an hour. | Reader |
+| **Get-VMDisk**             | Generates a link to download a Virtual Machiche's disk. The link is only available for an hour. | Contributor |
 | **Get-VMs**                | Lists available VMs                                                                             | Reader |
