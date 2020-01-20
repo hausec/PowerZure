@@ -54,8 +54,8 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 | Function                  | Description                                                                  | Role        |
 |---------------------------|------------------------------------------------------------------------------|-------------|
 | **Get-KeyVaults**             | Lists the Key Vaults                                                         | Reader      |
-| **Get-KeyVaultSecrets**       | Get the secrets from a specific Key Vault                                    | Contributor |
-| **Get-AllKeyVaultSecrets**    | Gets ALL the secrets from all Key Vaults.                                    | Contributor |
+| **Get-KeyVaultContents**       | Get the secrets from a specific Key Vault                                    | Contributor |
+| **Get-AllKeyVaultContents**    | Gets ALL the secrets from all Key Vaults.                                    | Contributor |
 | **Get-AppSecrets**            | Returns the application passwords or certificate credentials                 | Contributor |
 | **Get-AllAppSecrets**         | Returns all application passwords or certificate credentials (If accessible) | Contributor |
 | **Get-AllSecrets**            | Gets ALL the secrets from all Key Vaults and applications.                   | Contributor |
