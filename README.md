@@ -45,6 +45,7 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 | **Get-RoleMembers**          | Gets the members of a role                                                          | Reader |
 | **Get-Sps**                  | Returns all service principals                                                      | Reader |
 | **Get-Sp**                   | Returns all info on a specified service principal                                   | Reader |
+| **Get-Apps**                 | Gets all applications and their Ids                                                 | Reader |
 | **Get-AppPermissions**       | Returns the permissions of an app                                                   | Reader |
 | **Get-WebApps**              | Gets running web apps                                                               | Reader |
 | **Get-WebAppDetails**        | Gets running webapps details                                                        | Reader |
