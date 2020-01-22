@@ -33,14 +33,14 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 | Function                 | Description                                                                         | Role   |
 |--------------------------|-------------------------------------------------------------------------------------|--------|
 | **Get-CurrentUser**          | Returns the current logged in user name, their role + groups, and any owned objects | Reader |
-| **Get-AzureUsers**           | Lists all users in the subscription                                                 | Reader |
-| **Get-AzureUser**            | Gathers info on a specific user                                                     | Reader |
-| **Get-AzureGroups**          | Lists all groups + info within Azure AD                                             | Reader |
+| **Get-AllUsers**           | Lists all users in the subscription                                                 | Reader |
+| **Get-User**            | Gathers info on a specific user                                                     | Reader |
+| **Get-AllGroups**          | Lists all groups + info within Azure AD                                             | Reader |
 | **Get-Resources**            | Lists all resources in the subscription                                             | Reader |
-| **Get-AzureApps**           | Lists all applications in the subscription                                          | Reader |
-| **Get-AzureGroupMembers**   | Gets all the members of a specific group. Group does NOT mean role.                 | Reader |
-| **Get-AllAzureGroupMembers** | Gathers all the group members of all the groups.                                    | Reader |
-| **Get-AllAzureRoleMembers**  | Gets all the members of all roles. Roles does not mean groups.                      | Reader |
+| **Get-Apps**           | Lists all applications in the subscription                                          | Reader |
+| **Get-GroupMembers**   | Gets all the members of a specific group. Group does NOT mean role.                 | Reader |
+| **Get-AllGroupMembers** | Gathers all the group members of all the groups.                                    | Reader |
+| **Get-AllRoleMembers**  | Gets all the members of all roles. Roles does not mean groups.                      | Reader |
 | **Get-Roles**                | Lists the roles in the subscription                                                 | Reader |
 | **Get-RoleMembers**          | Gets the members of a role                                                          | Reader |
 | **Get-Sps**                  | Returns all service principals                                                      | Reader |

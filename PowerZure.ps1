@@ -14,7 +14,15 @@ If ($Modules.Name -contains 'Az')
 Else
 {
     Write-Host "Az Module not installed. Installing."
+    #This installs the Az module
     Install-Module -Name Az -AllowClobber
+    #This installs the Az CLI modules
+    Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+    $directory = pwd
+    #After installing the modules, PS needs to be restarted and PowerZure needs to be reimported.
+    Start-Process powershell.exe -argument "-noexit -command ipmo '$directory\PowerZure.ps1'"
+    #Killing old PS window
+    Stop-Process -Id $PID
 }
 #Login Check
 $ErrorActionPreference = "silentlyContinue"
@@ -127,15 +135,16 @@ Contributor     Start-Runbook - Starts a specific Runbook
                 ------------------Info Gathering -------------
 
 Reader          Get-CurrentUser - Returns the current logged in user name, their role + groups, and any owned objects
-Reader          Get-AzureUsers - Lists all users in the subscription
-Reader          Get-AzureUser - Gathers info on a specific user
-Reader          Get-AzureGroups - Lists all groups + info within Azure AD
+Reader          Get-AllUsers - Lists all users in the subscription
+Reader          Get-User - Gathers info on a specific user
+Reader          Get-AllGroups - Lists all groups + info within Azure AD
 Reader          Get-Resources - Lists all resources in the subscription
-Reader          Get-AzureApps - Lists all applications in the subscription
-Reader          Get-AzureGroupMembers - Gets all the members of a specific group. Group does NOT mean role.
-Reader          Get-AllAzureGroupMembers - Gathers all the group members of all the groups.
-Reader          Get-AllAzureRoleMembers - Gets all the members of all roles. Roles does not mean groups.
-Reader          Get-Roles -  Gets the members of a role 
+Reader          Get-Apps - Lists all applications in the subscription
+Reader          Get-GroupMembers - Gets all the members of a specific group. Group does NOT mean role.
+Reader          Get-AllGroupMembers - Gathers all the group members of all the groups.
+Reader          Get-AllRoleMembers - Gets all the members of all roles. Roles does not mean groups.
+Reader          Get-RoleMembers -  Gets the members of a role 
+Reader          Get-Roles - Gets the roles of a user
 Reader          Get-ServicePrincipals - Returns all service principals
 Reader          Get-ServicePrincipal - Returns all info on a specified service principal
 Reader          Get-Apps - Returns all applications and their Ids
@@ -184,7 +193,7 @@ function Get-Resources
         az resource list --query '[].{Name:name,RG:resourceGroup,Location:location}' -o table
 }
 
-function Get-AzureUsers 
+function Get-AllUsers 
 {
 <# 
 .SYNOPSIS
@@ -224,7 +233,7 @@ function Get-AzureUsers
 
 }
 
-function Get-AzureUser 
+function Get-User 
 {
 <# 
 .SYNOPSIS
@@ -270,7 +279,7 @@ function Get-AzureUser
     }
 }
 
-function Get-AzureGroups 
+function Get-AllGroups 
 {
 <# 
 .SYNOPSIS
@@ -309,7 +318,7 @@ function Get-AzureGroups
      
 }
 
-function Get-AzureApps 
+function Get-Apps 
 {
 <# 
 .SYNOPSIS
@@ -348,7 +357,7 @@ function Get-AzureApps
     
 }
 
-function Get-AzureGroupMembers 
+function Get-GroupMembers 
 {
 <# 
 .SYNOPSIS
@@ -400,7 +409,7 @@ function Get-AzureGroupMembers
     
 }
 
-function Get-AllAzureGroupMembers 
+function Get-AllGroupMembers 
 {
 <# 
 .SYNOPSIS
@@ -440,7 +449,7 @@ function Get-AllAzureGroupMembers
         }
 }
 
-function Get-AllAzureRoleMembers 
+function Get-AllRoleMembers 
 {
 <# 
 .SYNOPSIS
@@ -486,7 +495,7 @@ function Get-AllAzureRoleMembers
 	}
 }
 
-function Get-Roles 
+function Get-Roles
 {
 <# 
 .SYNOPSIS
