@@ -256,7 +256,7 @@ function Get-User
     }
     else
     {
-        $Id = az ad user list --query "[?userPrincipalName=='$Name'].{Id:objectId}" -o tsv
+        $Id = az ad user list --query "[?userPrincipalName=='$User'].{Id:objectId}" -o tsv
         $Username = az ad user list --upn $User --query '[].{UPN:userPrincipalName,ObjectType:objectType,DN:onPremisesDistinguishedName,UserType:userType,Enabled:accountEnabled}' -o yaml
         $Name = az ad user list --display-name $User --query '[].{UPN:userPrincipalName}' -o tsv
         $Roles = az role assignment list --all --query "[?principalName=='$User'].{Role:roleDefinitionName}" -o yaml
@@ -555,12 +555,13 @@ function Set-Role
 {
 <# 
 .SYNOPSIS
-    Assigns a user a role for a specific resource
+    Assigns a user a role for a specific resource or subscription 
 
 .PARAMETER 
     -User
     -Role
     -Resource
+    -Subscription (Name of subscription)
 
 .EXAMPLE
     Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM
@@ -570,14 +571,23 @@ function Set-Role
     [CmdletBinding()]
     Param(
     [Parameter(Mandatory=$false)][String]$Resource = $null,
+    [Parameter(Mandatory=$false)][String]$Subscription = $null,
     [Parameter(Mandatory=$false)][String]$User = $null,
     [Parameter(Mandatory=$false)][String]$Role = $null)
 
-    if($Resource -eq "")
+    if($Subscription)
         {
-            Write-Host "Requires a Resource name." -ForegroundColor Red
-            Write-Host "Usage Example: Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM" -ForegroundColor Red
+           $assign=az role assignment create --assignee $User --role $Role --subscription $Subscription
+           if(!$assign)
+           {
+                Write-Host "Failed to assign role."
+           }
+           else
+           {
+                Write-Host "Successfully added $User to $Role for $Subscription"
+           }
         }
+
     elseif($User -eq "")
         {
             Write-Host "Requires a User name." -ForegroundColor Red
@@ -590,15 +600,31 @@ function Set-Role
         }
     else
         {
-            $Scope = az resource list --name $Resource --query '[].{id:id}' -o tsv
-            try
+            if($Resource -eq "")
             {
-                az role assignment create --role $Role --assignee $User --scope $Scope | Out-Null
-                Write-Host "Successfully added $User to $Role for $Resource"
+                 Write-Host "Requires a Resource name." -ForegroundColor Red
+                 Write-Host "Usage Example: Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM" -ForegroundColor Red
             }
-            catch
+            else
             {
-                Write-Host "Failed to add $User to $Role for $Resource"
+                $Scope = az resource list --name $Resource --query '[].{id:id}' -o tsv
+                try
+                {
+                    $create = az role assignment create --role $Role --assignee $User --scope $Scope | Out-Null
+                    If(!$create)
+                    {
+                        Write-Host "Failed to add $User to $Role for $Resource"
+                    }
+                    else
+                    {
+                        
+                        Write-Host "Successfully added $User to $Role for $Resource"
+                    }
+                
+                }
+                catch
+                {  
+                }
             }
         }
 
