@@ -2,18 +2,18 @@
 
 PowerZure is a PowerShell script written to assist in assessing Azure security. Functions are broken out into their context as well as the role needed to run them. 
 
-# Help
+## Help
 | Function         | Description                                 | Role   |
 |------------------|---------------------------------------------|--------|
 | **PowerZure -h**| Diplays the help menu | Any |
 
-# Mandatory
+## Mandatory
 
 | Function         | Description                                 | Role   |
 |------------------|---------------------------------------------|--------|
 | **Set-Subscription**| Sets the default Subscription to operate in | Reader |
 
-# Operational
+## Operational
 
 | Function              | Description                                                                                                    | Role          |
 |-----------------------|----------------------------------------------------------------------------------------------------------------|---------------|
@@ -27,8 +27,12 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 | **Start-VM**              | Starts a VM                                                                                                    | Contributor   |
 | **Restart-VM**            | Restarts a VM                                                                                                  | Contributor   |
 | **Start-Runbook**         | Starts a specific Runbook                                                                                      | Contributor   |
+| **Set-Role** 				| Sets a role for a specific user on a specific resource or subscription	        							 | Owner		 |
+| **Remove-Role**			| Removes a user from a role on a specific resource or subscription												 | Owner         |
+| **Set-Group**				| Adds a user to a group																						 | Administrator |
 
-# Information Gathering
+
+## Information Gathering
 
 | Function                 | Description                                                                         | Role   |
 |--------------------------|-------------------------------------------------------------------------------------|--------|
@@ -50,7 +54,7 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 | **Get-WebApps**              | Gets running web apps                                                               | Reader |
 | **Get-WebAppDetails**        | Gets running webapps details                                                        | Reader |
 
-# Secret Gathering
+## Secret Gathering
 
 | Function                  | Description                                                                  | Role        |
 |---------------------------|------------------------------------------------------------------------------|-------------|
@@ -62,7 +66,7 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 | **Get-AllSecrets**            | Gets ALL the secrets from all Key Vaults and applications.                   | Contributor |
 | **Get-AutomationCredentials** | Gets the credentials from any Automation Accounts                            | Contributor |
 
-# Data Exfiltration
+## Data Exfiltration
 
 | Function               | Description                                                                                     | Role   |
 |------------------------|-------------------------------------------------------------------------------------------------|--------|

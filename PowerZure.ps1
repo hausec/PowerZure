@@ -131,6 +131,10 @@ Contributor     Stop-VM - Stops a VM
 Contributor     Start-VM - Starts a VM
 Contributor     Restart-VM - Restarts a VM
 Contributor     Start-Runbook - Starts a specific Runbook
+Owner           Set-Role - Adds a user to a role for a resource or a subscription
+Owner           Remove-Role -Removes a user from a role on a resource or subscription
+Administrator   Set-Group - Adds a user to an Azure AD group
+
 
                 ------------------Info Gathering -------------
 
@@ -449,6 +453,42 @@ function Get-AllGroupMembers
         }
 }
 
+function Set-Group 
+{
+<# 
+.SYNOPSIS
+    Adds a user to an Azure AD Group
+
+.PARAMETER 
+    -User (UPN of the user)
+    -Group (AAD Group name)
+
+.EXAMPLE
+    Set-Group -User john@contoso.com -Group 'SQL Users'
+#>
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$false)][String]$Group = $null,
+    [Parameter(Mandatory=$false)][String]$User = $null)    
+
+    If($User -eq "")
+    {
+        Write-Host "Requires a UserPrincipalName, e.g. User@domain.com" -ForegroundColor Red
+        Write-Host "Usage Example: Set-Group -User john@contoso.com -Group 'SQL Users'" -ForegroundColor Red
+    }
+    elseif($Group -eq "")
+    {
+        Write-Host "Requires a Group name, e.g. Administrators" -ForegroundColor Red
+        Write-Host "Usage Example: Set-Group -User john@contoso.com -Group 'SQL Users'" -ForegroundColor Red
+    }
+    else
+    {
+        $Id = az ad user list --query "[?userPrincipalName=='$User'].{Id:objectId}" -o tsv
+        az ad group member add --group $Group --member-id $Id
+    }
+
+}
+
 function Get-AllRoleMembers 
 {
 <# 
@@ -565,6 +605,7 @@ function Set-Role
 
 .EXAMPLE
     Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM
+    Set-Role -Role Owner -User john@contoso.com -Subscription SubName
     
 #>
 
@@ -592,11 +633,13 @@ function Set-Role
         {
             Write-Host "Requires a User name." -ForegroundColor Red
             Write-Host "Usage Example: Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM" -ForegroundColor Red
+            Write-Host "Usage Example: Set-Role -Role Owner -User john@contoso.com -Subscription SubName" -ForegroundColor Red
         }
     elseif($Role -eq "")
         {
             Write-Host "Requires a Role name." -ForegroundColor Red
             Write-Host "Usage Example: Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM" -ForegroundColor Red
+            Write-Host "Usage Example: Set-Role -Role Owner -User john@contoso.com -Subscription SubName" -ForegroundColor Red
         }
     else
         {
@@ -604,6 +647,7 @@ function Set-Role
             {
                  Write-Host "Requires a Resource name." -ForegroundColor Red
                  Write-Host "Usage Example: Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM" -ForegroundColor Red
+                 Write-Host "Usage Example: Set-Role -Role Owner -User john@contoso.com -Subscription SubName" -ForegroundColor Red
             }
             else
             {
@@ -619,6 +663,89 @@ function Set-Role
                     {
                         
                         Write-Host "Successfully added $User to $Role for $Resource"
+                    }
+                
+                }
+                catch
+                {  
+                }
+            }
+        }
+
+}
+
+function Remove-Role
+{
+<# 
+.SYNOPSIS
+    Removes a user from a role on a specific resource or subscription 
+
+.PARAMETER 
+    -User
+    -Role
+    -Resource
+    -Subscription (Name of subscription)
+
+.EXAMPLE
+    Remove-Role -Role Owner -User john@contoso.com -Resource WIN10VM
+    Remove-Role -Role Owner -User john@contoso.com -Subscription SubName
+    
+#>
+
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$false)][String]$Resource = $null,
+    [Parameter(Mandatory=$false)][String]$Subscription = $null,
+    [Parameter(Mandatory=$false)][String]$User = $null,
+    [Parameter(Mandatory=$false)][String]$Role = $null)
+
+    if($Subscription)
+        {
+           $assign=az role assignment delete --assignee $User --role $Role --subscription $Subscription
+           if(!$assign)
+           {
+                Write-Host "Successfully deleted $User from $Role for $Subscription"    
+           }
+           else
+           {
+                Write-Host "Failed to delete role."
+           }
+        }
+
+    elseif($User -eq "")
+        {
+            Write-Host "Requires a User name." -ForegroundColor Red
+            Write-Host "Usage Example: Remove-Role -Role Owner -User john@contoso.com -Resource WIN10VM" -ForegroundColor Red
+            Write-Host "Usage Example: Remove-Role -Role Owner -User john@contoso.com -Subscription SubName" -ForegroundColor Red
+        }
+    elseif($Role -eq "")
+        {
+            Write-Host "Requires a Role name." -ForegroundColor Red
+            Write-Host "Usage Example: Remove-Role -Role Owner -User john@contoso.com -Resource WIN10VM" -ForegroundColor Red
+            Write-Host "Usage Example: Remove-Role -Role Owner -User john@contoso.com -Subscription SubName" -ForegroundColor Red
+        }
+    else
+        {
+            if($Resource -eq "")
+            {
+                 Write-Host "Requires a Resource name." -ForegroundColor Red
+                 Write-Host "Usage Example: Remove-Role -Role Owner -User john@contoso.com -Resource WIN10VM" -ForegroundColor Red
+                 Write-Host "Usage Example: Remove-Role -Role Owner -User john@contoso.com -Subscription SubName" -ForegroundColor Red
+            }
+            else
+            {
+                $Scope = az resource list --name $Resource --query '[].{id:id}' -o tsv
+                try
+                {
+                    $create = az role assignment delete --role $Role --assignee $User --scope $Scope | Out-Null
+                    If(!$create)
+                    {
+                        Write-Host "Successfully deleted $User from $Role for $Resource"
+                    }
+                    else
+                    {
+                        Write-Host "Failed to delete $User to $Role for $Resource"
+                        
                     }
                 
                 }
