@@ -26,11 +26,23 @@ Else
 }
 #Login Check
 $ErrorActionPreference = "silentlyContinue"
+Write-Host @'
+                                                                                                                          
+8888888b.                                              8888888888P                           
+888   Y88b    ________                                       d88P                            
+888    888  /\  ___   \                                     d88P                             
+888   d88P /  \/   \   \ 888  888  888  .d88b.  888d888   d88P    888  888 888d888  .d88b.  
+8888888P"     | # # |    888  888  888 d8P  Y8b 888P"    d88P     888  888 888P"   d8P  Y8b 
+888        |  |     |\ | 888  888  888 88888888 888     d88P      888  888 888     88888888 
+888            \_ _/  \  Y88b 888 d88P Y8b.     888    d88P       Y88b 888 888     Y8b.     
+888         \_________/   "Y8888888P"   "Y8888  888   d8888888888  "Y88888 888      "Y8888                                                                                                                      
+                                                                                                                   
+'@ 
 Try
 {  
     $User = az ad signed-in-user show --query '[userPrincipalName]' -o tsv
     if ($User.Length -gt 1)
-    {
+    {                                                   
     $Id = az ad signed-in-user show --query '[objectId]' -o tsv
     Write-Host "Welcome $User"
     Write-Host ""
@@ -172,7 +184,7 @@ Reader          Get-StorageAccounts - Gets all storage accounts
 Contributor     Get-StorageAccountKeys -  Gets the account keys for a storage account
 Reader          Get-StorageContents - Gets the contents of a storage container or file share. OAuth is not support to access file shares via cmdlets, so you must have access to the Storage Account's key.
 Reader          Get-Runbooks - Lists all the Runbooks
-Reader          Get-Runbook - Reads content of a specific Runbook
+Reader          Get-RunbookContent - Reads content of a specific Runbook
 Reader          Get-AvailableVMDisks -  Lists the VM disks available. 
 Contributor     Get-VMDisk - Generates a link to download a Virtual Machiche's disk. The link is only available for an hour.
 Reader          Get-VMs - Lists available VMs      
@@ -763,7 +775,7 @@ function Get-KeyVaults
 .SYNOPSIS
     Lists the Key Vaults
 #>
-    az keyvault list --query '[].{Name:name,ResourceGroup:resourceGroup,Tags:tags}' -o yaml
+    Get-AzKeyVault
 }
 
 function Get-KeyVaultContents
@@ -1521,7 +1533,7 @@ function Get-Runbooks
 
 }
 
-function Get-Runbook
+function Get-RunbookContent
 {
  <#
 .SYNOPSIS
@@ -1536,9 +1548,9 @@ function Get-Runbook
 
     -Slot (Optional; use if differenciating between published or drafted Runbook)
 .EXAMPLE
-    Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook
-    Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Published"
-    Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Draft"
+    Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook
+    Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Published"
+    Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Draft"
 #>
         [CmdletBinding()]
          Param(
@@ -1551,23 +1563,23 @@ function Get-Runbook
      if($ResourceGroup -eq "")
      {
         Write-Host "Requires Resource Group name" -ForegroundColor Red
-        Write-Host "Usage: Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook" -ForegroundColor Red
-        Write-Host "       Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Published"" -ForegroundColor Red
-        Write-Host "       Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Draft"" -ForegroundColor Red
+        Write-Host "Usage: Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook" -ForegroundColor Red
+        Write-Host "       Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Published"" -ForegroundColor Red
+        Write-Host "       Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Draft"" -ForegroundColor Red
      }
      elseif($Account -eq "")
      {
         Write-Host "Requires Account name" -ForegroundColor Red
-        Write-Host "Usage: Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook" -ForegroundColor Red
-        Write-Host "       Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Published"" -ForegroundColor Red
-        Write-Host "       Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Draft"" -ForegroundColor Red
+        Write-Host "Usage: Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook" -ForegroundColor Red
+        Write-Host "       Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Published"" -ForegroundColor Red
+        Write-Host "       Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Draft"" -ForegroundColor Red
      }
      elseif($Runbook -eq "")
      {
         Write-Host "Requires Runbook name" -ForegroundColor Red
-        Write-Host "Usage: Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook" -ForegroundColor Red
-        Write-Host "       Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Published"" -ForegroundColor Red
-        Write-Host "       Get-Runbook -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Draft"" -ForegroundColor Red
+        Write-Host "Usage: Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook" -ForegroundColor Red
+        Write-Host "       Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Published"" -ForegroundColor Red
+        Write-Host "       Get-RunbookContent -Account AutomationAccountexample -ResourceGroup TestGroup -Runbook TestBook -Slot "Draft"" -ForegroundColor Red
      }
 
 
