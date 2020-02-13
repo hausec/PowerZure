@@ -46,7 +46,7 @@ Try
     $Id = az ad signed-in-user show --query '[objectId]' -o tsv
     Write-Host "Welcome $User"
     Write-Host ""
-    Write-Host "Please set your default subscription with 'Set-Subscription --subscription {id}"
+    Write-Host "Please set your default subscription with 'Set-Subscription -Id {id}' or 'az account set --subscription {id}'"
     Write-Host ""
     Write-Host "Here are the subscriptions you have access to:"
     Write-Host ""
