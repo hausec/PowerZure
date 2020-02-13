@@ -1663,7 +1663,7 @@ function Execute-Command
 {
  <#
 .SYNOPSIS
-    Will run a command on a specified VM
+    Will run a command or script on a specified VM
 
 .PARAMETER
     -OS (Windows/Linux)
@@ -1676,6 +1676,7 @@ function Execute-Command
 #>
         [CmdletBinding()]
          Param(
+        [Parameter(Mandatory=$false)][String]$File = $null,
         [Parameter(Mandatory=$false)][String]$OS = $null,
         [Parameter(Mandatory=$false)][String]$Command = $null,
         [Parameter(Mandatory=$false)][String]$VM = $null,
@@ -1717,6 +1718,73 @@ function Execute-Command
             }
     }
 }
+
+function Execute-Script
+{
+ <#
+.SYNOPSIS
+    Will run a command or script on a specified VM
+
+.PARAMETER
+    -OS (Windows/Linux)
+    -ResourceGroup (Resource group it's located in)
+    -Command 
+    -VM (Name of VM to run file on. Obviously must be Windows with .net installed)
+    -File (Must be a PS or bash script)
+
+.EXAMPLE
+    Execute-Script -OS Windows -ResourceGroup TestRG -VM AzureWin10 -Command whoami
+#>
+        [CmdletBinding()]
+         Param(
+        [Parameter(Mandatory=$false)][String]$File = $null,
+        [Parameter(Mandatory=$false)][String]$OS = $null,
+        [Parameter(Mandatory=$false)][String]$Command = $null,
+        [Parameter(Mandatory=$false)][String]$VM = $null,
+        [Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
+
+     if($ResourceGroup -eq "")
+     {
+        Write-Host "Requires Resource Group name" -ForegroundColor Red
+        Write-Host "Usage: Execute-Script -OS Windows -ResourceGroup TestRG -VM AzureWin10 -File C:\path\to\script" -ForegroundColor Red
+     }
+     elseif($OS -eq "")
+     {
+        Write-Host "Requires Operating System (Linux or Windows)" -ForegroundColor Red
+        Write-Host "Usage: Execute-Script -OS Windows -ResourceGroup TestRG -VM AzureWin10 -File C:\path\to\script" -ForegroundColor Red
+     }
+     elseif($Command -eq "")
+     {
+        Write-Host "Requires a command" -ForegroundColor Red
+        Write-Host "Usage: Execute-Script -OS Windows -ResourceGroup TestRG -VM AzureWin10 -File C:\path\to\script" -ForegroundColor Red
+     }
+     elseif($VM -eq "")
+     {
+        Write-Host "Requires VM name" -ForegroundColor Red
+        Write-Host "Usage: Execute-Script -OS Windows -ResourceGroup TestRG -VM AzureWin10 -File C:\path\to\script" -ForegroundColor Red
+     }
+     elseif($File -eq "")
+     {
+        Write-Host "Requires a supplied .ps1 or bash script" -ForegroundColor Red
+        Write-Host "Usage: Execute-Script -OS Windows -ResourceGroup TestRG -VM AzureWin10 -File C:\path\to\script" -ForegroundColor Red
+     }
+     else
+     {
+            if($OS -eq "Linux")
+            {
+                az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunShellScripts --scripts @$File
+            }
+            elseif($OS -eq "Windows")
+            {
+                az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript --scripts @$File
+            }
+            else
+            {
+            Write-Host "OS Must be Windows or Linux"
+            }
+
+}
+
 
 function Execute-Program
 {
