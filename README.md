@@ -5,7 +5,7 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 ## Help
 | Function         | Description                                 | Role   |
 |------------------|---------------------------------------------|--------|
-| **PowerZure -h**| Diplays the help menu | Any |
+| **PowerZure -h**| Displays the help menu | Any |
 
 ## Mandatory
 
@@ -76,5 +76,5 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 | **Get-Runbooks**           | Lists all the Runbooks                                                                          | Reader |
 | **Get-RunbookContent**     | Reads content of a specific Runbook                                                             | Reader |
 | **Get-AvailableVMDisks**   | Lists the VM disks available.                                                                   | Reader |
-| **Get-VMDisk**             | Generates a link to download a Virtual Machiche's disk. The link is only available for an hour. | Contributor |
+| **Get-VMDisk**             | Generates a link to download a Virtual Machine's disk. The link is only available for an hour. | Contributor |
 | **Get-VMs**                | Lists available VMs                                                                             | Reader |
