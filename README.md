@@ -36,6 +36,7 @@ PowerZure is a PowerShell script written to assist in assessing Azure security. 
 
 | Function                 | Description                                                                         | Role   |
 |--------------------------|-------------------------------------------------------------------------------------|--------|
+| **Get-Targets**			|	Compares your role to your scope to determine what you have access to and what kind of access it is (Read/write/execute).	| Reader |
 | **Get-CurrentUser**          | Returns the current logged in user name, their role + groups, and any owned objects | Reader |
 | **Get-AllUsers**           | Lists all users in the subscription                                                 | Reader |
 | **Get-User**            | Gathers info on a specific user                                                     | Reader |

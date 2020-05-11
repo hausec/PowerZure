@@ -46,15 +46,10 @@ Try
     $Id = az ad signed-in-user show --query '[objectId]' -o tsv
     Write-Host "Welcome $User"
     Write-Host ""
-    Write-Host "Please set your default subscription with 'Set-Subscription -Id {id}' or 'az account set --subscription {id}'"
+    Write-Host "Please set your default subscription with 'Set-Subscription -Id {id}' or 'az account set --subscription {id}' if you have multiple subscriptions."
     Write-Host ""
-    Write-Host "Here are the subscriptions you have access to:"
-    Write-Host ""
-    az account list --query '[].{SubscriptionName:name,Id:id,TenantId:tenantId}' -o Table
-    Write-Host ""
-    Write-Host "Here are your roles:" 
-    Write-Host ""
-    az role assignment list --all --query "[?principalName=='$User'].{Role:roleDefinitionName,ResoureGroup:resourceGroup}" -o table
+    Write-Host "Here are your roles and subscriptions:"
+	az role assignment list --all --query "[?principalName=='$User'].{Scope:scope,Role:roleDefinitionName}" | ConvertFrom-Json
     Write-Host ""
     Write-Host "Here are the AD groups you belong to:"
     Write-Host ""
@@ -150,6 +145,7 @@ Administrator   Set-Group - Adds a user to an Azure AD group
 
                 ------------------Info Gathering -------------
 
+Reader			Get-Targets - Compares your role to your scope to determine what you have access to and what kind of access it is (Read/write/execute).	
 Reader          Get-CurrentUser - Returns the current logged in user name, their role + groups, and any owned objects
 Reader          Get-AllUsers - Lists all users in the subscription
 Reader          Get-User - Gathers info on a specific user
@@ -891,12 +887,10 @@ function Get-CurrentUser
         [Parameter(Mandatory=$false)][Switch]$all = $null)
 	if($all)
      {
-         az ad signed-in-user show -o json | ConvertFrom-Json  
-		 $UID=az ad signed-in-user show --query 'userPrincipalName' -o tsv
+        az ad signed-in-user show -o json | ConvertFrom-Json  
+		$UID=az ad signed-in-user show --query 'userPrincipalName' -o tsv
 		Write-Host ""
-		az role assignment list --all --query "[?principalName=='$UID'].{Role:roleDefinitionName,Name:principalName,Type:principalType,ResourceGroup:resourceGroup}" -o table
-		Write-Host ""
-		az role assignment list --all --query "[?principalName=='$UID'].{Scope:scope}" -o table
+		az role assignment list --all --query "[?principalName=='$UID'].{Scope:scope,Role:roleDefinitionName}" | ConvertFrom-Json
 		Write-Host ""
 		Write-Host "Owned Objects:"
 		Write-Host ""
@@ -908,9 +902,7 @@ function Get-CurrentUser
      {
 		$UID=az ad signed-in-user show --query 'userPrincipalName' -o tsv
 		Write-Host ""
-		az role assignment list --all --query "[?principalName=='$UID'].{Role:roleDefinitionName,Name:principalName,Type:principalType,ResourceGroup:resourceGroup}" -o table
-		Write-Host ""
-		az role assignment list --all --query "[?principalName=='$UID'].{Scope:scope}" -o table
+		az role assignment list --all --query "[?principalName=='$UID'].{Scope:scope,Role:roleDefinitionName}" | ConvertFrom-Json
 		Write-Host ""
 		Write-Host "Owned Objects:"
 		Write-Host ""
@@ -1126,7 +1118,7 @@ function Get-WebAppDetails
 function Get-StorageAccounts
 {
 <#
-.SNYOPSIS 
+.SYNOPSIS 
     Gets storage blobs 
 #>
     az storage account list --query '[].{Name:name,URL:primaryEndpoints.blob}' -o table
@@ -1865,7 +1857,7 @@ function Execute-MSBuild
         Write-Host "Usage: Execute-MSBuild -ResourceGroup TestRG -VM AzureWin10 -File /path/to/payload/onyourmachine.xml" -ForegroundColor Red
      }
      elseif($VM -eq "")
-     {
+     {rhausknec
         Write-Host "Requires VM name" -ForegroundColor Red
         Write-Host "Usage: Execute-MSBuild -ResourceGroup TestRG -VM AzureWin10 -File /path/to/payload/onyourmachine.xml" -ForegroundColor Red
      }
@@ -1991,4 +1983,173 @@ function Execute-Backdoor
         $response = Invoke-WebRequest -Method Post -Uri $URI
         $jobid = (ConvertFrom-Json ($response.Content)).jobids[0]
      }
+}
+function Get-Targets
+{
+<#
+.SNYOPSIS 
+    Checks your role against the scope of your role to determine what you have access to. 
+#>
+
+$UID = az ad signed-in-user show --query 'userPrincipalName' -o tsv
+$role = az role assignment list --all --query "[?principalName=='$UID'].{Role:roleDefinitionName}" -o tsv
+$assignments = az role assignment list --all --query "[?principalName=='$UID'].{Scope:scope,Role:roleDefinitionName}" | ConvertFrom-Json
+
+ForEach ($assignment in $assignments)
+	{
+		Write-host ""
+		Write-Host "Scope:" $assignment.Scope -ForegroundColor Red
+		Write-host ""
+		$regex = $assignment.Scope -match '(?<=\/resourceGroups\/)[^\/]+'
+		$rg = $matches[0]	
+		$subcheck = $assignment.Scope.Split('/') | select -last 1
+		$rgupper = $rg.ToUpper()
+		$scopeupper = $assignment.Scope -replace '(?<=\/resourceGroups\/)[^\/]+',$matches[0].ToUpper()
+		If ($subcheck -match $rg)
+		{
+			if ($assignment.role -match 'Contributor' -or 'Owner' -or 'Admin')
+			{
+
+			Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
+			Write-host ""
+			Write-host "Virtual Machines" -ForegroundColor Green
+			Write-host ""
+			az vm list -g $rgupper --query "[].{Name:name,Username:osProfile.adminUsername,Password:osProfile.adminPassword,OS:storageProfile.osDisk.osType}" -o table
+			Write-host ""
+			Write-host "Network Interfaces" -ForegroundColor Green
+			Write-host ""
+			az resource list --resource-group $rg --resource-type "Microsoft.Network/networkInterfaces" --query "[].{Name:name,ResourceGroup:resourceGroup}" -o table
+			Write-host ""
+			Write-host "Storage Accounts" -ForegroundColor Green
+			Write-host ""
+			az resource list --resource-group $rg --resource-type "Microsoft.Storage/storageAccounts" -o table
+			Write-host ""
+			Write-host "Key Vaults" -ForegroundColor Green
+			Write-host ""
+			az resource list --resource-group $rg --resource-type "Microsoft.KeyVault/vaults" -o table
+			Write-host ""
+			Write-host "Automation Accounts & Runbooks" -ForegroundColor Green
+			Write-host ""
+			az resource list --resource-group $rg --resource-type "Microsoft.Automation/automationAccounts" -o table
+			Write-host ""
+			}
+			elseif ($assignment.role -eq 'Reader')
+			{
+			Write-host ""
+			Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
+			Write-host ""
+			Write-host "Virtual Machines" -ForegroundColor Green
+			Write-host ""
+			az vm list -g $rgupper --query "[].{Name:name,Username:osProfile.adminUsername,Password:osProfile.adminPassword,OS:storageProfile.osDisk.osType}" -o table
+			Write-host ""
+			Write-host "Network Interfaces" -ForegroundColor Green
+			Write-host ""
+			az resource list --resource-group $rg --resource-type "Microsoft.Network/networkInterfaces" --query "[].{Name:name,ResourceGroup:resourceGroup}" -o table
+			Write-host ""
+			Write-host "Storage Accounts" -ForegroundColor Green
+			Write-host ""
+			az resource list --resource-group $rg --resource-type "Microsoft.Storage/storageAccounts" -o table
+			Write-host ""
+			Write-host "Key Vaults" -ForegroundColor Green
+			Write-host ""
+			az resource list --resource-group $rg --resource-type "Microsoft.KeyVault/vaults" -o table
+			Write-host ""
+			Write-host "Automation Accounts & Runbooks" -ForegroundColor Green
+			Write-host ""
+			az resource list --resource-group $rg --resource-type "Microsoft.Automation/automationAccounts" -o table
+			Write-host ""
+			}
+		}
+		elseIf ($assignment.Scope -match 'Microsoft.Compute/virtualMachines')
+		{
+			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
+			{
+				Write-host ""
+				Write-Host "You have Read/Write/Execute permissions over the following Virtual Machines:" -ForegroundColor Green
+				Write-host ""
+				az vm list --query "[?id=='$scopeupper'].{Name:name,Username:osProfile.adminUsername,Password:osProfile.adminPassword,OS:storageProfile.osDisk.osType}" -o table
+				Write-host ""
+			}
+			If($assignment.Role -match 'Reader')
+			{
+				Write-host ""
+				Write-Host "You have Read permissions on the following Virtual Machines:" -ForegroundColor Green
+				Write-host ""
+				az vm list --query "[?id=='$scopeupper'].{Name:name,Username:osProfile.adminUsername,Password:osProfile.adminPassword,OS:storageProfile.osDisk.osType}" -o table
+			}
+		}
+		elseIf ($assignment.Scope -match 'Microsoft.Network/networkInterfaces')
+		{
+			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
+			{
+				
+				Write-host ""
+				Write-Host "You have Read/Write/Execute permissions on the following Network Interfaces" -ForegroundColor Green
+				Write-host ""
+				az resource list --resource-group $rg --resource-type "Microsoft.Network/networkInterfaces" --query "[].{Name:name,ResourceGroup:resourceGroup}" -o table
+			}
+			If($assignment.Role -match 'Reader')
+			{
+				Write-host ""
+				Write-Host "You have Read permissions on the following Network Interfaces:" -ForegroundColor Green
+				Write-host ""
+				az resource list --resource-group $rg --resource-type "Microsoft.Network/networkInterfaces" --query "[].{Name:name,ResourceGroup:resourceGroup}" -o table
+			}
+		}
+		elseIf ($assignment.Scope -match 'Microsoft.KeyVault/vaults')
+		{
+			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
+			{
+				
+				Write-host ""
+				Write-Host "You have Read/Write/Execute permissions on the following Key Vaults:" -ForegroundColor Green
+				Write-host ""
+				az resource list --resource-group $rg --resource-type "Microsoft.KeyVault/vaults" -o table
+			}
+			If($assignment.Role -match 'Reader')
+			{
+				
+				Write-host ""
+				Write-Host "You have Read permissions on the following Key Vaults:" -ForegroundColor Green
+				Write-host ""
+				az resource list --resource-group $rg --resource-type "Microsoft.KeyVault/vaults" -o table
+			}
+		}
+		elseIf ($assignment.Scope -match 'Microsoft.Automation/automationAccounts')
+		{
+			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
+			{
+				
+				Write-host ""
+				Write-Host "You have Read/Write/Execute permissions on the following Automation Accounts:" -ForegroundColor Green
+				Write-host ""
+				az resource list --resource-group $rg --resource-type "Microsoft.Automation/automationAccounts" -o table
+			}
+			If($assignment.Role -match 'Reader')
+			{
+				Write-host ""
+				Write-Host "You have Read permissions on the following Automation Accounts:" -ForegroundColor Green
+				Write-host ""
+				az resource list --resource-group $rg --resource-type "Microsoft.Automation/automationAccounts" -o table
+			}
+		}
+		elseIf ($assignment.Scope -match 'Microsoft.Storage/storageAccounts')
+		{
+			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
+			{
+				Write-host ""
+				Write-Host "You have Read/Write/Execute permissions on the following Storage Accounts:" -ForegroundColor Green
+				Write-host ""
+				az resource list --resource-group $rg --resource-type "Microsoft.Storage/storageAccounts" -o table
+			}
+			If($assignment.Role -match 'Reader')
+			{
+				Write-host ""
+				Write-Host "You have Read permissions on the following Storage Accounts:" -ForegroundColor Green
+				Write-host ""
+				az resource list --resource-group $rg --resource-type "Microsoft.Storage/storageAccounts" -o table
+			}
+		}
+	
+	}
 }
