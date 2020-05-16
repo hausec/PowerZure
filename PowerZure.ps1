@@ -49,7 +49,8 @@ Try
     Write-Host "Please set your default subscription with 'Set-Subscription -Id {id}' or 'az account set --subscription {id}' if you have multiple subscriptions."
     Write-Host ""
     Write-Host "Here are your roles and subscriptions:"
-	az role assignment list --all --query "[?principalName=='$User'].{Scope:scope,Role:roleDefinitionName}" | ConvertFrom-Json
+    Write-Host ""
+	az role assignment list --all --query "[?principalName=='$User'].{Scope:scope,Role:roleDefinitionName}" -o table
     Write-Host ""
     Write-Host "Here are the AD groups you belong to:"
     Write-Host ""
@@ -1987,169 +1988,269 @@ function Execute-Backdoor
 function Get-Targets
 {
 <#
-.SNYOPSIS 
+.SYNOPSIS 
     Checks your role against the scope of your role to determine what you have access to. 
 #>
 
 $UID = az ad signed-in-user show --query 'userPrincipalName' -o tsv
-$role = az role assignment list --all --query "[?principalName=='$UID'].{Role:roleDefinitionName}" -o tsv
 $assignments = az role assignment list --all --query "[?principalName=='$UID'].{Scope:scope,Role:roleDefinitionName}" | ConvertFrom-Json
 
-ForEach ($assignment in $assignments)
-	{
-		Write-host ""
-		Write-Host "Scope:" $assignment.Scope -ForegroundColor Red
-		Write-host ""
-		$regex = $assignment.Scope -match '(?<=\/resourceGroups\/)[^\/]+'
-		$rg = $matches[0]	
-		$subcheck = $assignment.Scope.Split('/') | select -last 1
-		$rgupper = $rg.ToUpper()
-		$scopeupper = $assignment.Scope -replace '(?<=\/resourceGroups\/)[^\/]+',$matches[0].ToUpper()
-		If ($subcheck -match $rg)
+	ForEach ($assignment in $assignments)
 		{
-			if ($assignment.role -match 'Contributor' -or 'Owner' -or 'Admin')
+			$role = az role assignment list --all --query "[?principalName=='$UID'].{Role:roleDefinitionName}" -o tsv
+			Write-Host "Role:" $role -ForegroundColor Green
+			Write-Host "Scope:" $assignment.Scope -ForegroundColor Green
+			Write-host ""
+			$sub = az account list | ConvertFrom-Json
+			$subid = $sub.id
+			$rglist =  az group list | ConvertFrom-Json
+			$permissions= az role definition list --name $role | ConvertFrom-Json
+			$actions = $permissions.permissions.actions
+			ForEach ($action in $actions)
 			{
-
-			Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
-			Write-host ""
-			Write-host "Virtual Machines" -ForegroundColor Green
-			Write-host ""
-			az vm list -g $rgupper --query "[].{Name:name,Username:osProfile.adminUsername,Password:osProfile.adminPassword,OS:storageProfile.osDisk.osType}" -o table
-			Write-host ""
-			Write-host "Network Interfaces" -ForegroundColor Green
-			Write-host ""
-			az resource list --resource-group $rg --resource-type "Microsoft.Network/networkInterfaces" --query "[].{Name:name,ResourceGroup:resourceGroup}" -o table
-			Write-host ""
-			Write-host "Storage Accounts" -ForegroundColor Green
-			Write-host ""
-			az resource list --resource-group $rg --resource-type "Microsoft.Storage/storageAccounts" -o table
-			Write-host ""
-			Write-host "Key Vaults" -ForegroundColor Green
-			Write-host ""
-			az resource list --resource-group $rg --resource-type "Microsoft.KeyVault/vaults" -o table
-			Write-host ""
-			Write-host "Automation Accounts & Runbooks" -ForegroundColor Green
-			Write-host ""
-			az resource list --resource-group $rg --resource-type "Microsoft.Automation/automationAccounts" -o table
-			Write-host ""
-			}
-			elseif ($assignment.role -eq 'Reader')
-			{
-			Write-host ""
-			Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
-			Write-host ""
-			Write-host "Virtual Machines" -ForegroundColor Green
-			Write-host ""
-			az vm list -g $rgupper --query "[].{Name:name,Username:osProfile.adminUsername,Password:osProfile.adminPassword,OS:storageProfile.osDisk.osType}" -o table
-			Write-host ""
-			Write-host "Network Interfaces" -ForegroundColor Green
-			Write-host ""
-			az resource list --resource-group $rg --resource-type "Microsoft.Network/networkInterfaces" --query "[].{Name:name,ResourceGroup:resourceGroup}" -o table
-			Write-host ""
-			Write-host "Storage Accounts" -ForegroundColor Green
-			Write-host ""
-			az resource list --resource-group $rg --resource-type "Microsoft.Storage/storageAccounts" -o table
-			Write-host ""
-			Write-host "Key Vaults" -ForegroundColor Green
-			Write-host ""
-			az resource list --resource-group $rg --resource-type "Microsoft.KeyVault/vaults" -o table
-			Write-host ""
-			Write-host "Automation Accounts & Runbooks" -ForegroundColor Green
-			Write-host ""
-			az resource list --resource-group $rg --resource-type "Microsoft.Automation/automationAccounts" -o table
-			Write-host ""
+				$paths = $action.Split("/")
+				If ($paths.count -eq 1)
+				{
+					$rt = $paths[0]
+					If ($rt -eq '*')
+					{
+						$result = az resource list --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 1)
+						{
+							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result		
+							Write-host ""							
+						}
+					}
+					elseif ($rt -eq 'write')
+					{
+						$result = az resource list --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" | ConvertFrom-Json
+						If ($result.length -gt 1)
+						{
+							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result	
+							Write-host ""							
+						}
+					}
+					elseif ($rt -eq 'read')
+					{
+						$result = az resource list --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" | ConvertFrom-Json
+						If ($result.length -gt 1)
+						{
+							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result		
+							Write-host ""							
+						}
+					}
+					elseif ($rt -eq 'action')
+					{
+						$result = az resource list --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" | ConvertFrom-Json
+						If ($result.length -gt 1)
+						{
+							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result	
+							Write-host ""							
+						}
+					}			
+				}				
+				If ($paths.count -eq 3)
+				{
+					$rt = $paths[0] + "/" + $paths[1]
+					$last = $action.Split("/") | select -last 1
+					
+					if ($last -eq '*')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result
+							Write-host ""							
+						}
+					}
+					elseif ($last -eq 'write')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result		
+							Write-host ""							
+						}
+					}
+					elseif ($last -eq 'read')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result	
+							Write-host ""							
+						}
+					}
+					elseif ($last -eq 'action')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result	
+							Write-host ""							
+						}
+					}			
+				}			
+				If ($paths.count -eq 4)
+				{
+					$rt = $paths[0] + "/" + $paths[1] + "/" + $paths[2]
+					$last = $action.Split("/") | select -last 1
+					If ($last -eq '*')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result		
+							Write-host ""							
+						}
+					}
+					elseif ($last -eq 'write')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result	
+							Write-host ""							
+						}
+					}
+					elseif ($last -eq 'read')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result		
+							Write-host ""							
+						}
+					}
+					elseif ($last -eq 'action')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result	
+							Write-host ""							
+						}
+					}			
+				}		
+				If ($paths.count -eq 5)
+				{
+					$rt = $paths[0] + "/" + $paths[1] + "/" + $paths[2] + "/" + $paths[3]
+					$last = $action.Split("/") | select -last 1
+					If ($last -eq '*')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result	
+							Write-host ""							
+						}
+					}
+					elseif ($last -eq 'write')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result	
+							Write-host ""							
+						}
+					}
+					elseif ($last -eq 'read')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result		
+							Write-host ""							
+						}
+					}
+					elseif ($last -eq 'action')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result	
+							Write-host ""							
+						}
+					}			
+				}
+				If ($paths.count -eq 6)
+				{
+					$rt = $paths[0] + "/" + $paths[1] + "/" + $paths[2] + "/" + $paths[3] + "/" + $paths[4]
+					$last = $action.Split("/") | select -last 1
+					If ($last -eq '*')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result				
+						}
+					}
+					elseif ($last -eq 'write')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result				
+						}
+					}
+					elseif ($last -eq 'read')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result				
+						}
+					}
+					elseif ($last -eq 'action')
+					{
+						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
+						If ($result.length -gt 0)
+						{
+							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
+							Write-host ""
+							$result				
+						}
+					}			
+				}
 			}
 		}
-		elseIf ($assignment.Scope -match 'Microsoft.Compute/virtualMachines')
-		{
-			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
-			{
-				Write-host ""
-				Write-Host "You have Read/Write/Execute permissions over the following Virtual Machines:" -ForegroundColor Green
-				Write-host ""
-				az vm list --query "[?id=='$scopeupper'].{Name:name,Username:osProfile.adminUsername,Password:osProfile.adminPassword,OS:storageProfile.osDisk.osType}" -o table
-				Write-host ""
-			}
-			If($assignment.Role -match 'Reader')
-			{
-				Write-host ""
-				Write-Host "You have Read permissions on the following Virtual Machines:" -ForegroundColor Green
-				Write-host ""
-				az vm list --query "[?id=='$scopeupper'].{Name:name,Username:osProfile.adminUsername,Password:osProfile.adminPassword,OS:storageProfile.osDisk.osType}" -o table
-			}
-		}
-		elseIf ($assignment.Scope -match 'Microsoft.Network/networkInterfaces')
-		{
-			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
-			{
-				
-				Write-host ""
-				Write-Host "You have Read/Write/Execute permissions on the following Network Interfaces" -ForegroundColor Green
-				Write-host ""
-				az resource list --resource-group $rg --resource-type "Microsoft.Network/networkInterfaces" --query "[].{Name:name,ResourceGroup:resourceGroup}" -o table
-			}
-			If($assignment.Role -match 'Reader')
-			{
-				Write-host ""
-				Write-Host "You have Read permissions on the following Network Interfaces:" -ForegroundColor Green
-				Write-host ""
-				az resource list --resource-group $rg --resource-type "Microsoft.Network/networkInterfaces" --query "[].{Name:name,ResourceGroup:resourceGroup}" -o table
-			}
-		}
-		elseIf ($assignment.Scope -match 'Microsoft.KeyVault/vaults')
-		{
-			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
-			{
-				
-				Write-host ""
-				Write-Host "You have Read/Write/Execute permissions on the following Key Vaults:" -ForegroundColor Green
-				Write-host ""
-				az resource list --resource-group $rg --resource-type "Microsoft.KeyVault/vaults" -o table
-			}
-			If($assignment.Role -match 'Reader')
-			{
-				
-				Write-host ""
-				Write-Host "You have Read permissions on the following Key Vaults:" -ForegroundColor Green
-				Write-host ""
-				az resource list --resource-group $rg --resource-type "Microsoft.KeyVault/vaults" -o table
-			}
-		}
-		elseIf ($assignment.Scope -match 'Microsoft.Automation/automationAccounts')
-		{
-			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
-			{
-				
-				Write-host ""
-				Write-Host "You have Read/Write/Execute permissions on the following Automation Accounts:" -ForegroundColor Green
-				Write-host ""
-				az resource list --resource-group $rg --resource-type "Microsoft.Automation/automationAccounts" -o table
-			}
-			If($assignment.Role -match 'Reader')
-			{
-				Write-host ""
-				Write-Host "You have Read permissions on the following Automation Accounts:" -ForegroundColor Green
-				Write-host ""
-				az resource list --resource-group $rg --resource-type "Microsoft.Automation/automationAccounts" -o table
-			}
-		}
-		elseIf ($assignment.Scope -match 'Microsoft.Storage/storageAccounts')
-		{
-			If($assignment.Role -match 'Contributor' -or 'Owner' -or 'Administrator')
-			{
-				Write-host ""
-				Write-Host "You have Read/Write/Execute permissions on the following Storage Accounts:" -ForegroundColor Green
-				Write-host ""
-				az resource list --resource-group $rg --resource-type "Microsoft.Storage/storageAccounts" -o table
-			}
-			If($assignment.Role -match 'Reader')
-			{
-				Write-host ""
-				Write-Host "You have Read permissions on the following Storage Accounts:" -ForegroundColor Green
-				Write-host ""
-				az resource list --resource-group $rg --resource-type "Microsoft.Storage/storageAccounts" -o table
-			}
-		}
-	
-	}
 }
+
