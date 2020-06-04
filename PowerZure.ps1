@@ -2461,3 +2461,56 @@ function Get-RunAsCertificate
 	Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AutomationTutorialPowerShell -Force
 	rm AutomationTutorialPowerShell.ps1
 }
+function Get-AADRolePermission
+{
+<#
+.SYNOPSIS 
+    Finds all AAD roles with a certain permission
+	
+.PARAMETER
+    -Permission
+
+.EXAMPLE
+    Get-AADRolePermissions -Permission microsoft.directory/groups/*
+#>
+	[CmdletBinding()]
+	 Param(
+	[Parameter(Mandatory=$true)][String]$Permission = $null)
+	
+	$roles=Get-AzureADMSRoleDefinition
+	ForEach($role in $roles)
+	{
+		If ($role.RolePermissions.AllowedResourceActions -match $Permission)
+		{
+			Write-Host "-----------------------------------------------------------"
+			$role.DisplayName
+			Write-Host ""
+			$role.RolePermissions.AllowedResourceActions
+		}
+	}
+}
+function Get-AADRole
+{
+<#
+.SYNOPSIS 
+    Finds a specified AAD Role and its definitions
+	
+.PARAMETER
+    -Role
+
+.EXAMPLE
+    Get-AADRole -Role 'Company Administrator'
+#>
+	[CmdletBinding()]
+	 Param(
+	[Parameter(Mandatory=$true)][String]$Rolename = $null)
+	
+	$role = Get-AzureADMSRoleDefinition | Where-Object {$_.DisplayName -eq $Rolename}
+	Write-Host ""
+	Write-Host "Name: " -ForegroundColor Green; $role.DisplayName
+	Write-Host "Description: "-ForegroundColor Green; $role.Description
+	Write-Host "Id: "-ForegroundColor Green; $role.Id
+	Write-Host "Enabled?: "-ForegroundColor Green; $role.IsEnabled
+	Write-Host "Permissions: " -ForegroundColor Green
+	$role.RolePermissions.AllowedResourceActions
+}	
