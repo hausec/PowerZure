@@ -2,12 +2,16 @@
 
 PowerZure is a PowerShell script written to assist in assessing Azure security. Functions are broken out into their context as well as the role needed to run them. 
 
+Usage: Import-Module C:\Path\To\Powerzure.ps1
+
+Then call one of the functions below.
+
 ## Help
 | Function         | Description                                 | Role   |
 |------------------|---------------------------------------------|--------|
 | **PowerZure -h**| Displays the help menu | Any |
 
-## Mandatory
+## Mandatory (If multiple subscriptions present)
 
 | Function         | Description                                 | Role   |
 |------------------|---------------------------------------------|--------|
