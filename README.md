@@ -1,4 +1,4 @@
-![powerzure](https://i.imgur.com/ZALeACF.png)
+![powerzure](https://i.imgur.com/IyPhHnG.jpg)
 
 PowerZure is a PowerShell script written to assist in assessing Azure security. Functions are broken out into their context as well as the role needed to run them. 
 

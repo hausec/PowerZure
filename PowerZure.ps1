@@ -14,6 +14,8 @@ If ($Modules.Name -contains 'Az')
 Else
 {
     Write-Host "Az Module not installed. Installing."
+	#This installs AAD PS Module
+	Install-module AzureADPreview -Verbose
     #This installs the Az PoSh module
     Install-Module -Name Az -AllowClobber
     #This installs the Az CLI modules
@@ -58,6 +60,8 @@ Try
     Write-Host ""
     Write-Host "Try PowerZure -h for a list of functions"
     Write-Host ""
+	Write-Host "If you need to use the Azure AD functions, you must login with Connect-AzureAD" -ForegroundColor Red
+	Write-Host "If you need to use the Automation Account functions, you must login with Connect-AzAccount" -ForegroundColor Red
     }
     else
     {
@@ -143,6 +147,7 @@ Contributor     Start-Runbook - Starts a specific Runbook
 Owner           Set-Role - Adds a user to a role for a resource or a subscription
 Owner           Remove-Role -Removes a user from a role on a resource or subscription
 Global Administrator   Set-Group - Adds a user to an Azure AD group
+Global Administrator   Set-Password - Sets a user's password in Azure AD
 
 
                 ------------------Info Gathering -------------
@@ -153,7 +158,6 @@ Reader          Get-AllUsers - Lists all users in the subscription
 Reader          Get-User - Gathers info on a specific user
 Reader          Get-AllGroups - Lists all groups + info within Azure AD
 Reader          Get-Resources - Lists all resources in the subscription
-Reader          Get-Apps - Lists all applications in the subscription
 Reader          Get-GroupMembers - Gets all the members of a specific group. Group does NOT mean role.
 Reader          Get-AllGroupMembers - Gathers all the group members of all the groups.
 Reader          Get-AllRoleMembers - Gets all the members of all roles. Roles does not mean groups.
@@ -166,6 +170,7 @@ Reader          Get-AppPermissions - Returns the permissions of an app
 Reader          Get-WebApps - Gets running webapps
 Reader          Get-WebAppDetails - Gets running webapps details
 Contributor 	Get-RunAsCertificate - Gets the login credentials for an Automation Accounts "RunAs" service principal
+Reader			Get-AADRoleMembers - Lists the active roles in Azure AD and what users are part of the role
 
                 ---------Secret/Key/Certificate Gathering -----
             
@@ -186,8 +191,9 @@ Reader          Get-Runbooks - Lists all the Runbooks
 Reader          Get-RunbookContent - Reads content of a specific Runbook
 Reader          Get-AvailableVMDisks -  Lists the VM disks available. 
 Contributor     Get-VMDisk - Generates a link to download a Virtual Machiche's disk. The link is only available for an hour.
-Reader          Get-VMs - Lists available VMs      
-
+Reader          Get-VMs - Lists available VMs     
+Reader			Get-SQLDBs - Lists all SQL Servers and their Databases + Administrator usernames
+				
 
 "@
 
@@ -246,6 +252,25 @@ function Get-AllUsers
         }
 	}
 
+}
+
+function Get-AADRoleMembers
+{
+<# 
+.SYNOPSIS
+    Lists the active roles in Azure AD and what users are part of the role. 
+#>
+$roles = Get-AzureADDirectoryRole
+foreach ($role in $roles)
+	{
+	$name = $role.DisplayName
+	$members = Get-AzureADDirectoryRoleMember -ObjectId $role.ObjectId
+	If ($members
+		{
+		Write-Host $name -ForegroundColor Red
+		$members.DisplayName
+		}
+	}
 }
 
 function Get-User 
@@ -333,44 +358,6 @@ function Get-AllGroups
      
 }
 
-function Get-Apps 
-{
-<# 
-.SYNOPSIS
-    Gathers all the application in Azure 
-.PARAMETERS
-    OutFile (.csv is special)
-.EXAMPLE
-    Get-AzureApps
-    Get-AzureApps -OutFile users.csv
-    Get-AzureApps -outFile users.txt
-#>
-
-    [CmdletBinding()]
-     Param(
-        [Parameter(Mandatory=$false)][String]$OutFile = $null)    
-
-    $split = $OutFile.Split(".")
-    $type = $split[-1]
-    $name = $split[0]
-    If($type -eq "csv")
-    {
-        $i= az ad app list -o json | ConvertFrom-Json
-        $i | export-csv $OutFile
-    } 
-    else
-    {
-        If($Outfile)
-        {
-         $i=az ad app list --query='[].{Name:displayName,URL:homepage}' -o yaml | Out-File $OutFile
-        }
-        else 
-        {
-         az ad app list --query='[].{Name:displayName,URL:homepage,id:objectId}' -o yaml
-        }
-	}
-    
-}
 
 function Get-GroupMembers 
 {
@@ -2514,3 +2501,55 @@ function Get-AADRole
 	Write-Host "Permissions: " -ForegroundColor Green
 	$role.RolePermissions.AllowedResourceActions
 }	
+
+function Get-SQLDBs
+{
+<#
+.SYNOPSIS 
+
+Lists the available SQL Databases on a server
+
+#>
+	
+	$Servers = az sql server list | ConvertFrom-Json
+
+	
+	ForEach($Server in $Servers)
+	{
+		$admin = $Server.administratorLogin
+		$password = $Server.administratorLoginPassword
+		$ids = $Server.id
+		$name = $Server.name
+		$db = az sql db list --ids $id | ConvertFrom-Json
+		$dbs = $db.name
+		Write-Host "Server - "$name""
+		Write-Host "Admin username - "$admin""$password""
+		Write-Host "Databases - "$dbs""
+	}
+}
+
+function Set-Password
+{
+<#
+.SYNOPSIS 
+Sets a user's password
+	
+.PARAMETER
+Password - New password for user
+
+Username - Name of user   
+
+.EXAMPLE
+
+Set-Password -Username john@contoso.com -Password newpassw0rd1
+#>
+	[CmdletBinding()]
+	 Param(
+	[Parameter(Mandatory=$false)][String]$Password = $null,
+	[Parameter(Mandatory=$false)][String]$Username = $null)
+	$Id = az ad user list --query "[?userPrincipalName=='$User'].{Id:objectId}" -o tsv
+	
+	Set-AzureADUserPassword -objectid $Id -Password $Password
+
+
+}
