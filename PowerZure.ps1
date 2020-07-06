@@ -222,9 +222,9 @@ function Get-AllUsers
 .PARAMETER
     OutFile (.csv is special)
 .EXAMPLE
-    Get-AzureUsers
-    Get-AzureUsers -OutFile users.csv
-    Get-AzureUsers -OutFile users.txt
+    Get-AllUsers
+    Get-AllUsers -OutFile users.csv
+    Get-AllUsers -OutFile users.txt
 #>
 
     [CmdletBinding()]
@@ -283,7 +283,7 @@ function Get-User
     User Principal Name
 
 .EXAMPLE
-    Get-AzureUser -User Test@domain.com
+    Get-User -User Test@domain.com
 #>
     [CmdletBinding()]
     Param(
@@ -327,9 +327,9 @@ function Get-AllGroups
 .PARAMETERS
     OutFile (.csv is special)
 .EXAMPLE
-    Get-AzureGroups
-    Get-AzureGroups -OutFile users.csv
-    Get-AzureGroups -outFile users.txt
+    Get-AllGroups
+    Get-AllGroups -OutFile users.csv
+    Get-AllGroups -outFile users.txt
 #>
 
     [CmdletBinding()]
