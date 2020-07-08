@@ -118,82 +118,80 @@ Information Gathering
 **Get-Targets**
 ~~~~~~~~~~~~~~~
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Compares your role to your scope to determine what you have access to
 and what kind of access it is (Read/write/execute).
 
-Syntax
-^^^^^^
+**Syntax**
+
 ::
 
    Get-Targets
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Looks at the current signed-in user’s roles, then looks at the role
 definitions and scope of that role. Role definitions are then compared
 to the scope of the role to determine which resources under that scope
 the role definitions are actionable against.
 
-Examples
-^^^^^^^^
-
+**Examples**
 
 ::
 
    Get-Targets
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 None
 
-Output
-^^^^^^
+**Output**
+
 
 List of resources with what type of access the current user has access
 to.
 
 **Get-CurrentUser**
-^^^^^^^^^^^^^^^^^^^
 
-.. _synopsis-1:
 
-Synopsis
-^^^^^^^^
+.. _**Synopsis**-1:
+
+**Synopsis**
+
 
 Returns the current logged in user name and any owned objects
 
-.. _syntax-1:
+.. _**Syntax**-1:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 ::
 
    Get-CurrentUser
 
-.. _description-1:
+.. _**Description**-1:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Looks at the current logged in username and compares that to the role
 assignment list to determine what objects/resources the user has
 ownership over.
 
-.. _examples-1:
+.. _**Examples**-1:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -207,59 +205,59 @@ Examples
 
 .. _required-modules-1:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _parameters-1:
+.. _**Parameters**-1:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -All
 
 Grabs all details
 
-.. _output-1:
+.. _**Output**-1:
 
-Output
-^^^^^^
+**Output**
+
 
 Current username and owned objects by that user
 
 **Get-AllUsers**
-^^^^^^^^^^^^^^^^
 
-.. _synopsis-2:
 
-Synopsis
-^^^^^^^^
+.. _**Synopsis**-2:
+
+**Synopsis**
+
 
 List all Azure users in the tenant
 
-.. _syntax-2:
+.. _****Syntax****-2:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-AllUsers 
 
-.. _description-2:
+.. _**Description**-2:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Lists all users in the tenant including their email, object type,
 distinguished name, Principal name, and usertype.
 
-.. _examples-2:
+.. _**Examples**-2:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -278,57 +276,57 @@ Examples
 
 .. _required-modules-2:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _parameters-2:
+.. _**Parameters**-2:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -Outfile
 
-Specifies the output of the data.
+Specifies the **Output** of the data.
 
-.. _output-2:
+.. _**Output**-2:
 
-Output
-^^^^^^
+**Output**
+
 
 List of all users in AAD, optionally in a file.
 
 **Get-AADRoleMembers**
 
-.. _synopsis-3:
+.. _**Synopsis**-3:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Lists the active roles in Azure AD and what users are part of the role.
 
-.. _syntax-3:
+.. _****Syntax****-3:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-AADRoleMembers
 
-.. _description-3:
+.. _**Description**-3:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gathers the AAD role members. This is different than Azure RBAC roles.
 
-.. _examples-3:
+.. _**Examples**-3:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -337,59 +335,59 @@ Examples
 
 .. _required-modules-3:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 AzureAD PowerShell
 
-.. _parameters-3:
+.. _**Parameters**-3:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 None
 
-.. _output-3:
+.. _**Output**-3:
 
-Output
-^^^^^^
+**Output**
+
 
 List of AAD Role members
 
 **Get-User**
-^^^^^^^^^^^^
 
-.. _synopsis-4:
 
-Synopsis
-^^^^^^^^
+.. _**Synopsis**-4:
+
+**Synopsis**
+
 
 Gathers info on a specific user
 
-.. _syntax-4:
+.. _****Syntax****-4:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-User -User Test@domain.com 
 
-.. _description-4:
+.. _**Description**-4:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gathers the UPN, Object ID, On-premise distinguished name, and if the
 account is enabled. Also lists the roles the user has in Azure RBAC.
 
-.. _examples-4:
+.. _**Examples**-4:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -398,59 +396,59 @@ Examples
 
 .. _required-modules-4:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _parameters-4:
+.. _**Parameters**-4:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 -User
 
 User Principal Name
 
-.. _output-4:
+.. _**Output**-4:
 
-Output
-^^^^^^
+**Output**
+
 
 Details of user
 
 **Get-AllGroups**
-^^^^^^^^^^^^^^^^^
+^
 
-.. _synopsis-5:
+.. _**Synopsis**-5:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gathers all the groups in the tenant
 
-.. _syntax-5:
+.. _****Syntax****-5:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-AllGroups
 
-.. _description-5:
+.. _**Description**-5:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gathers all the groups in the tenant 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _examples-5:
 
-Examples
-^^^^^^^^
+.. _**Examples**-5:
+
+**Examples**
+
 
 
 ::
@@ -467,169 +465,169 @@ Examples
 
   Get-AllGroups -OutFile users.txt 
 
-.. _parameters-5:
+.. _**Parameters**-5:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -OutFile
 
-Output file
+**Output** file
 
-.. _output-5:
+.. _**Output**-5:
 
-Output
-^^^^^^
+**Output**
+
 
 List of groups in AAD, optionally in the format of a file.
 
 **Get-Resources**
-^^^^^^^^^^^^^^^^^
+^
 
-.. _synopsis-6:
+.. _**Synopsis**-6:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Lists all resources
 
-.. _syntax-6:
+.. _****Syntax****-6:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-Resources
 
-.. _description-6:
+.. _**Description**-6:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Lists all the resources in the subscription that the user has access to.
 
-.. _examples-6:
+.. _**Examples**-6:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-Resources
 
-.. _parameters-6:
+.. _**Parameters**-6:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 None
 
 .. _required-modules-5:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-6:
+.. _**Output**-6:
 
-Output
-^^^^^^
+**Output**
+
 
 List of resources the user can see
 
 **Get-Apps**
-^^^^^^^^^^^^
 
-.. _synopsis-7:
 
-Synopsis
-^^^^^^^^
+.. _**Synopsis**-7:
+
+**Synopsis**
+
 
 Returns all applications and their Ids
 
-.. _syntax-7:
+.. _****Syntax****-7:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-Apps
 
-.. _description-7:
+.. _**Description**-7:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Returns all the applications in Azure AD and their IDs
 
-.. _examples-7:
+.. _**Examples**-7:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-Apps
 
-.. _parameters-7:
+.. _**Parameters**-7:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 None
 
 .. _required-modules-6:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-7:
+.. _**Output**-7:
 
-Output
-^^^^^^
+**Output**
+
 
 Applications in AAD
 
 **Get-GroupMembers**
 ~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-8:
+.. _**Synopsis**-8:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gets all the members of a specific group. Group does NOT mean role.
 
-.. _syntax-8:
+.. _****Syntax****-8:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-GroupMembers -Group 'SQL Users' 
 
-.. _description-8:
+.. _**Description**-8:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Will get the members of a specific AAD group.
 
-.. _examples-8:
+.. _**Examples**-8:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -641,10 +639,10 @@ Examples
 
   Get-GroupMembers -Group 'SQL Users' -OutFile users.csv
 
-.. _parameters-8:
+.. _**Parameters**-8:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 -Group
 
@@ -652,53 +650,53 @@ Group name
 
 -OutFile
 
-Output file
+**Output** file
 
 .. _required-modules-7:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-8:
+.. _**Output**-8:
 
-Output
-^^^^^^
+**Output**
+
 
 Group members of the specified group, optionally to a file.
 
 **Get-AllGroupMembers**
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-9:
+.. _**Synopsis**-9:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gathers all the group members of all the groups.
 
-.. _syntax-9:
+.. _****Syntax****-9:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-AllGroupMembers
 
-.. _description-9:
+.. _**Description**-9:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Goes through each group in AAD and lists the members.
 
-.. _examples-9:
+.. _**Examples**-9:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -710,58 +708,58 @@ Examples
 
   Get-AllGroupMembers
 
-.. _parameters-9:
+.. _**Parameters**-9:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -OutFile
 
-Output filename/type
+**Output** filename/type
 
 .. _required-modules-8:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-9:
+.. _**Output**-9:
 
-Output
-^^^^^^
+**Output**
+
 
 List of group members for each group in AAD.
 
 **Get-AllRoleMembers**
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-10:
+.. _**Synopsis**-10:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gets all the members of all roles. Roles does not mean groups.
 
-.. _syntax-10:
+.. _****Syntax****-10:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-AllRoleMembers
 
-.. _description-10:
+.. _**Description**-10:
 
-Description
-^^^^^^^^^^^
+**Description**
 
-.. _examples-10:
 
-Examples
-^^^^^^^^
+.. _**Examples**-10:
+
+**Examples**
+
 
 .. _get-allrolemembers-1:
 
@@ -769,85 +767,85 @@ Examples
 ::
 
   Get-AllRoleMembers
-^^^^^^^^^^^^^^^^^^^^^^
+
 
 
 ::
 
   Get-AllRoleMembers -OutFile users.csv
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^
 
 
 ::
 
   Get-AllRoleMembers -OutFile users.txt
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^
 
-.. _parameters-10:
+.. _**Parameters**-10:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -OutFile
 
-Output filename/type
+**Output** filename/type
 
 .. _required-modules-9:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-10:
+.. _**Output**-10:
 
-Output
-^^^^^^
+**Output**
+
 
 All members of all roles
 
 **Get-RoleMembers** 
 ~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-11:
+.. _**Synopsis**-11:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gets the members of a role.
 
-.. _syntax-11:
+.. _****Syntax****-11:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-RoleMembers -Role [Role name]
 
-.. _description-11:
+.. _**Description**-11:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gets the members of a role. Capitalization matters (i.e. reader vs
 Reader <---correct)
 
-.. _examples-11:
+.. _**Examples**-11:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-RoleMembers -Role Reader
 
-.. _parameters-11:
+.. _**Parameters**-11:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 -Role
 
@@ -855,59 +853,59 @@ Name of role. Needs to be properly capitalized
 
 .. _required-modules-10:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-11:
+.. _**Output**-11:
 
-Output
-^^^^^^
+**Output**
+
 
 Members of specified role.
 
 **Get-Roles**
-^^^^^^^^^^^^^
 
-.. _synopsis-12:
 
-Synopsis
-^^^^^^^^
+.. _**Synopsis**-12:
+
+**Synopsis**
+
 
 Lists the roles of a specific user.
 
-.. _syntax-12:
+.. _****Syntax****-12:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-Roles -User [UPN] 
 
-.. _description-12:
+.. _**Description**-12:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Lists the Azure RBAC roles of a specific user based on their UPN.
 
-.. _examples-12:
+.. _**Examples**-12:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-Roles -User john@contoso.com
 
-.. _parameters-12:
+.. _**Parameters**-12:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -User
 
@@ -915,117 +913,117 @@ UPN of the user
 
 .. _required-modules-11:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-12:
+.. _**Output**-12:
 
-Output
-^^^^^^
+**Output**
+
 
 Roles of the specified user
 
 **Get-ServicePrincipals**
-^^^^^^^^^^^^^^^^^^^^^^^^^
+^
 
-.. _synopsis-13:
+.. _**Synopsis**-13:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Returns all service principals
 
-.. _syntax-13:
+.. _****Syntax****-13:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-ServicePrincipals
 
-.. _description-13:
+.. _**Description**-13:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Returns all service principals in AAD.
 
-.. _examples-13:
+.. _**Examples**-13:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-ServicePrincipals
 
-.. _parameters-13:
+.. _**Parameters**-13:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 None
 
 .. _required-modules-12:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-13:
+.. _**Output**-13:
 
-Output
-^^^^^^
+**Output**
+
 
 List of SPs in AAD
 
 **Get-ServicePrincipal**
-^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _synopsis-14:
 
-Synopsis
-^^^^^^^^
+.. _**Synopsis**-14:
+
+**Synopsis**
+
 
 Returns all info on a service principal
 
-.. _syntax-14:
+.. _****Syntax****-14:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-ServicePrincipal –id [SP ID]
 
-.. _description-14:
+.. _**Description**-14:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Returns all details on a service principal via the SP’s ID.
 
-.. _examples-14:
+.. _**Examples**-14:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-ServicePrincipal -id fdb54b57-a416-4115-8b21-81c73d2c2deb
 
-.. _parameters-14:
+.. _**Parameters**-14:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -id
 
@@ -1033,59 +1031,59 @@ ID of the Service Principal
 
 .. _required-modules-13:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-14:
+.. _**Output**-14:
 
-Output
-^^^^^^
+**Output**
+
 
 Details of specified service principal
 
 **Get-AppPermissions**
-^^^^^^^^^^^^^^^^^^^^^^
 
-.. _synopsis-15:
 
-Synopsis
-^^^^^^^^
+.. _**Synopsis**-15:
+
+**Synopsis**
+
 
 Returns the permissions of an app
 
-.. _syntax-15:
+.. _****Syntax****-15:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
    Get-AppPermissions -Id [App ID]
 
-.. _description-15:
+.. _**Description**-15:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gathers the permissions an application has.
 
-.. _examples-15:
+.. _**Examples**-15:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-AppPermissions -Id fdb54b57-a416-4115-8b21-81c73d2c2deb
 
-.. _parameters-15:
+.. _**Parameters**-15:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 -Id
 
@@ -1093,120 +1091,120 @@ ID of the Application
 
 .. _required-modules-14:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-15:
+.. _**Output**-15:
 
-Output
-^^^^^^
+**Output**
+
 
 Application’s permissions
 
 **Get-WebApps**
 ~~~~~~~~~~~~~~~
 
-.. _synopsis-16:
+.. _**Synopsis**-16:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gets running webapps
 
-.. _syntax-16:
+.. _****Syntax****-16:
 
-Syntax
-^^^^^^
+****Syntax****
+
 
 
 ::
 
   Get-WebApps
 
-.. _description-16:
+.. _**Description**-16:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gathers the names of the running web applications
 
-.. _examples-16:
+.. _**Examples**-16:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-WebApps
 
-.. _parameters-16:
+.. _**Parameters**-16:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 None
 
 .. _required-modules-15:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-16:
+.. _**Output**-16:
 
-Output
-^^^^^^
+**Output**
+
 
 Web application names
 
 **Get-WebAppDetails** 
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-17:
+.. _**Synopsis**-17:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gets running webapps details
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-17:
 
-Syntax
-^^^^^^
+.. _****Syntax****-17:
+
+****Syntax****
+
 
 
 ::
 
   Get-WebAppDetails -Name [WebAppName]
 
-.. _description-17:
+.. _**Description**-17:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gets the details of a web application
 
-.. _examples-17:
+.. _**Examples**-17:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-WebAppDetails -Name AppName
 
-.. _parameters-17:
+.. _**Parameters**-17:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -name
 
@@ -1214,25 +1212,25 @@ Name of web application
 
 .. _required-modules-16:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-17:
+.. _**Output**-17:
 
-Output
-^^^^^^
+**Output**
+
 
 Details of web application
 
 **Get-RunAsCertificate** 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-18:
+.. _**Synopsis**-18:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Will gather a RunAs accounts certificate which can then be used to login
 as that account.
@@ -1240,12 +1238,12 @@ as that account.
 .. _permissions-1:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-18:
 
-Syntax
-^^^^^^
+.. _****Syntax****-18:
+
+****Syntax****
+
 
 
 ::
@@ -1253,21 +1251,21 @@ Syntax
   Get-RunAsCertificate -ResourceGroup [RG Name] -AutomationAccount [AA
 Name]
 
-.. _description-18:
+.. _**Description**-18:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Will gather a RunAs accounts certificate which can then be used to login
 as that account. By default, RunAs accounts are contributors over the
 subscription. This function does take a minute to run as it creates a
-runbook, uploads it, runs it, then parses the output to gather the
+runbook, uploads it, runs it, then parses the **Output** to gather the
 certificate.
 
-.. _examples-18:
+.. _**Examples**-18:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -1275,10 +1273,10 @@ Examples
   Get-RunAsCertificate -ResourceGroup Test_RG -AutomationAccount
 TestAccount
 
-.. _parameters-18:
+.. _**Parameters**-18:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 -ResourceGroup
 
@@ -1290,147 +1288,147 @@ The name of the Automation Account.
 
 .. _required-modules-17:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure PowerShell
 
-.. _output-18:
+.. _**Output**-18:
 
-Output
-^^^^^^
+**Output**
+
 
 Connection string for the RunAs account
 
 **Get-AADRole** 
 ~~~~~~~~~~~~~~~
 
-.. _synopsis-19:
+.. _**Synopsis**-19:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Finds a specified AAD Role and its definitions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 .. _permissions-2:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-19:
 
-Syntax
-^^^^^^
+.. _****Syntax****-19:
+
+****Syntax****
+
 
 
 ::
 
    Get-AADRole -Role [Role]
 
-.. _description-19:
+.. _**Description**-19:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Finds a specified AAD Role and its definitions. Role must be properly capitalized. If role has a space in the name, use single quotes around the name.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _examples-19:
 
-Examples
-^^^^^^^^
+.. _**Examples**-19:
+
+**Examples**
+
 
 
 ::
 
   Get-AADRole -Role 'Company Administrator'
 
-.. _parameters-19:
+.. _**Parameters**-19:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 None
 
 .. _required-modules-18:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 AzureAD PowerShell
 
-.. _output-19:
+.. _**Output**-19:
 
-Output
-^^^^^^
+**Output**
+
 
 Active roles
 
 **Get-AADRoleMembers** 
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-20:
+.. _**Synopsis**-20:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Lists the active roles in Azure AD and what users are part of the role.
 
 .. _permissions-3:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-20:
 
-Syntax
-^^^^^^
+.. _****Syntax****-20:
+
+****Syntax****
+
 
 
 ::
 
   Get-AADRoleMembers
 
-.. _description-20:
+.. _**Description**-20:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Lists the active roles in Azure AD and what users are part of the role.
 
-.. _examples-20:
+.. _**Examples**-20:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-AADRoleMembers
 
-.. _parameters-20:
+.. _**Parameters**-20:
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 
 None
 
 .. _required-modules-19:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-20:
+.. _**Output**-20:
 
-Output
-^^^^^^
+**Output**
+
 
 Active roles
 
@@ -1438,24 +1436,24 @@ Operational
 -----------
 
 **Execute-Command**
-^^^^^^^^^^^^^^^^^^^
 
-.. _synopsis-21:
 
-Synopsis
-^^^^^^^^
+.. _**Synopsis**-21:
+
+**Synopsis**
+
 
 Will run a command or script on a specified VM
 
 .. _permissions-4:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-21:
 
-Syntax
-^^^^^^
+.. _****Syntax****-21:
+
+****Syntax****
+
 
 
 ::
@@ -1463,20 +1461,20 @@ Syntax
   Execute-Command -OS [OS] -ResourceGroup [RG Name] -VM [VM Name]
 -Command [Command]
 
-.. _description-21:
+.. _**Description**-21:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Executes a command on a virtual machine in Azure using 
 ::
 
   az vm run-command invoke
 
-.. _examples-21:
+.. _**Examples**-21:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -1484,10 +1482,10 @@ Examples
   Execute-Command -OS Windows -ResourceGroup TestRG -VM AzureWin10
 -Command whoami
 
-.. _parameters-21:
+.. _**Parameters**-21:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -OS
 
@@ -1507,25 +1505,25 @@ The command to be executed
 
 .. _required-modules-20:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-21:
+.. _**Output**-21:
 
-Output
-^^^^^^
+**Output**
 
-Output of command being run or a failure message if failed
+
+**Output** of command being run or a failure message if failed
 
 **Execute-MSBuild** 
 ~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-22:
+.. _**Synopsis**-22:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Will run a supplied MSBuild payload on a specified VM. By default, Azure
 VMs have .NET 4.0 installed. Requires Contributor Role. Will run as
@@ -1534,22 +1532,22 @@ SYSTEM.
 .. _permissions-5:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-22:
 
-Syntax
-^^^^^^
+.. _****Syntax****-22:
+
+****Syntax****
+
 
 
 ::
 
   Execute-MSBuild -ResourceGroup [RG Name] -VM [Virtual Machine name] -File [C:/path/to/payload/onyourmachine.xml]
 
-.. _description-22:
+.. _**Description**-22:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Uploads an MSBuild payload as a .ps1 script to the target VM then calls
 msbuild.exe with 
@@ -1558,49 +1556,49 @@ msbuild.exe with
 
   az run-command invoke.
 
-.. _examples-22:
+.. _**Examples**-22:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Execute-MSBuild -ResourceGroup TestRG -VM AzureWin10 -File C:\tempbuild.xml
 
-.. _parameters-22:
+.. _**Parameters**-22:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -ResourceGroup
-^^^^^^^^^^^^^^
+
 
 Resource group name the VM is located in
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 -VM
-^^^
+
 
 Name of the virtual machine to execute the command on
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 -File
-^^^^^
+
 
 Location of build.xml file
 
 .. _required-modules-21:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-22:
+.. _**Output**-22:
 
-Output
-^^^^^^
+**Output**
+
 
 Success message of msbuild starting the build if successful, error
 message if upload failed.
@@ -1608,32 +1606,32 @@ message if upload failed.
 **Execute-Program** 
 ~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-23:
+.. _**Synopsis**-23:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Will run a given binary on a specified VM
 
 .. _permissions-6:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-23:
 
-Syntax
-^^^^^^
+.. _****Syntax****-23:
+
+****Syntax****
+
 
 
 ::
 
   Execute-Program -ResourceGroup [RG Name] -VM [Virtual Machine name] -File [C:/path/to/payload.exe]
 
-.. _description-23:
+.. _**Description**-23:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Takes a supplied binary, base64 encodes the byte stream to a file,
 uploads that file to the VM, then runs a command via
@@ -1645,20 +1643,20 @@ uploads that file to the VM, then runs a command via
 to decode the base64 byte stream to a .exe file, then executes
 the binary.
 
-.. _examples-23:
+.. _**Examples**-23:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 	Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File
 C:tempbeacon.exe
 
-.. _parameters-23:
+.. _**Parameters**-23:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -ResourceGroup
 
@@ -1674,49 +1672,49 @@ Location of executable binary
 
 .. _required-modules-22:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-23:
+.. _**Output**-23:
 
-Output
-^^^^^^
+**Output**
 
-“Provisioning Succeeded” output. Because it’s a binary being executed,
-there will be no native output unless the binary is meant to return data
+
+“Provisioning Succeeded” **Output**. Because it’s a binary being executed,
+there will be no native **Output** unless the binary is meant to return data
 to stdout.
 
 **Create-Backdoor** 
 ~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-24:
+.. _**Synopsis**-24:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Creates a backdoor in Azure via Runbooks
 
 .. _permissions-7:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-24:
 
-Syntax
-^^^^^^
+.. _****Syntax****-24:
+
+****Syntax****
+
 
 
 ::
 
   Create-Backdoor -Username [Username] -Password [Password] -AutomationAccount [AA name] -ResourceGroup [RG Name] -NewUsername [New UN] -NewPassword [New Password]
 
-.. _description-24:
+.. _**Description**-24:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Will create a Runbook that creates an Azure account and generates a
 Webhook to that Runbook so it can be executed if you lose access to
@@ -1726,10 +1724,10 @@ Azure. Also gives the ability to upload your own .ps1 file as a Runbook
 This requires an account that is part of the 'Administrators' Role
 (Needed to make a user)
 
-.. _examples-24:
+.. _**Examples**-24:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -1737,10 +1735,10 @@ Examples
   Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd
 
 
-.. _parameters-24:
+.. _**Parameters**-24:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -Username
 
@@ -1769,66 +1767,66 @@ Password for that new account
 
 .. _required-modules-23:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure PowerShell
 
-.. _output-24:
+.. _**Output**-24:
 
-Output
-^^^^^^
+**Output**
+
 
 URI if successful, permissions error if failure
 
 **Execute-Backdoor** 
 ~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-25:
+.. _**Synopsis**-25:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 This runs the backdoor URI that is created with "Create-Backdoor”
 
 .. _permissions-8:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-25:
 
-Syntax
-^^^^^^
+.. _****Syntax****-25:
+
+****Syntax****
+
 
 
 ::
 
   Execute-Backdoor -URI [URI]
 
-.. _description-25:
+.. _**Description**-25:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Executes the URI created by Create-Backdoor
 
-.. _examples-25:
+.. _**Examples**-25:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Execute-Backdoor -URI https://s16events.azure-automation.net/webhooks?token=qol1XudydN13%2bI5bilBZzbCjdzTIcfs4Fj4yH61WvQ%3d
 
-.. _parameters-25:
+.. _**Parameters**-25:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -URI
 
@@ -1836,26 +1834,26 @@ The URI generated by Create-Backdoor
 
 .. _required-modules-24:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 | Azure CLI
 | Azure PowerShell
 
-.. _output-25:
+.. _**Output**-25:
 
-Output
-^^^^^^
+**Output**
+
 
 Webhook successfully executed
 
 **Execute-CommandRunbook** 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-26:
+.. _**Synopsis**-26:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Will execute a supplied command or script from a Runbook if the Runbook
 is configured with a "RunAs" account
@@ -1863,31 +1861,31 @@ is configured with a "RunAs" account
 .. _permissions-9:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-26:
 
-Syntax
-^^^^^^
+.. _****Syntax****-26:
+
+****Syntax****
+
 
 
 ::
 
   Execute-CommandRunbook -AutomationAccount [AA Name] -ResourceGroup [RGName] -VM [VM Name] -Command [Command]
 
-.. _description-26:
+.. _**Description**-26:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 If an Automation Account is utilizing a ‘Runas’ account, this allows you
 to run commands against a virtual machine if that RunAs account has the
 correct permissions over the VM.
 
-.. _examples-26:
+.. _**Examples**-26:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -1899,10 +1897,10 @@ Examples
 
   Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VM Win10Test -Script "C:temptest.ps1"
 
-.. _parameters-26:
+.. _**Parameters**-26:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -AutomationAccount
 
@@ -1927,67 +1925,67 @@ Run an entire script instead of just one command.
 
 .. _required-modules-25:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure PowerShell
 
-.. _output-26:
+.. _**Output**-26:
 
-Output
-^^^^^^
+**Output**
 
-Output of command if successfully ran.
+
+**Output** of command if successfully ran.
 
 **Upload-StorageContent** 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-27:
+.. _**Synopsis**-27:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Uploads a supplied file to a storage share.
 
 .. _permissions-10:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-27:
 
-Syntax
-^^^^^^
+.. _****Syntax****-27:
+
+****Syntax****
+
 
 
 ::
 
   Upload-StorageContent -StorageAccount [Storage Account name] -Share [Storage share name] -File [File name to upload]
 
-.. _description-27:
+.. _**Description**-27:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Uploads a supplied file to a storage container located in a storage
 account
 
-.. _examples-27:
+.. _**Examples**-27:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Upload-StorageContent -StorageAccount TestName -Share TestShare -File secret.txt
 
-.. _parameters-27:
+.. _**Parameters**-27:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -StorageAccount
 
@@ -2003,66 +2001,66 @@ Share name to upload to
 
 .. _required-modules-26:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure Powershell
 
-.. _output-27:
+.. _**Output**-27:
 
-Output
-^^^^^^
+**Output**
+
 
 Success message
 
 **Stop-VM** 
 ~~~~~~~~~~~
 
-.. _synopsis-28:
+.. _**Synopsis**-28:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Stops a Virtual Machine
 
 .. _permissions-11:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-28:
 
-Syntax
-^^^^^^
+.. _****Syntax****-28:
+
+****Syntax****
+
 
 
 ::
 
    Stop-VM -VM [VM name] -ResourceGroup [RG] 
 
-.. _description-28:
+.. _**Description**-28:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Stops a VM
 
-.. _examples-28:
+.. _**Examples**-28:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
    Stop-VM -VM Example2016R2 -ResourceGroup Test_RG
 
-.. _parameters-28:
+.. _**Parameters**-28:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -VM
 
@@ -2074,46 +2072,46 @@ Resource group the VM is located in
 
 .. _required-modules-27:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-28:
+.. _**Output**-28:
 
-Output
-^^^^^^
+**Output**
+
 
 VM successfully stops
 
 Start-VM 
 ~~~~~~~~
 
-**Synopsis**
+****Synopsis****
 
 Starts a Virtual Machine
 
 **Permissions**
 
-**Syntax**
+******Syntax******
 
 
 ::
 
    Start-VM -VM [VM name] -ResourceGroup [RG] 
 
-**Description**
+****Description****
 
 Starts a VM
 
-**Examples**
+****Examples****
 
 
 ::
 
    Start-VM -VM Example2016R2 -ResourceGroup Test_RG
 
-**Parameters**
+****Parameters****
 
 -VM
 
@@ -2125,12 +2123,12 @@ Resource group the VM is located in
 
 .. _required-modules-28:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-**Output**
+****Output****
 
 VM successfully starts
 
@@ -2139,31 +2137,31 @@ VM successfully starts
 Restart-VM 
 ~~~~~~~~~~
 
-**Synopsis**
+****Synopsis****
 
 Restarts a Virtual Machine
 
 **Permissions**
 
-**Syntax**
+******Syntax******
 
 
 ::
 
    Restart-VM -VM [VM name] -ResourceGroup [RG] 
 
-**Description**
+****Description****
 
 Restarts a VM
 
-**Examples**
+****Examples****
 
 
 ::
 
    Restart-VM -VM Example2016R2 -ResourceGroup Test_RG
 
-**Parameters**
+****Parameters****
 
 -VM
 
@@ -2175,61 +2173,61 @@ Resource group the VM is located in
 
 .. _required-modules-29:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-**Output**
+****Output****
 
 VM successfully restarts
 
 **Start-Runbook** 
 ~~~~~~~~~~~~~~~~~
 
-.. _synopsis-29:
+.. _**Synopsis**-29:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Starts a Runbook
 
 .. _permissions-12:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-29:
 
-Syntax
-^^^^^^
+.. _****Syntax****-29:
+
+****Syntax****
+
 
 
 ::
 
    Start-Runbook -Account [Automation Account name] -ResourceGroup [Resource Group name] -Runbook [Runbook name] 
 
-.. _description-29:
+.. _**Description**-29:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Starts a specified Runbook
 
-.. _examples-29:
+.. _**Examples**-29:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
    Start-Runbook -Account AutoAccountTest -ResourceGroup TestRG -Runbook TestRunbook 
 
-.. _parameters-29:
+.. _**Parameters**-29:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -Account
 
@@ -2245,56 +2243,56 @@ Name of runbook
 
 .. _required-modules-30:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure PowerShell
 
-.. _output-29:
+.. _**Output**-29:
 
-Output
-^^^^^^
+**Output**
 
-Runbook output
+
+Runbook **Output**
 
 **Set-Role** 
 ~~~~~~~~~~~~
 
-.. _synopsis-30:
+.. _**Synopsis**-30:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Assigns a user a role for a specific resource or subscription
 
 .. _permissions-13:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-30:
 
-Syntax
-^^^^^^
+.. _****Syntax****-30:
+
+****Syntax****
+
 
 
 ::
 
   Set-Role -Role Owner -User [UPN] -Resource [Resource name]
 
-.. _description-30:
+.. _**Description**-30:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Sets a role over a resource or subscription.
 
-.. _examples-30:
+.. _**Examples**-30:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -2306,10 +2304,10 @@ Examples
 
   Set-Role -Role Owner -User john@contoso.com -Subscription SubName
 
-.. _parameters-30:
+.. _**Parameters**-30:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -User
 
@@ -2329,39 +2327,39 @@ Name of subscription
 
 .. _required-modules-31:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-30:
+.. _**Output**-30:
 
-Output
-^^^^^^
+**Output**
+
 
 Role successfully applied
 
 Remove-Role 
 ~~~~~~~~~~~
 
-**Synopsis**
+****Synopsis****
 
 Removes a user from a role for a specific resource or subscription
 
 **Permissions**
 
-**Syntax**
+******Syntax******
 
 
 ::
 
   Set-Role -Role Owner -User [UPN] -Resource [Resource name]
 
-**Description**
+****Description****
 
 Removes a role over a resource or subscription.
 
-**Examples**
+****Examples****
 
 
 ::
@@ -2373,7 +2371,7 @@ Removes a role over a resource or subscription.
 
   Remove-Role -Role Owner -User john@contoso.com -Subscription SubName
 
-**Parameters**
+****Parameters****
 
 -User
 
@@ -2393,62 +2391,62 @@ Name of subscription
 
 .. _required-modules-32:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-**Output**
+****Output****
 
 Role successfully Removed
 
 **Set-Group** 
 ~~~~~~~~~~~~~
 
-.. _synopsis-31:
+.. _**Synopsis**-31:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Adds a user to an Azure AD Group
 
 .. _permissions-14:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-31:
 
-Syntax
-^^^^^^
+.. _****Syntax****-31:
+
+****Syntax****
+
 
 
 ::
 
   Set-Group -User [UPN] -Group [Group name]
 
-.. _description-31:
+.. _**Description**-31:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Adds a user to an AAD group. If the group name has spaces, put the group
 name in single quotes.
 
-.. _examples-31:
+.. _**Examples**-31:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Set-Group -User john@contoso.com -Group 'SQL Users' 
 
-.. _parameters-31:
+.. _**Parameters**-31:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -User
 
@@ -2460,64 +2458,64 @@ AAD Group name
 
 .. _required-modules-33:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-31:
+.. _**Output**-31:
 
-Output
-^^^^^^
+**Output**
+
 
 User added to group
 
 **Set-Password** 
 ~~~~~~~~~~~~~~~~
 
-.. _synopsis-32:
+.. _**Synopsis**-32:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Sets a user's password
 
 .. _permissions-15:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-32:
 
-Syntax
-^^^^^^
+.. _****Syntax****-32:
+
+****Syntax****
+
 
 
 ::
 
   Set-Password -Username [UPN] -Password [new password]
 
-.. _description-32:
+.. _**Description**-32:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Sets a user’s password. Requires AAD PS Module.
 
-.. _examples-32:
+.. _**Examples**-32:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Set-Password -Username john@contoso.com -Password newpassw0rd1
 
-.. _parameters-32:
+.. _**Parameters**-32:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -Password
 
@@ -2529,17 +2527,17 @@ Name of user
 
 .. _required-modules-34:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 AzureAD PowerShell
 
-.. _output-32:
+.. _**Output**-32:
 
-Output
-^^^^^^
+**Output**
+
 
 Password successfully set
 
@@ -2547,116 +2545,116 @@ Secret/Key/Certificate Gathering
 --------------------------------
 
 **Get-KeyVaults**
-^^^^^^^^^^^^^^^^^
+^
 
-.. _synopsis-33:
+.. _**Synopsis**-33:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Lists the Key Vaults
 
 .. _permissions-16:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-33:
 
-Syntax
-^^^^^^
+.. _****Syntax****-33:
+
+****Syntax****
+
 
 
 ::
 
   Get-KeyVaults
 
-.. _description-33:
+.. _**Description**-33:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gathers the Keyvaults in the subscription
 
-.. _examples-33:
+.. _**Examples**-33:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-KeyVaults
 
-.. _parameters-33:
+.. _**Parameters**-33:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 None
 
 .. _required-modules-35:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-33:
+.. _**Output**-33:
 
-Output
-^^^^^^
+**Output**
+
 
 List of KeyVaults
 
 **Get-KeyVaultContents** 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-34:
+.. _**Synopsis**-34:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Get the secrets from a specific Key Vault
 
 .. _permissions-17:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-34:
 
-Syntax
-^^^^^^
+.. _****Syntax****-34:
+
+****Syntax****
+
 
 
 ::
 
   Get-KeyVaultContents -Name [VaultName] 
 
-.. _description-34:
+.. _**Description**-34:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Takes a supplied KeyVault name and edits the access policy to allow the
 current user to view the vault. Once the secrets are displayed, it
 re-edits the policy and removes your access.
 
-.. _examples-34:
+.. _**Examples**-34:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-KeyVaultContents -Name TestVault
 
-.. _parameters-34:
+.. _**Parameters**-34:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -Name
 
@@ -2664,25 +2662,25 @@ Vault name
 
 .. _required-modules-36:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-34:
+.. _**Output**-34:
 
-Output
-^^^^^^
+**Output**
+
 
 KeyVault contents
 
 **Get-AllKeyVaultContents** 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-35:
+.. _**Synopsis**-35:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gets ALL the secrets from all Key Vaults. If the logged in user cannot
 access a key vault, it tries to edit the access policy to allow access.
@@ -2690,55 +2688,55 @@ access a key vault, it tries to edit the access policy to allow access.
 .. _permissions-18:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-35:
 
-Syntax
-^^^^^^
+.. _****Syntax****-35:
+
+****Syntax****
+
 
 
 ::
 
   Get-AllKeyVaultContents
 
-.. _description-35:
+.. _**Description**-35:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Goes through each key vault and edits the access policy to allow the
 user to view the contents, displays the contents, then re-edits the
 policies to remove the user from the access policy.
 
-.. _examples-35:
+.. _**Examples**-35:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-AllKeyVaultContents
 
-.. _parameters-35:
+.. _**Parameters**-35:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 None
 
 .. _required-modules-37:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-35:
+.. _**Output**-35:
 
-Output
-^^^^^^
+**Output**
+
 
 Key vault content
 
@@ -2748,87 +2746,87 @@ Data Exfiltration
 **Get-StorageAccounts** 
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-36:
+.. _**Synopsis**-36:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Get a list of storage accounts and their blobs
 
 .. _permissions-19:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-36:
 
-Syntax
-^^^^^^
+.. _****Syntax****-36:
+
+****Syntax****
+
 
 
 ::
 
   Get-StorageAccounts
 
-.. _description-36:
+.. _**Description**-36:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gets a list of storage account blobs
 
-.. _examples-36:
+.. _**Examples**-36:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-StorageAccounts
 
-.. _parameters-36:
+.. _**Parameters**-36:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 None
 
 .. _required-modules-38:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure Powershell
 
-.. _output-36:
+.. _**Output**-36:
 
-Output
-^^^^^^
+**Output**
+
 
 List of storage accounts
 
 **Get-StorageAccountKeys** 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-37:
+.. _**Synopsis**-37:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gets the account keys for a storage account
 
 .. _permissions-20:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-37:
 
-Syntax
-^^^^^^
+.. _****Syntax****-37:
+
+****Syntax****
+
 
 
 ::
@@ -2836,18 +2834,18 @@ Syntax
   Get-StorageAccountKeys -ResourceGroup [Resource Group name] -Account
 [StorageAccountName]
 
-.. _description-37:
+.. _**Description**-37:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gets the account keys for a storage account to be used to access the
 storage account.
 
-.. _examples-37:
+.. _**Examples**-37:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -2855,10 +2853,10 @@ Examples
   Get-StorageAccountKeys -ResourceGroup MyGroup -Account
 StorageAccountName -kerb 
 
-.. _parameters-37:
+.. _**Parameters**-37:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 - ResourceGroup
 
@@ -2874,39 +2872,39 @@ Also grab the “Kerberos keys”
 
 .. _required-modules-39:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure Powershell
 
-.. _output-37:
+.. _**Output**-37:
 
-Output
-^^^^^^
+**Output**
+
 
 List of keys in plain text
 
 **Get-StorageContents** 
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-38:
+.. _**Synopsis**-38:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gets the contents of a storage container or file share.
 
 .. _permissions-21:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-38:
 
-Syntax
-^^^^^^
+.. _****Syntax****-38:
+
+****Syntax****
+
 
 
 ::
@@ -2914,19 +2912,19 @@ Syntax
   Get-StorageContents -StorageAccount [Storage account name]
 -ResourceGroup [Resource group name] -File [File name]
 
-.. _description-38:
+.. _**Description**-38:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Gets the contents of a storage container or file share. OAuth is not
 support to access file shares via cmdlets, so you must have access to
 the Storage Account's key.
 
-.. _examples-38:
+.. _**Examples**-38:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -2934,10 +2932,10 @@ Examples
    Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup
 -File secret.txt -NoDelete
 
-.. _parameters-38:
+.. _**Parameters**-38:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -ResourceGroup
 
@@ -2958,27 +2956,27 @@ Does not delete the file after it's downloaded. Optional
 
 .. _required-modules-40:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure Powershell
 
-.. _output-38:
+.. _**Output**-38:
 
-Output
-^^^^^^
+**Output**
+
 
 File contents are displayed
 
 **Get-Runbooks** 
 ~~~~~~~~~~~~~~~~
 
-.. _synopsis-39:
+.. _**Synopsis**-39:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Lists all the run books in all Automation accounts under the
 subscription
@@ -2986,67 +2984,67 @@ subscription
 .. _permissions-22:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-39:
 
-Syntax
-^^^^^^
+.. _****Syntax****-39:
+
+****Syntax****
+
 
 
 ::
 
   Get-Runbooks
 
-.. _description-39:
+.. _**Description**-39:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Recursively goes through each Automation Account and lists the runbook
 names, it’s state, the creation and modification time, and what AA it is
 under.
 
-.. _examples-39:
+.. _**Examples**-39:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-Runbooks
 
-.. _parameters-39:
+.. _**Parameters**-39:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 None
 
 .. _required-modules-41:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure PowerShell
 
-.. _output-39:
+.. _**Output**-39:
 
-Output
-^^^^^^
+**Output**
+
 
 List of runbooks and their associated Automation Accounts
 
 **Get-RunbookContent** 
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-40:
+.. _**Synopsis**-40:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Gets a specific Runbook and displays its contents. Use -NoDelete to not
 delete after reading
@@ -3054,12 +3052,12 @@ delete after reading
 .. _permissions-23:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-40:
 
-Syntax
-^^^^^^
+.. _****Syntax****-40:
+
+****Syntax****
+
 
 
 ::
@@ -3067,15 +3065,15 @@ Syntax
   Get-RunbookContent -Account [AutomationAccountName] -ResourceGroup
 [ResourceGroupName] -Runbook [Runbook name]
 
-.. _description-40:
+.. _**Description**-40:
 
-Description
-^^^^^^^^^^^
+**Description**
 
-.. _examples-40:
 
-Examples
-^^^^^^^^
+.. _**Examples**-40:
+
+**Examples**
+
 
 
 ::
@@ -3095,10 +3093,10 @@ TestGroup -Runbook TestBook -Slot "Published"
   Get-RunbookContent -Account AutomationAccountexample -ResourceGroup
 TestGroup -Runbook TestBook -Slot "Draft"
 
-.. _parameters-40:
+.. _**Parameters**-40:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -Runbook
 
@@ -3122,90 +3120,90 @@ Optional; use if differenciating between published or drafted Runbook
 
 .. _required-modules-42:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
 Azure PowerShell
 
-.. _output-40:
+.. _**Output**-40:
 
-Output
-^^^^^^
+**Output**
+
 
 Runbook content
 
 **Get-AvailableVMDisks** 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-41:
+.. _**Synopsis**-41:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Lists the VM disks available.
 
 .. _permissions-24:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-41:
 
-Syntax
-^^^^^^
+.. _****Syntax****-41:
+
+****Syntax****
+
 
 
 ::
 
   Get-AvailableVMDisks
 
-.. _description-41:
+.. _**Description**-41:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Lists the VM disks available in the subscription
 
-.. _examples-41:
+.. _**Examples**-41:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-AvailableVMDisks
 
-.. _parameters-41:
+.. _**Parameters**-41:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 None
 
 .. _required-modules-43:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-41:
+.. _**Output**-41:
 
-Output
-^^^^^^
+**Output**
+
 
 List of VM Disks
 
 **Get-VMDisk** 
 ~~~~~~~~~~~~~~
 
-.. _synopsis-42:
+.. _**Synopsis**-42:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Generates a link to download a Virtual Machiche's disk. The link is only
 available for an hour.
@@ -3213,31 +3211,31 @@ available for an hour.
 .. _permissions-25:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-42:
 
-Syntax
-^^^^^^
+.. _****Syntax****-42:
+
+****Syntax****
+
 
 
 ::
 
    Get-VMDisk -DiskName [Disk name] -ResourceGroup [RG Name]
 
-.. _description-42:
+.. _**Description**-42:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Generates a link to download a Virtual Machiche's disk. The link is only
 available for an hour. Note that you’re downloading a VM Disk, so it’s
 probably going to be many GBs in size. Hope you have fiber!
 
-.. _examples-42:
+.. _**Examples**-42:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
@@ -3246,10 +3244,10 @@ Examples
 AzureWin10_OsDisk_1_c2c7da5a0838404c84a70d6ec097ebf5 -ResourceGroup
 TestGroup
 
-.. _parameters-42:
+.. _**Parameters**-42:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -ResourceGroup
 
@@ -3261,144 +3259,144 @@ Name of VM disk
 
 .. _required-modules-44:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-42:
+.. _**Output**-42:
 
-Output
-^^^^^^
+**Output**
+
 
 Link to download the VM disk
 
 **Get-VMs** 
 ~~~~~~~~~~~
 
-.. _synopsis-43:
+.. _**Synopsis**-43:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Lists all virtual machines available, their disks, and their IPs.
 
 .. _permissions-26:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-43:
 
-Syntax
-^^^^^^
+.. _****Syntax****-43:
+
+****Syntax****
+
 
 
 ::
 
   Get-VMs
 
-.. _description-43:
+.. _**Description**-43:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Lists all virtual machines available, their disks, and their IPs, as
 well their running state
 
-.. _examples-43:
+.. _**Examples**-43:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-VMs
 
-.. _parameters-43:
+.. _**Parameters**-43:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 None
 
 .. _required-modules-45:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-43:
+.. _**Output**-43:
 
-Output
-^^^^^^
+**Output**
+
 
 List of VMs and details
 
 **Get-SQLDBs** 
 ~~~~~~~~~~~~~~
 
-.. _synopsis-44:
+.. _**Synopsis**-44:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Lists the available SQL Databases on a server
 
 .. _permissions-27:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-44:
 
-Syntax
-^^^^^^
+.. _****Syntax****-44:
+
+****Syntax****
+
 
 
 ::
 
   Get-SQLDBs
 
-.. _description-44:
+.. _**Description**-44:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Lists the available SQL Databases on a server. There currently are no
 cmdlets in any PS module to interact with said DBs, so the only option
 is to login via portal and use the preview browser.
 
-.. _examples-44:
+.. _**Examples**-44:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Get-SQLDBs
 
-.. _parameters-44:
+.. _**Parameters**-44:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 None
 
 .. _required-modules-46:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-44:
+.. _**Output**-44:
 
-Output
-^^^^^^
+**Output**
+
 
 List of SQL Databases in the subscription
 
@@ -3408,10 +3406,10 @@ Mandatory
 **Set-Subscription**
 ~~~~~~~~~~~~~~~~~~~~
 
-.. _synopsis-45:
+.. _**Synopsis**-45:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Sets default subscription. Necessary if in a tenant with multiple
 subscriptions.
@@ -3419,39 +3417,39 @@ subscriptions.
 .. _permissions-28:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-45:
 
-Syntax
-^^^^^^
+.. _****Syntax****-45:
+
+****Syntax****
+
 
 
 ::
 
   Set-Subscription -Id [Subscription ID]
 
-.. _description-45:
+.. _**Description**-45:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Sets the default subscription
 
-.. _examples-45:
+.. _**Examples**-45:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   Set-Subscription -Id b049c906-7000-4899-b644-f3eb835f04d0
 
-.. _parameters-45:
+.. _**Parameters**-45:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -Id
 
@@ -3459,15 +3457,15 @@ Subscription ID
 
 .. _required-modules-47:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-45:
+.. _**Output**-45:
 
-Output
-^^^^^^
+**Output**
+
 
 Success message
 
@@ -3477,49 +3475,49 @@ Help
 **PowerZure**
 ~~~~~~~~~~~~~
 
-.. _synopsis-46:
+.. _**Synopsis**-46:
 
-Synopsis
-^^^^^^^^
+**Synopsis**
+
 
 Displays info about this script.
 
 .. _permissions-29:
 
 Permissions
-^^^^^^^^^^^
 
-.. _syntax-46:
 
-Syntax
-^^^^^^
+.. _****Syntax****-46:
+
+****Syntax****
+
 
 
 ::
 
   PowerZure -h
 
-.. _description-46:
+.. _**Description**-46:
 
-Description
-^^^^^^^^^^^
+**Description**
+
 
 Displays info about this script.
 
-.. _examples-46:
+.. _**Examples**-46:
 
-Examples
-^^^^^^^^
+**Examples**
+
 
 
 ::
 
   PowerZure -h
 
-.. _parameters-46:
+.. _**Parameters**-46:
 
-Parameters 
-^^^^^^^^^^
+**Parameters** 
+
 
 -h
 
@@ -3527,14 +3525,14 @@ Help
 
 .. _required-modules-48:
 
-Required Modules
-^^^^^^^^^^^^^^^^
+**Required Modules**
+
 
 Azure CLI
 
-.. _output-46:
+.. _**Output**-46:
 
-Output
-^^^^^^
+**Output**
+
 
 List of functions in this script
