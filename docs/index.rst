@@ -56,16 +56,16 @@ Author: Ryan Hausknecht (@haus3c)
 
 License: BSD-3
 
+
+
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: About
    
    index
    
 .. toctree::
    :maxdepth: 2
-   :hidden:
    :caption: Requirements
    
    Requirements/requirements
