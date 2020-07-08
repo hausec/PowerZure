@@ -1,7 +1,5 @@
 ![powerzure](https://i.imgur.com/d5B0U0B.png)
 
-![powerzure](https://i.imgur.com/d5B0U0B.png)
-
 ### For a list of functions, their usage, and more, check out https://powerzure.readthedocs.io
 
 
