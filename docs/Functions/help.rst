@@ -20,8 +20,6 @@ Permissions
 
 ****Syntax****
 
-
-
 ::
 
   PowerZure -h
