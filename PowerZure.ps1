@@ -261,7 +261,7 @@ foreach ($role in $roles)
 	{
 	$name = $role.DisplayName
 	$members = Get-AzureADDirectoryRoleMember -ObjectId $role.ObjectId
-	If ($members
+	If ($members)
 		{
 		Write-Host $name -ForegroundColor Red
 		$members.DisplayName
