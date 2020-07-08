@@ -1117,7 +1117,7 @@ Get-RunAsCertificate
 Will gather a RunAs accounts certificate which can then be used to login
 as that account.
 
-.. _permissions-1:
+
 
 Permissions
 
@@ -1191,7 +1191,7 @@ Get-AADRole
 Finds a specified AAD Role and its definitions
 
 
-.. _permissions-2:
+
 
 Permissions
 
@@ -1253,7 +1253,7 @@ Get-AADRoleMembers
 
 Lists the active roles in Azure AD and what users are part of the role.
 
-.. _permissions-3:
+
 
 Permissions
 

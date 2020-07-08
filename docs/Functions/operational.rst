@@ -12,10 +12,6 @@ Execute-Command
 
 Will run a command or script on a specified VM
 
-.. _permissions-4:
-
-Permissions
-
 
 .. _**Syntax**-21:
 
@@ -92,9 +88,9 @@ Will run a supplied MSBuild payload on a specified VM. By default, Azure
 VMs have .NET 4.0 installed. Requires Contributor Role. Will run as
 SYSTEM.
 
-.. _permissions-5:
 
-Permissions
+
+
 
 
 .. _**Syntax**-22:
@@ -176,9 +172,9 @@ Execute-Program
 
 Will run a given binary on a specified VM
 
-.. _permissions-6:
 
-Permissions
+
+
 
 
 .. _**Syntax**-23:
@@ -258,9 +254,9 @@ Create-Backdoor
 
 Creates a backdoor in Azure via Runbooks
 
-.. _permissions-7:
 
-Permissions
+
+
 
 
 .. _**Syntax**-24:
@@ -302,7 +298,7 @@ This requires an account that is part of the 'Administrators' Role
 
 -Username
 
-Username you used to login to Azure with, that has permissions to create
+Username you used to login to Azure with, that has  to create
 a Runbook and user
 
 -Password
@@ -339,7 +335,7 @@ Azure PowerShell
 **Output**
 
 
-URI if successful, permissions error if failure
+URI if successful,  error if failure
 
 Execute-Backdoor 
 ----------------
@@ -351,9 +347,9 @@ Execute-Backdoor
 
 This runs the backdoor URI that is created with "Create-Backdoor”
 
-.. _permissions-8:
 
-Permissions
+
+
 
 
 .. _**Syntax**-25:
@@ -418,9 +414,9 @@ Execute-CommandRunbook
 Will execute a supplied command or script from a Runbook if the Runbook
 is configured with a "RunAs" account
 
-.. _permissions-9:
 
-Permissions
+
+
 
 
 .. _**Syntax**-26:
@@ -440,7 +436,7 @@ Permissions
 
 If an Automation Account is utilizing a ‘Runas’ account, this allows you
 to run commands against a virtual machine if that RunAs account has the
-correct permissions over the VM.
+correct  over the VM.
 
 .. _**Examples**-26:
 
@@ -508,9 +504,9 @@ Upload-StorageContent
 
 Uploads a supplied file to a storage share.
 
-.. _permissions-10:
 
-Permissions
+
+
 
 
 .. _**Syntax**-27:
@@ -584,9 +580,9 @@ Stop-VM
 
 Stops a Virtual Machine
 
-.. _permissions-11:
 
-Permissions
+
+
 
 
 .. _**Syntax**-28:
@@ -650,7 +646,7 @@ Start-VM
 
 Starts a Virtual Machine
 
-**Permissions**
+****
 
 **Syntax**
 
@@ -659,18 +655,18 @@ Starts a Virtual Machine
 
    Start-VM -VM [VM name] -ResourceGroup [RG] 
 
-****Description****
+**Description**
 
 Starts a VM
 
-****Examples****
+**Examples**
 
 
 ::
 
    Start-VM -VM Example2016R2 -ResourceGroup Test_RG
 
-****Parameters****
+**Parameters**
 
 -VM
 
@@ -700,7 +696,7 @@ Restart-VM
 
 Restarts a Virtual Machine
 
-**Permissions**
+****
 
 **Syntax**
 
@@ -709,18 +705,18 @@ Restarts a Virtual Machine
 
    Restart-VM -VM [VM name] -ResourceGroup [RG] 
 
-****Description****
+**Description**
 
 Restarts a VM
 
-****Examples****
+**Examples**
 
 
 ::
 
    Restart-VM -VM Example2016R2 -ResourceGroup Test_RG
 
-****Parameters****
+**Parameters**
 
 -VM
 
@@ -751,9 +747,9 @@ Start-Runbook
 
 Starts a Runbook
 
-.. _permissions-12:
 
-Permissions
+
+
 
 
 .. _**Syntax**-29:
@@ -826,9 +822,9 @@ Set-Role
 
 Assigns a user a role for a specific resource or subscription
 
-.. _permissions-13:
 
-Permissions
+
+
 
 
 .. _**Syntax**-30:
@@ -905,7 +901,7 @@ Remove-Role
 
 Removes a user from a role for a specific resource or subscription
 
-**Permissions**
+****
 
 **Syntax**
 
@@ -914,11 +910,11 @@ Removes a user from a role for a specific resource or subscription
 
   Remove-Role -Role Owner -User [UPN] -Resource [Resource name]
 
-****Description****
+**Description**
 
 Removes a role over a resource or subscription.
 
-****Examples****
+**Examples**
 
 
 ::
@@ -930,7 +926,7 @@ Removes a role over a resource or subscription.
 
   Remove-Role -Role Owner -User john@contoso.com -Subscription SubName
 
-****Parameters****
+**Parameters**
 
 -User
 
@@ -969,9 +965,9 @@ Set-Group
 
 Adds a user to an Azure AD Group
 
-.. _permissions-14:
 
-Permissions
+
+
 
 
 .. _**Syntax**-31:
@@ -1039,9 +1035,9 @@ Set-Password
 
 Sets a user's password
 
-.. _permissions-15:
 
-Permissions
+
+
 
 
 .. _**Syntax**-32:
