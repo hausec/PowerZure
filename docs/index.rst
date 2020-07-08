@@ -143,7 +143,8 @@ Examples
 
 
 ::
-	 Get-Targets`
+
+   Get-Targets
 
 Required Modules
 ^^^^^^^^^^^^^^^^
@@ -176,9 +177,9 @@ Returns the current logged in user name and any owned objects
 Syntax
 ^^^^^^
 
-
 ::
-	 Get-CurrentUser
+
+   Get-CurrentUser
 
 .. _description-1:
 
@@ -194,7 +195,10 @@ ownership over.
 Examples
 ^^^^^^^^
 
-` Get-CurrentUser`
+
+::
+
+   Get-CurrentUser`
 
 ` Get-CurrentUser -All`
 
