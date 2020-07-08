@@ -8,7 +8,7 @@ uses three Azure modules, each with a different purpose.
 
 1. `Azure
    CLI <https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest>`__
-   (`az`)
+   (az)
 
 The Azure CLI is the primary module used in PowerZure as throughout my
 testing and building this project, it became clear the Azure CLI module
