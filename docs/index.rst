@@ -108,3 +108,10 @@ Authentication is done by using an existing accesstoken.json file or by
 logging in via prompt when logging into Azure CLI, meaning you can
 safely use PowerZure to interact with a victim’s cloud instance from
 your operating machine.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Functions
+   
+   Functions/functions
