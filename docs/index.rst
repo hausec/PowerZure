@@ -58,14 +58,11 @@ License: BSD-3
 
 
 
+
+   
 .. toctree::
    :maxdepth: 2
    :hidden:
-   
-   index
-   
-.. toctree::
-   :maxdepth: 2
    :caption: Requirements
    
    Requirements/requirements
