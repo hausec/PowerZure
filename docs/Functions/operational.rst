@@ -642,7 +642,7 @@ VM successfully stops
 Start-VM 
 --------
 
-****Synopsis****
+**Synopsis**
 
 Starts a Virtual Machine
 
@@ -683,7 +683,7 @@ Resource group the VM is located in
 
 Azure CLI
 
-****Output****
+**Output**
 
 VM successfully starts
 
@@ -692,7 +692,7 @@ VM successfully starts
 Restart-VM 
 ----------
 
-****Synopsis****
+**Synopsis**
 
 Restarts a Virtual Machine
 
@@ -733,7 +733,7 @@ Resource group the VM is located in
 
 Azure CLI
 
-****Output****
+**Output**
 
 VM successfully restarts
 
@@ -897,7 +897,7 @@ Role successfully applied
 Remove-Role 
 -----------
 
-****Synopsis****
+**Synopsis**
 
 Removes a user from a role for a specific resource or subscription
 
@@ -951,7 +951,7 @@ Name of subscription
 
 Azure CLI
 
-****Output****
+**Output**
 
 Role successfully Removed
 

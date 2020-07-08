@@ -924,7 +924,7 @@ Azure CLI
 
 Details of specified service principal
 
-Get-AppPermissions
+Get-App
 ------------------
 
 
@@ -933,7 +933,7 @@ Get-AppPermissions
 **Synopsis**
 
 
-Returns the permissions of an app
+Returns the  of an app
 
 .. _**Syntax**-15:
 
@@ -943,14 +943,14 @@ Returns the permissions of an app
 
 ::
 
-   Get-AppPermissions -Id [App ID]
+   Get-App -Id [App ID]
 
 .. _**Description**-15:
 
 **Description**
 
 
-Gathers the permissions an application has.
+Gathers the  an application has.
 
 .. _**Examples**-15:
 
@@ -960,7 +960,7 @@ Gathers the permissions an application has.
 
 ::
 
-  Get-AppPermissions -Id fdb54b57-a416-4115-8b21-81c73d2c2deb
+  Get-App -Id fdb54b57-a416-4115-8b21-81c73d2c2deb
 
 .. _**Parameters**-15:
 
@@ -983,7 +983,7 @@ Azure CLI
 **Output**
 
 
-Application’s permissions
+Application’s 
 
 Get-WebApps
 -----------
@@ -1053,7 +1053,7 @@ Get-WebAppDetails
 
 Gets running webapps details
 
-Permissions
+
 
 
 .. _**Syntax**-17:
@@ -1119,7 +1119,7 @@ as that account.
 
 
 
-Permissions
+
 
 
 .. _**Syntax**-18:
@@ -1193,7 +1193,7 @@ Finds a specified AAD Role and its definitions
 
 
 
-Permissions
+
 
 
 .. _**Syntax**-19:
@@ -1255,7 +1255,7 @@ Lists the active roles in Azure AD and what users are part of the role.
 
 
 
-Permissions
+
 
 
 .. _**Syntax**-20:

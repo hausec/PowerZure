@@ -11,9 +11,9 @@ Help
 
 Displays info about this script.
 
-.. _permissions-29:
 
-Permissions
+
+
 
 
 .. _**Syntax**-46:

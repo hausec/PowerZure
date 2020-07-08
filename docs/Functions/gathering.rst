@@ -11,9 +11,9 @@ Get-KeyVaults
 
 Lists the Key Vaults
 
-.. _permissions-16:
 
-Permissions
+
+
 
 
 .. _**Syntax**-33:
@@ -74,9 +74,9 @@ Get-KeyVaultContents
 
 Get the secrets from a specific Key Vault
 
-.. _permissions-17:
 
-Permissions
+
+
 
 
 .. _**Syntax**-34:
@@ -142,9 +142,9 @@ Get-AllKeyVaultContents
 Gets ALL the secrets from all Key Vaults. If the logged in user cannot
 access a key vault, it tries to edit the access policy to allow access.
 
-.. _permissions-18:
 
-Permissions
+
+
 
 
 .. _**Syntax**-35:

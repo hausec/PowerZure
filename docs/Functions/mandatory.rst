@@ -12,9 +12,9 @@ Set-Subscription
 Sets default subscription. Necessary if in a tenant with multiple
 subscriptions.
 
-.. _permissions-28:
 
-Permissions
+
+
 
 
 .. _**Syntax**-45:

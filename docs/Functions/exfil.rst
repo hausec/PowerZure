@@ -11,9 +11,9 @@ Get-StorageAccounts
 
 Get a list of storage accounts and their blobs
 
-.. _permissions-19:
 
-Permissions
+
+
 
 
 .. _**Syntax**-36:
@@ -76,9 +76,9 @@ Get-StorageAccountKeys
 
 Gets the account keys for a storage account
 
-.. _permissions-20:
 
-Permissions
+
+
 
 
 .. _**Syntax**-37:
@@ -154,9 +154,9 @@ Get-StorageContents
 
 Gets the contents of a storage container or file share.
 
-.. _permissions-21:
 
-Permissions
+
+
 
 
 .. _**Syntax**-38:
@@ -239,9 +239,9 @@ Get-Runbooks
 Lists all the run books in all Automation accounts under the
 subscription
 
-.. _permissions-22:
 
-Permissions
+
+
 
 
 .. _**Syntax**-39:
@@ -307,9 +307,9 @@ Get-RunbookContent
 Gets a specific Runbook and displays its contents. Use -NoDelete to not
 delete after reading
 
-.. _permissions-23:
 
-Permissions
+
+
 
 
 .. _**Syntax**-40:
@@ -402,9 +402,9 @@ Get-AvailableVMDisks
 
 Lists the VM disks available.
 
-.. _permissions-24:
 
-Permissions
+
+
 
 
 .. _**Syntax**-41:
@@ -466,9 +466,9 @@ Get-VMDisk
 Generates a link to download a Virtual Machiche's disk. The link is only
 available for an hour.
 
-.. _permissions-25:
 
-Permissions
+
+
 
 
 .. _**Syntax**-42:
@@ -537,9 +537,9 @@ Get-VMs
 
 Lists all virtual machines available, their disks, and their IPs.
 
-.. _permissions-26:
 
-Permissions
+
+
 
 
 .. _**Syntax**-43:
@@ -601,9 +601,9 @@ Get-SQLDBs
 
 Lists the available SQL Databases on a server
 
-.. _permissions-27:
 
-Permissions
+
+
 
 
 .. _**Syntax**-44:
