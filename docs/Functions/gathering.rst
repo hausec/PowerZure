@@ -1,8 +1,8 @@
 Secret/Key/Certificate Gathering
 ================================
 
-**Get-KeyVaults**
-^
+Get-KeyVaults
+-------------
 
 .. _**Synopsis**-33:
 
@@ -64,8 +64,8 @@ Azure CLI
 
 List of KeyVaults
 
-**Get-KeyVaultContents** 
----------------~~~~~~~~~
+Get-KeyVaultContents
+--------------------
 
 .. _**Synopsis**-34:
 
@@ -131,8 +131,8 @@ Azure CLI
 
 KeyVault contents
 
-**Get-AllKeyVaultContents** 
----------------~~~~~~~~~~~~
+Get-AllKeyVaultContents
+-----------------------
 
 .. _**Synopsis**-35:
 

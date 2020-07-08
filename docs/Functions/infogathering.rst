@@ -2,7 +2,7 @@ Information Gathering
 =====================
 
 Get-Targets
-^^^^^^^^^^^
+-----------
 
 **Synopsis**
 
@@ -113,7 +113,8 @@ Grabs all details
 
 Current username and owned objects by that user
 
-**Get-AllUsers**
+Get-AllUsers
+------------
 
 
 .. _**Synopsis**-2:
@@ -184,7 +185,8 @@ Specifies the **Output** of the data.
 
 List of all users in AAD, optionally in a file.
 
-**Get-AADRoleMembers**
+Get-AADRoleMembers
+------------------
 
 .. _**Synopsis**-3:
 
@@ -304,8 +306,8 @@ User Principal Name
 
 Details of user
 
-**Get-AllGroups**
-^
+Get-AllGroups
+-------------
 
 .. _**Synopsis**-5:
 
@@ -369,7 +371,7 @@ Gathers all the groups in the tenant
 List of groups in AAD, optionally in the format of a file.
 
 **Get-Resources**
-^
+-----------------
 
 .. _**Synopsis**-6:
 
@@ -426,8 +428,8 @@ Azure CLI
 
 List of resources the user can see
 
-**Get-Apps**
-
+Get-Apps
+--------
 
 .. _**Synopsis**-7:
 
@@ -440,8 +442,6 @@ Returns all applications and their Ids
 
 ****Syntax****
 
-
-
 ::
 
   Get-Apps
@@ -450,14 +450,11 @@ Returns all applications and their Ids
 
 **Description**
 
-
 Returns all the applications in Azure AD and their IDs
 
 .. _**Examples**-7:
 
 **Examples**
-
-
 
 ::
 
@@ -484,8 +481,8 @@ Azure CLI
 
 Applications in AAD
 
-**Get-GroupMembers**
---------------------
+Get-GroupMembers
+----------------
 
 .. _**Synopsis**-8:
 
@@ -553,8 +550,8 @@ Azure CLI
 
 Group members of the specified group, optionally to a file.
 
-**Get-AllGroupMembers**
------------------------
+Get-AllGroupMembers
+-------------------
 
 .. _**Synopsis**-9:
 
@@ -618,8 +615,8 @@ Azure CLI
 
 List of group members for each group in AAD.
 
-**Get-AllRoleMembers**
-----------------------
+Get-AllRoleMembers
+------------------
 
 .. _**Synopsis**-10:
 
@@ -691,8 +688,8 @@ Azure CLI
 
 All members of all roles
 
-**Get-RoleMembers** 
--------------------
+Get-RoleMembers
+---------------
 
 .. _**Synopsis**-11:
 
@@ -704,8 +701,6 @@ Gets the members of a role.
 .. _****Syntax****-11:
 
 ****Syntax****
-
-
 
 ::
 
@@ -722,8 +717,6 @@ Reader <---correct)
 .. _**Examples**-11:
 
 **Examples**
-
-
 
 ::
 
@@ -752,7 +745,8 @@ Azure CLI
 
 Members of specified role.
 
-**Get-Roles**
+Get-Roles
+---------
 
 
 .. _**Synopsis**-12:
@@ -765,7 +759,6 @@ Lists the roles of a specific user.
 .. _****Syntax****-12:
 
 ****Syntax****
-
 
 
 ::
@@ -791,7 +784,7 @@ Lists the Azure RBAC roles of a specific user based on their UPN.
 
 .. _**Parameters**-12:
 
-**Parameters** 
+**Parameters**
 
 
 -User
@@ -812,8 +805,8 @@ Azure CLI
 
 Roles of the specified user
 
-**Get-ServicePrincipals**
-^
+Get-ServicePrincipals
+---------------------
 
 .. _**Synopsis**-13:
 
@@ -870,7 +863,8 @@ Azure CLI
 
 List of SPs in AAD
 
-**Get-ServicePrincipal**
+Get-ServicePrincipal
+--------------------
 
 
 .. _**Synopsis**-14:
@@ -930,7 +924,8 @@ Azure CLI
 
 Details of specified service principal
 
-**Get-AppPermissions**
+Get-AppPermissions
+------------------
 
 
 .. _**Synopsis**-15:
@@ -990,8 +985,8 @@ Azure CLI
 
 Application’s permissions
 
-**Get-WebApps**
----------------
+Get-WebApps
+-----------
 
 .. _**Synopsis**-16:
 
@@ -1048,8 +1043,8 @@ Azure CLI
 
 Web application names
 
-**Get-WebAppDetails** 
----------------------
+Get-WebAppDetails
+-----------------
 
 .. _**Synopsis**-17:
 
@@ -1111,8 +1106,8 @@ Azure CLI
 
 Details of web application
 
-**Get-RunAsCertificate** 
-------------------------
+Get-RunAsCertificate
+--------------------
 
 .. _**Synopsis**-18:
 
@@ -1130,8 +1125,6 @@ Permissions
 .. _****Syntax****-18:
 
 ****Syntax****
-
-
 
 ::
 
@@ -1152,8 +1145,6 @@ certificate.
 .. _**Examples**-18:
 
 **Examples**
-
-
 
 ::
 
@@ -1189,8 +1180,8 @@ Azure PowerShell
 
 Connection string for the RunAs account
 
-**Get-AADRole** 
----------------
+Get-AADRole
+-----------
 
 .. _**Synopsis**-19:
 
@@ -1209,8 +1200,6 @@ Permissions
 
 ****Syntax****
 
-
-
 ::
 
    Get-AADRole -Role [Role]
@@ -1226,8 +1215,6 @@ Finds a specified AAD Role and its definitions. Role must be properly capitalize
 .. _**Examples**-19:
 
 **Examples**
-
-
 
 ::
 
@@ -1256,8 +1243,8 @@ AzureAD PowerShell
 
 Active roles
 
-**Get-AADRoleMembers** 
-----------------------
+Get-AADRoleMembers
+------------------
 
 .. _**Synopsis**-20:
 
@@ -1275,8 +1262,6 @@ Permissions
 
 ****Syntax****
 
-
-
 ::
 
   Get-AADRoleMembers
@@ -1291,8 +1276,6 @@ Lists the active roles in Azure AD and what users are part of the role.
 .. _**Examples**-20:
 
 **Examples**
-
-
 
 ::
 

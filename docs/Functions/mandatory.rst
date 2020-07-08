@@ -1,8 +1,8 @@
 Mandatory
 =========
 
-**Set-Subscription**
---------------------
+Set-Subscription
+----------------
 
 .. _**Synopsis**-45:
 

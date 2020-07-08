@@ -1,8 +1,8 @@
 Data Exfiltration
 =================
 
-**Get-StorageAccounts** 
------------------------
+Get-StorageAccounts
+-------------------
 
 .. _**Synopsis**-36:
 
@@ -66,8 +66,8 @@ Azure Powershell
 
 List of storage accounts
 
-**Get-StorageAccountKeys** 
----------------~~~~~~~~~~~
+Get-StorageAccountKeys
+----------------------
 
 .. _**Synopsis**-37:
 
@@ -144,8 +144,8 @@ Azure Powershell
 
 List of keys in plain text
 
-**Get-StorageContents** 
----------------~~~~~~~~
+Get-StorageContents 
+-------------------
 
 .. _**Synopsis**-38:
 
@@ -228,8 +228,8 @@ Azure Powershell
 
 File contents are displayed
 
-**Get-Runbooks** 
----------------~
+Get-Runbooks
+------------
 
 .. _**Synopsis**-39:
 
@@ -296,8 +296,8 @@ Azure PowerShell
 
 List of runbooks and their associated Automation Accounts
 
-**Get-RunbookContent** 
----------------~~~~~~~
+Get-RunbookContent 
+------------------
 
 .. _**Synopsis**-40:
 
@@ -392,8 +392,8 @@ Azure PowerShell
 
 Runbook content
 
-**Get-AvailableVMDisks** 
----------------~~~~~~~~~
+Get-AvailableVMDisks
+--------------------
 
 .. _**Synopsis**-41:
 
@@ -455,8 +455,8 @@ Azure CLI
 
 List of VM Disks
 
-**Get-VMDisk** 
-~~~~~~~~~~~~~~
+Get-VMDisk
+----------
 
 .. _**Synopsis**-42:
 
@@ -498,9 +498,7 @@ probably going to be many GBs in size. Hope you have fiber!
 
 ::
 
-   Get-VMDisk -DiskName
-AzureWin10_OsDisk_1_c2c7da5a0838404c84a70d6ec097ebf5 -ResourceGroup
-TestGroup
+   Get-VMDisk -DiskName AzureWin10_OsDisk_1_c2c7da5a0838404c84a70d6ec097ebf5 -ResourceGroup TestGroup
 
 .. _**Parameters**-42:
 
@@ -529,8 +527,8 @@ Azure CLI
 
 Link to download the VM disk
 
-**Get-VMs** 
-~~~~~~~~~~~
+Get-VMs
+-------
 
 .. _**Synopsis**-43:
 
@@ -593,8 +591,8 @@ Azure CLI
 
 List of VMs and details
 
-**Get-SQLDBs** 
-~~~~~~~~~~~~~~
+Get-SQLDBs
+----------
 
 .. _**Synopsis**-44:
 
