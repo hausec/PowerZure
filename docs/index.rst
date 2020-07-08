@@ -1,5 +1,15 @@
-About
+PowerZure
 =====
+.. meta::
+   description lang=en: Assess and Exploit Azure
+
+.. image:: https://camo.githubusercontent.com/436df67699284103b20531e0efbc1f6607cebb57/68747470733a2f2f692e696d6775722e636f6d2f643542305530422e706e67
+   :align: center
+   :width: 300px
+   :alt: PowerZure logo
+
+
+
 
 What is PowerZure?
 ------------------
@@ -55,8 +65,6 @@ Author & License
 Author: Ryan Hausknecht (@haus3c)
 
 License: BSD-3
-
-
 
 
    
