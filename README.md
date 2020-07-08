@@ -34,6 +34,8 @@ Then call one of the functions below.
 | **Set-Role** 				| Sets a role for a specific user on a specific resource or subscription	        							 | Owner		 |
 | **Remove-Role**			| Removes a user from a role on a specific resource or subscription												 | Owner         |
 | **Set-Group**				| Adds a user to a group																						 | Administrator |
+| **Set-Password**		    | Sets a user's password in Azure AD														     				 | Administrator |
+
 
 
 ## Information Gathering
@@ -58,6 +60,9 @@ Then call one of the functions below.
 | **Get-AppPermissions**       | Returns the permissions of an app                                                   | Reader |
 | **Get-WebApps**              | Gets running web apps                                                               | Reader |
 | **Get-WebAppDetails**        | Gets running webapps details                                                        | Reader |
+| **Get-RunAsCertificate**     | Gets the login credentials for an Automation Accounts "RunAs" service principal | Contributor |
+| **Get-AADRoleMembers**     | Lists the active roles in Azure AD and what users are part of the role | Reader |
+
 
 ## Secret Gathering
 
@@ -66,10 +71,6 @@ Then call one of the functions below.
 | **Get-KeyVaults**             | Lists the Key Vaults                                                         | Reader      |
 | **Get-KeyVaultContents**       | Get the secrets from a specific Key Vault                                    | Contributor |
 | **Get-AllKeyVaultContents**    | Gets ALL the secrets from all Key Vaults.                                    | Contributor |
-| **Get-AppSecrets**            | Returns the application passwords or certificate credentials                 | Contributor |
-| **Get-AllAppSecrets**         | Returns all application passwords or certificate credentials (If accessible) | Contributor |
-| **Get-AllSecrets**            | Gets ALL the secrets from all Key Vaults and applications.                   | Contributor |
-| **Get-AutomationCredentials** | Gets the credentials from any Automation Accounts                            | Contributor |
 
 ## Data Exfiltration
 
@@ -83,3 +84,4 @@ Then call one of the functions below.
 | **Get-AvailableVMDisks**   | Lists the VM disks available.                                                                   | Reader |
 | **Get-VMDisk**             | Generates a link to download a Virtual Machine's disk. The link is only available for an hour. | Contributor |
 | **Get-VMs**                | Lists available VMs                                                                             | Reader |
+| **Get-SQLDBs**                | Lists available SQLDBs                                                                             | Reader |
