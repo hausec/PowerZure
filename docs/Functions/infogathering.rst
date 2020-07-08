@@ -485,7 +485,7 @@ Azure CLI
 Applications in AAD
 
 **Get-GroupMembers**
----------------~~~~~
+--------------------
 
 .. _**Synopsis**-8:
 
@@ -554,7 +554,7 @@ Azure CLI
 Group members of the specified group, optionally to a file.
 
 **Get-AllGroupMembers**
----------------~~~~~~~~
+-----------------------
 
 .. _**Synopsis**-9:
 
@@ -619,7 +619,7 @@ Azure CLI
 List of group members for each group in AAD.
 
 **Get-AllRoleMembers**
----------------~~~~~~~
+----------------------
 
 .. _**Synopsis**-10:
 
@@ -692,7 +692,7 @@ Azure CLI
 All members of all roles
 
 **Get-RoleMembers** 
----------------~~~~
+-------------------
 
 .. _**Synopsis**-11:
 
@@ -1049,7 +1049,7 @@ Azure CLI
 Web application names
 
 **Get-WebAppDetails** 
----------------~~~~~~
+---------------------
 
 .. _**Synopsis**-17:
 
@@ -1112,7 +1112,7 @@ Azure CLI
 Details of web application
 
 **Get-RunAsCertificate** 
----------------~~~~~~~~~
+------------------------
 
 .. _**Synopsis**-18:
 
@@ -1257,7 +1257,7 @@ AzureAD PowerShell
 Active roles
 
 **Get-AADRoleMembers** 
----------------~~~~~~~
+----------------------
 
 .. _**Synopsis**-20:
 

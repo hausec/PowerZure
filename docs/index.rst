@@ -76,7 +76,7 @@ License: BSD-3
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :hidden:
    :caption: Functions
    
