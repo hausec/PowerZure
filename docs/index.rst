@@ -1,7 +1,7 @@
 .. meta::
    description lang=en: Assess and Exploit Azure
 
-.. image:: https://i.imgur.com/Yej6Vzu.png
+.. image:: https://i.imgur.com/AQCbTn5.png
    :align: center
    :width: 800px
    :alt: PowerZure logo

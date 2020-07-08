@@ -370,8 +370,8 @@ Gathers all the groups in the tenant
 
 List of groups in AAD, optionally in the format of a file.
 
-**Get-Resources**
------------------
+Get-Resources
+-------------
 
 .. _**Synopsis**-6:
 
