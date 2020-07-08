@@ -8,28 +8,65 @@ If ($Version -lt 5)
 }
 #Module Check
 $Modules = Get-InstalledModule
-If ($Modules.Name -contains 'Az')
+if ($Modules.Name -notcontains 'Az.Accounts')
 {
+	Write-host "Install Az Module?" -ForegroundColor Yellow 
+    $Readhost = Read-Host " ( y / n ) " 
+    if ($ReadHost -eq 'y') 
+	{
+		Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+		$Modules = Get-InstalledModule
+		if ($Modules.Name -match 'Az')
+		{
+			Write-Host "Successfully installed AzureAD module. Please open a new PowerShell window and re-import PowerZure to continue"
+		}
+	}
+	if ($ReadHost -eq 'n') 
+	{
+		Write-Host "Az not installed, several functions will not work."
+	}
 }
-Else
+if ($Modules.Name -notcontains 'AzureAD')
 {
-    Write-Host "Az Module not installed. Installing."
-	#This installs AAD PS Module
-	Install-module AzureADPreview -Verbose
-    #This installs the Az PoSh module
-    Install-Module -Name Az -AllowClobber
-    #This installs the Az CLI modules
-    Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
-    $directory = pwd
-    #After installing the modules, PS needs to be restarted and PowerZure needs to be reimported.
-    Start-Process powershell.exe -argument "-noexit -command ipmo '$directory\PowerZure.ps1'"
-    #Killing old PS window
-    Stop-Process -Id $PID
+	Write-host "Install AzureAD Module?" -ForegroundColor Yellow 
+    $Readhost = Read-Host " ( y / n ) " 
+    if ($ReadHost -eq 'y') 
+	{
+		Install-module AzureADPreview -Verbose
+		$Modules = Get-InstalledModule
+		if ($Modules.Name -match 'AzureAD')
+		{
+			Write-Host "Successfully installed AzureAD module. Please open a new PowerShell window and re-import PowerZure to continue"
+		}
+	}
+	if ($ReadHost -eq 'n') 
+	{
+		Write-Host "AzureAD not installed, some functions will not work."
+	}
 }
-#Login Check
+$AzTest = Get-AzContext
+if (!$AzTest)
+{
+	Write-host "Install Azure PowerShell Module?" -ForegroundColor Yellow 
+    $Readhost = Read-Host " ( y / n ) " 
+    if ($ReadHost -eq 'y') 
+	{
+		Install-Module -Name Az -AllowClobber
+		$AzTest = Get-AzContext
+		if ($AzTest)
+		{
+			Write-Host "Successfully installed Az module. Please open a new PowerShell window and re-import PowerZure to continue"
+		}
+	}
+	if ($ReadHost -eq 'n') 
+	{
+		Write-Host "AzurePS not installed, some functions will not work."
+	}
+}
+
 $ErrorActionPreference = "silentlyContinue"
-Write-Host @'
-                                                                                                                          
+Write-Host @' 
+                                                                                                                   
 8888888b.                                              8888888888P                           
 888   Y88b    ________                                       d88P                            
 888    888  /\  ___   \                                     d88P                             
@@ -38,14 +75,18 @@ Write-Host @'
 888        |  |     |\ | 888  888  888 88888888 888     d88P      888  888 888     88888888 
 888            \_ _/  \  Y88b 888 d88P Y8b.     888    d88P       Y88b 888 888     Y8b.     
 888         \_________/   "Y8888888P"   "Y8888  888   d8888888888  "Y88888 888      "Y8888                                                                                                                      
-                                                                                                                   
+ 
 '@ 
+
+Write-Host 'Confused on what to do next? Check out the documentation: https://powerzure.readthedocs.io/' -ForegroundColor Green
+
 Try
 {  
     $User = az ad signed-in-user show --query '[userPrincipalName]' -o tsv
     if ($User.Length -gt 1)
     {                                                   
     $Id = az ad signed-in-user show --query '[objectId]' -o tsv
+	Write-Host ""
     Write-Host "Welcome $User"
     Write-Host ""
     Write-Host "Please set your default subscription with 'Set-Subscription -Id {id}' or 'az account set --subscription {id}' if you have multiple subscriptions."
@@ -65,13 +106,13 @@ Try
     }
     else
     {
-    Write-Host "Please login via az login"
+    Write-Host "Please login via az login" -ForegroundColor Red
     }
 
 }
 Catch
 {
-    Write-Host "Please login via az login"
+    Write-Host "Please login via az login" -ForegroundColor Red
 }
 
 function Set-Subscription
@@ -119,78 +160,77 @@ function PowerZure
         if($h -eq $true)
         {
             Write-Host @"
+			
+			  PowerZure Version 1.2
 
-                             PowerZure Version 1.0
-
-                               List of Functions
-
-
---Role Needed-- ------------------Mandatory ----------------
-
-Reader          Set-Subscription - Sets the default Subscription to operate in
-
-                ------------------Operational --------------
-
-Contributor     Execute-Command - Will run a command on a specified VM
-Contributor     Execute-MSBuild - Will run a supplied MSBuild payload on a specified VM. By default, Azure VMs have .NET 4.0 installed. Requires Contributor Role. Will run as SYSTEM.
-Contributor     Execute-Program - Executes a supplied program. 
-Global Administrator	Create-Backdoor - Will create a Runbook that creates an Azure account and generates a Webhook to that Runbook so it can be executed if you lose access to Azure. 
-                Also gives the ability to upload your own .ps1 file as a Runbook (Customization)
-                This requires an account that is part of the 'Administrators' Role (Needed to make a user)
-Global Administrator	Execute-Backdoor - This runs the backdoor that is created with "Create-Backdoor". Needs the URI generated from Create-Backdoor
-Contributor		Execute-CommandRunbook - Will execute a command from a runbook that is ran with a "RunAs" account
-Contributor     Upload-StorageContent - Uploads a supplied file to a storage share.
-Contributor     Stop-VM - Stops a VM
-Contributor     Start-VM - Starts a VM
-Contributor     Restart-VM - Restarts a VM
-Contributor     Start-Runbook - Starts a specific Runbook
-Owner           Set-Role - Adds a user to a role for a resource or a subscription
-Owner           Remove-Role -Removes a user from a role on a resource or subscription
-Global Administrator   Set-Group - Adds a user to an Azure AD group
-Global Administrator   Set-Password - Sets a user's password in Azure AD
+				List of Functions
 
 
-                ------------------Info Gathering -------------
+------------------Mandatory ----------------
 
-Reader			Get-Targets - Compares your role to your scope to determine what you have access to and what kind of access it is (Read/write/execute).	
-Reader          Get-CurrentUser - Returns the current logged in user name, their role + groups, and any owned objects
-Reader          Get-AllUsers - Lists all users in the subscription
-Reader          Get-User - Gathers info on a specific user
-Reader          Get-AllGroups - Lists all groups + info within Azure AD
-Reader          Get-Resources - Lists all resources in the subscription
-Reader          Get-GroupMembers - Gets all the members of a specific group. Group does NOT mean role.
-Reader          Get-AllGroupMembers - Gathers all the group members of all the groups.
-Reader          Get-AllRoleMembers - Gets all the members of all roles. Roles does not mean groups.
-Reader          Get-RoleMembers -  Gets the members of a role 
-Reader          Get-Roles - Gets the roles of a user
-Reader          Get-ServicePrincipals - Returns all service principals
-Reader          Get-ServicePrincipal - Returns all info on a specified service principal
-Reader          Get-Apps - Returns all applications and their Ids
-Reader          Get-AppPermissions - Returns the permissions of an app
-Reader          Get-WebApps - Gets running webapps
-Reader          Get-WebAppDetails - Gets running webapps details
-Contributor 	Get-RunAsCertificate - Gets the login credentials for an Automation Accounts "RunAs" service principal
-Reader			Get-AADRoleMembers - Lists the active roles in Azure AD and what users are part of the role
+Reader                  Set-Subscription - Sets the default Subscription to operate in
 
-                ---------Secret/Key/Certificate Gathering -----
+------------------Operational --------------
+
+Execute-Command -------- Will run a command on a specified VM
+Execute-MSBuild -------- Will run a supplied MSBuild payload on a specified VM. By default, Azure VMs have .NET 4.0 installed. Requires Contributor Role. Will run as SYSTEM.
+Execute-Program -------- Executes a supplied program. 
+Create-Backdoor -------- Will create a Runbook that creates an Azure account and generates a Webhook to that Runbook so it can be executed if you lose access to Azure. 
+                         Also gives the ability to upload your own .ps1 file as a Runbook (Customization)
+                         This requires an account that is part of the 'Administrators' Role (Needed to make a user)
+Execute-Backdoor ------- This runs the backdoor that is created with "Create-Backdoor". Needs the URI generated from Create-Backdoor
+Execute-CommandRunbook - Will execute a command from a runbook that is ran with a "RunAs" account
+Upload-StorageContent -- Uploads a supplied file to a storage share.
+Stop-VM ---------------- Stops a VM
+Start-VM --------------- Starts a VM
+Restart-VM ------------- Restarts a VM
+Start-Runbook ---------- Starts a specific Runbook
+Set-Role --------------- Adds a user to a role for a resource or a subscription
+Remove-Role ------------ Removes a user from a role on a resource or subscription
+Set-Group -------------- Adds a user to an Azure AD group
+Set-Password ----------- Sets a user's password in Azure AD
+
+
+------------------Info Gathering -------------
+
+Get-Targets ------------ Compares your role to your scope to determine what you have access to and what kind of access it is (Read/write/execute).	
+Get-CurrentUser -------- Returns the current logged in user name, their role + groups, and any owned objects
+Get-AllUsers ----------- Lists all users in the subscription
+Get-User --------------- Gathers info on a specific user
+Get-AllGroups ---------- Lists all groups + info within Azure AD
+Get-Resources ---------- Lists all resources in the subscription
+Get-GroupMembers ------- Gets all the members of a specific group. Group does NOT mean role.
+Get-AllGroupMembers ---- Gathers all the group members of all the groups.
+Get-AllRoleMembers ----- Gets all the members of all roles. Roles does not mean groups.
+Get-RoleMembers -------- Gets the members of a role 
+Get-Roles -------------- Gets the roles of a user
+Get-ServicePrincipals -- Returns all service principals
+Get-ServicePrincipal --- Returns all info on a specified service principal
+Get-Apps --------------- Returns all applications and their Ids
+Get-AppPermissions ----- Returns the permissions of an app
+Get-WebApps ------------ Gets running webapps
+Get-WebAppDetails ------ Gets running webapps details
+Get-RunAsCertificate --- Gets the login credentials for an Automation Accounts "RunAs" service principal
+Get-AADRoleMembers ----- Lists the active roles in Azure AD and what users are part of the role
+
+---------Secret/Key/Certificate Gathering -----
             
-Reader          Get-KeyVaults - Lists the Key Vaults
-Contributor     Get-KeyVaultContents - Get the keys, secrets, and certificates from a specific Key Vault
-Contributor     Get-AllKeyVaultContents - Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to 
+Get-KeyVaults ---------- Lists the Key Vaults
+Get-KeyVaultContents --- Get the keys, secrets, and certificates from a specific Key Vault
+Get-AllKeyVaultContents -Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to 
            
-                -----------------Data Exfiltration--------------
+-----------------Data Exfiltration--------------
             
-Reader          Get-StorageAccounts - Gets all storage accounts
-Contributor     Get-StorageAccountKeys -  Gets the account keys for a storage account
-Reader          Get-StorageContents - Gets the contents of a storage container or file share. OAuth is not support to access file shares via cmdlets, so you must have access to the Storage Account's key.
-Reader          Get-Runbooks - Lists all the Runbooks
-Reader          Get-RunbookContent - Reads content of a specific Runbook
-Reader          Get-AvailableVMDisks -  Lists the VM disks available. 
-Contributor     Get-VMDisk - Generates a link to download a Virtual Machiche's disk. The link is only available for an hour.
-Reader          Get-VMs - Lists available VMs     
-Reader			Get-SQLDBs - Lists all SQL Servers and their Databases + Administrator usernames
-				
-
+Get-StorageAccounts ---- Gets all storage accounts
+Get-StorageAccountKeys - Gets the account keys for a storage account
+Get-StorageContents ---- Gets the contents of a storage container or file share. OAuth is not support to access file shares via cmdlets, so you must have access to the Storage Account's key.
+Get-Runbooks ----------- Lists all the Runbooks
+Get-RunbookContent ----- Reads content of a specific Runbook
+Get-AvailableVMDisks --  Lists the VM disks available. 
+Get-VMDisk ------------- Generates a link to download a Virtual Machiche's disk. The link is only available for an hour.
+Get-VMs ---------------- Lists available VMs     
+Get-SQLDBs ------------- Lists all SQL Servers and their Databases + Administrator usernames
+			
 "@
 
         }

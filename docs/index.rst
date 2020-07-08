@@ -7,8 +7,6 @@
    :alt: PowerZure logo
 
 
-
-
 What is PowerZure?
 ------------------
 
