@@ -1,9 +1,9 @@
 .. meta::
    description lang=en: Assess and Exploit Azure
 
-.. image:: https://camo.githubusercontent.com/436df67699284103b20531e0efbc1f6607cebb57/68747470733a2f2f692e696d6775722e636f6d2f643542305530422e706e67
+.. image:: https://i.imgur.com/Yej6Vzu.png
    :align: center
-   :width: 600px
+   :width: 800px
    :alt: PowerZure logo
 
 
