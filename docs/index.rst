@@ -83,4 +83,10 @@ License: BSD-3
    :hidden:
    :caption: Functions
    
-   Functions/functions
+   Functions/infogathering
+   Functions/mandatory
+   Functions/operational
+   Functions/exfil
+   Functions/help
+   Functions/gathering
+   
