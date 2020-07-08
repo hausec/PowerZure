@@ -129,8 +129,7 @@ Syntax
 
 
 ::
-	
-Get-Targets`
+	 Get-Targets`
 
 Description
 ^^^^^^^^^^^
@@ -145,8 +144,7 @@ Examples
 
 
 ::
-	
-Get-Targets`
+	 Get-Targets`
 
 Required Modules
 ^^^^^^^^^^^^^^^^
@@ -181,8 +179,7 @@ Syntax
 
 
 ::
-	
-Get-CurrentUser`
+	 Get-CurrentUser
 
 .. _description-1:
 
@@ -198,15 +195,9 @@ ownership over.
 Examples
 ^^^^^^^^
 
+` Get-CurrentUser`
 
-::
-	
- Get-CurrentUser`
-
-
-::
-	
- Get-CurrentUser -All`
+` Get-CurrentUser -All`
 
 .. _required-modules-1:
 
@@ -246,10 +237,7 @@ List all Azure users in the tenant
 Syntax
 ^^^^^^
 
-
-::
-	
-Get-AllUsers `
+`Get-AllUsers `
 
 .. _description-2:
 
