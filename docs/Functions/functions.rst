@@ -2,11 +2,11 @@
 Functions
 =========
 
-**Information Gathering**
+Information Gathering
 ^^^^^^^^^^^^^^^^^^^^^
 
-**Get-Targets**
----------------
+Get-Targets
+-----------
 
 **Synopsis**
 
@@ -50,7 +50,8 @@ None
 List of resources with what type of access the current user has access
 to.
 
-**Get-CurrentUser**
+Get-CurrentUser
+---------------
 
 
 .. _**Synopsis**-1:
