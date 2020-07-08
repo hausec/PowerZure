@@ -128,7 +128,8 @@ Syntax
 ^^^^^^
 
 ::
-   Get-Targets
+
+Get-Targets
 
 Description
 ^^^^^^^^^^^
