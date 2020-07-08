@@ -2,7 +2,7 @@ Information Gathering
 =====================
 
 Get-Targets
------------
+^^^^^^^^^^^
 
 **Synopsis**
 
