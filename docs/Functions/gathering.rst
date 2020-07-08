@@ -16,9 +16,9 @@ Lists the Key Vaults
 Permissions
 
 
-.. _****Syntax****-33:
+.. _**Syntax**-33:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -79,9 +79,9 @@ Get the secrets from a specific Key Vault
 Permissions
 
 
-.. _****Syntax****-34:
+.. _**Syntax**-34:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -147,9 +147,9 @@ access a key vault, it tries to edit the access policy to allow access.
 Permissions
 
 
-.. _****Syntax****-35:
+.. _**Syntax**-35:
 
-****Syntax****
+**Syntax**
 
 
 

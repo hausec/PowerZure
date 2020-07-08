@@ -16,9 +16,9 @@ Displays info about this script.
 Permissions
 
 
-.. _****Syntax****-46:
+.. _**Syntax**-46:
 
-****Syntax****
+**Syntax**
 
 ::
 

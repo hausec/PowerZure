@@ -17,9 +17,9 @@ Will run a command or script on a specified VM
 Permissions
 
 
-.. _****Syntax****-21:
+.. _**Syntax**-21:
 
-****Syntax****
+**Syntax**
 
 
 ::
@@ -97,9 +97,9 @@ SYSTEM.
 Permissions
 
 
-.. _****Syntax****-22:
+.. _**Syntax**-22:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -181,9 +181,9 @@ Will run a given binary on a specified VM
 Permissions
 
 
-.. _****Syntax****-23:
+.. _**Syntax**-23:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -263,9 +263,9 @@ Creates a backdoor in Azure via Runbooks
 Permissions
 
 
-.. _****Syntax****-24:
+.. _**Syntax**-24:
 
-****Syntax****
+**Syntax**
 
 
 ::
@@ -356,9 +356,9 @@ This runs the backdoor URI that is created with "Create-Backdoor”
 Permissions
 
 
-.. _****Syntax****-25:
+.. _**Syntax**-25:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -423,9 +423,9 @@ is configured with a "RunAs" account
 Permissions
 
 
-.. _****Syntax****-26:
+.. _**Syntax**-26:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -513,9 +513,9 @@ Uploads a supplied file to a storage share.
 Permissions
 
 
-.. _****Syntax****-27:
+.. _**Syntax**-27:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -589,9 +589,9 @@ Stops a Virtual Machine
 Permissions
 
 
-.. _****Syntax****-28:
+.. _**Syntax**-28:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -652,7 +652,7 @@ Starts a Virtual Machine
 
 **Permissions**
 
-******Syntax******
+**Syntax**
 
 
 ::
@@ -702,7 +702,7 @@ Restarts a Virtual Machine
 
 **Permissions**
 
-******Syntax******
+**Syntax**
 
 
 ::
@@ -756,9 +756,9 @@ Starts a Runbook
 Permissions
 
 
-.. _****Syntax****-29:
+.. _**Syntax**-29:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -831,9 +831,9 @@ Assigns a user a role for a specific resource or subscription
 Permissions
 
 
-.. _****Syntax****-30:
+.. _**Syntax**-30:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -907,7 +907,7 @@ Removes a user from a role for a specific resource or subscription
 
 **Permissions**
 
-******Syntax******
+**Syntax**
 
 
 ::
@@ -974,9 +974,9 @@ Adds a user to an Azure AD Group
 Permissions
 
 
-.. _****Syntax****-31:
+.. _**Syntax**-31:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -1044,9 +1044,9 @@ Sets a user's password
 Permissions
 
 
-.. _****Syntax****-32:
+.. _**Syntax**-32:
 
-****Syntax****
+**Syntax**
 
 
 

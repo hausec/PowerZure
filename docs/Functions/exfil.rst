@@ -16,9 +16,9 @@ Get a list of storage accounts and their blobs
 Permissions
 
 
-.. _****Syntax****-36:
+.. _**Syntax**-36:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -81,9 +81,9 @@ Gets the account keys for a storage account
 Permissions
 
 
-.. _****Syntax****-37:
+.. _**Syntax**-37:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -159,9 +159,9 @@ Gets the contents of a storage container or file share.
 Permissions
 
 
-.. _****Syntax****-38:
+.. _**Syntax**-38:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -244,9 +244,9 @@ subscription
 Permissions
 
 
-.. _****Syntax****-39:
+.. _**Syntax**-39:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -312,9 +312,9 @@ delete after reading
 Permissions
 
 
-.. _****Syntax****-40:
+.. _**Syntax**-40:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -407,9 +407,9 @@ Lists the VM disks available.
 Permissions
 
 
-.. _****Syntax****-41:
+.. _**Syntax**-41:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -471,9 +471,9 @@ available for an hour.
 Permissions
 
 
-.. _****Syntax****-42:
+.. _**Syntax**-42:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -542,9 +542,9 @@ Lists all virtual machines available, their disks, and their IPs.
 Permissions
 
 
-.. _****Syntax****-43:
+.. _**Syntax**-43:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -606,9 +606,9 @@ Lists the available SQL Databases on a server
 Permissions
 
 
-.. _****Syntax****-44:
+.. _**Syntax**-44:
 
-****Syntax****
+**Syntax**
 
 
 

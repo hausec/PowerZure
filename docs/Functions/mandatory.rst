@@ -17,9 +17,9 @@ subscriptions.
 Permissions
 
 
-.. _****Syntax****-45:
+.. _**Syntax**-45:
 
-****Syntax****
+**Syntax**
 
 
 

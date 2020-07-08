@@ -59,7 +59,7 @@ Returns the current logged in user name and any owned objects
 
 .. _**Syntax**-1:
 
-****Syntax****
+**Syntax**
 
 
 ::
@@ -124,9 +124,9 @@ Get-AllUsers
 
 List all Azure users in the tenant
 
-.. _****Syntax****-2:
+.. _**Syntax**-2:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -195,9 +195,9 @@ Get-AADRoleMembers
 
 Lists the active roles in Azure AD and what users are part of the role.
 
-.. _****Syntax****-3:
+.. _**Syntax**-3:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -255,9 +255,9 @@ List of AAD Role members
 
 Gathers info on a specific user
 
-.. _****Syntax****-4:
+.. _**Syntax**-4:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -316,9 +316,9 @@ Get-AllGroups
 
 Gathers all the groups in the tenant
 
-.. _****Syntax****-5:
+.. _**Syntax**-5:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -380,9 +380,9 @@ Get-Resources
 
 Lists all resources
 
-.. _****Syntax****-6:
+.. _**Syntax**-6:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -438,9 +438,9 @@ Get-Apps
 
 Returns all applications and their Ids
 
-.. _****Syntax****-7:
+.. _**Syntax**-7:
 
-****Syntax****
+**Syntax**
 
 ::
 
@@ -491,9 +491,9 @@ Get-GroupMembers
 
 Gets all the members of a specific group. Group does NOT mean role.
 
-.. _****Syntax****-8:
+.. _**Syntax**-8:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -560,9 +560,9 @@ Get-AllGroupMembers
 
 Gathers all the group members of all the groups.
 
-.. _****Syntax****-9:
+.. _**Syntax**-9:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -625,9 +625,9 @@ Get-AllRoleMembers
 
 Gets all the members of all roles. Roles does not mean groups.
 
-.. _****Syntax****-10:
+.. _**Syntax**-10:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -698,9 +698,9 @@ Get-RoleMembers
 
 Gets the members of a role.
 
-.. _****Syntax****-11:
+.. _**Syntax**-11:
 
-****Syntax****
+**Syntax**
 
 ::
 
@@ -756,9 +756,9 @@ Get-Roles
 
 Lists the roles of a specific user.
 
-.. _****Syntax****-12:
+.. _**Syntax**-12:
 
-****Syntax****
+**Syntax**
 
 
 ::
@@ -815,9 +815,9 @@ Get-ServicePrincipals
 
 Returns all service principals
 
-.. _****Syntax****-13:
+.. _**Syntax**-13:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -874,9 +874,9 @@ Get-ServicePrincipal
 
 Returns all info on a service principal
 
-.. _****Syntax****-14:
+.. _**Syntax**-14:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -935,9 +935,9 @@ Get-AppPermissions
 
 Returns the permissions of an app
 
-.. _****Syntax****-15:
+.. _**Syntax**-15:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -995,9 +995,9 @@ Get-WebApps
 
 Gets running webapps
 
-.. _****Syntax****-16:
+.. _**Syntax**-16:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -1056,9 +1056,9 @@ Gets running webapps details
 Permissions
 
 
-.. _****Syntax****-17:
+.. _**Syntax**-17:
 
-****Syntax****
+**Syntax**
 
 
 
@@ -1122,9 +1122,9 @@ as that account.
 Permissions
 
 
-.. _****Syntax****-18:
+.. _**Syntax**-18:
 
-****Syntax****
+**Syntax**
 
 ::
 
@@ -1196,9 +1196,9 @@ Finds a specified AAD Role and its definitions
 Permissions
 
 
-.. _****Syntax****-19:
+.. _**Syntax**-19:
 
-****Syntax****
+**Syntax**
 
 ::
 
@@ -1258,9 +1258,9 @@ Lists the active roles in Azure AD and what users are part of the role.
 Permissions
 
 
-.. _****Syntax****-20:
+.. _**Syntax**-20:
 
-****Syntax****
+**Syntax**
 
 ::
 
