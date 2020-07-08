@@ -56,58 +56,27 @@ Author: Ryan Hausknecht (@haus3c)
 
 License: BSD-3
 
-Requirements
-============
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: About
+   
+   index
+   
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Requirements
+   
+   Requirements/requirements
 
-Azure has many different PowerShell modules, each using a different API.
-Some have been deprecated and some do not have nearly as much
-functionality as the others, despite all being Microsoft-made. PowerZure
-uses three Azure modules, each with a different purpose.
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Operational Usage
+   
+   Operationalusage/opusage
 
-1. `Azure
-   CLI <https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest>`__
-   (`az`)
-
-The Azure CLI is the primary module used in PowerZure as throughout my
-testing and building this project, it became clear the Azure CLI module
-had the most functionality and decent support on Github. Azure CLI is
-the successor to the AzureRM module and uses the Azure REST API.
-
-2. `Azure
-   PowerShell <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__
-
-The Azure PS module is used to fill in gaps where Azure CLI
-functionality lacks. Specifically, Azure CLI has no cmdlets for
-interacting with Automation Accounts or Runbooks, hence the need for
-Azure PS. Azure PS uses the Graph API.
-
-3. `AzureAD <https://docs.microsoft.com/en-us/powershell/module/Azuread/?view=azureadps-2.0>`__
-
-The AzureAD module is used for the more mature cmdlets around
-interacting with (you guessed it) Azure Active Directory. While both
-Azure CLI and Azure PS have cmdlets for doing basic things, like listing
-users and groups, when it came to more advanced things such as adding an
-AAD role to a user, the AzureAD module is needed. AzureAD uses the Graph
-API.
-
-These three modules are needed to **fully** use PowerZure. If you do not
-need to interact with AAD or Automation Accounts, then Azure CLI is the
-only module needed. With this being said, PowerZure should also be run
-from an elevated PowerShell window.
-
-Operational Usage
-=================
-
-PowerZure comes in .ps1 format which requires it to be imported for each
-new PowerShell session. To import, simply use 
-::
-	Import-Module C:\Location\to\Powerzure.ps1
-
-There is zero reason to ever run PowerZure on a victim’s machine.
-Authentication is done by using an existing accesstoken.json file or by
-logging in via prompt when logging into Azure CLI, meaning you can
-safely use PowerZure to interact with a victim’s cloud instance from
-your operating machine.
 
 .. toctree::
    :maxdepth: 2
