@@ -127,7 +127,8 @@ and what kind of access it is (Read/write/execute).
 Syntax
 ^^^^^^
 ::
-	Get-Targets
+
+   Get-Targets
 
 Description
 ^^^^^^^^^^^
