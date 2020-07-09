@@ -11,3 +11,42 @@ Authentication is done by using an existing accesstoken.json file or by
 logging in via prompt when logging into Azure CLI, meaning you can
 safely use PowerZure to interact with a victim’s cloud instance from
 your operating machine.
+
+If the target environment is contraining Azure access to their network/VPN, then consider using a proxy.
+
+You must sign-in to Azure before PowerZure functions are made available. To sign in, use the cmdlet 
+
+::
+
+   az login
+   
+If you are using functions that use the AzureAD module, you must additionally sign in with
+
+::
+
+   Connect-AzureAD
+   
+If you are using functions that use the Azure PowerShell module, you must additionally sign in with
+
+::
+
+   Connect-AzAccount
+   
+Check out the functions pages on the left to see which functions use which modules. Majority of PowerZure uses the az (Azure CLI) module.
+
+Once you are signed in to Azure, you can import PowerZure:
+
+
+::
+
+   ipmo C:\Path\To\Powerzure.ps1
+   
+   
+Upon importing, it will list your current role and available subscriptions. From there, you can run
+
+::
+
+   Get-Targets
+
+   
+To get a list of resources you have access to.
