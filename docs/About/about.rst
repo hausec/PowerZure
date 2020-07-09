@@ -31,7 +31,7 @@ C# was also explored for creating this project but there were two main
 problems:
 
 1. There were at least four different APIs being used for the project.
-   MSOL, Azure REST, Azure SDK, Graph.
+   MSOL, Azure REST, Azure SDK, and Graph.
 
 2. The documentation for these APIs simply was too poor to continue.
    Entire methods missing, namespaces typo’d, and other problems begged

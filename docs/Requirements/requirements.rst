@@ -8,20 +8,18 @@ uses three Azure modules, each with a different purpose. If you do not have thes
 
 1. `Azure
    CLI <https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest>`__
-   (az)
 
 The Azure CLI is the primary module used in PowerZure as throughout my
 testing and building this project, it became clear the Azure CLI module
-had the most functionality and decent support on Github. Azure CLI is
-the successor to the AzureRM module and uses the Azure REST API.
+had the most functionality and decent support on Github. Azure CLI uses the Azure REST API.
 
 2. `Azure
-   PowerShell <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__
+   PowerShell Az <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__
 
-The Azure PS module is used to fill in gaps where Azure CLI
+The Azure PS "Az" module is used to fill in gaps where Azure CLI
 functionality lacks. Specifically, Azure CLI has no cmdlets for
 interacting with Automation Accounts or Runbooks, hence the need for
-Azure PS. Azure PS uses the Graph API.
+Azure PS. Azure PS is the successor to the AzureRM module uses the Graph API.
 
 3. `AzureAD <https://docs.microsoft.com/en-us/powershell/module/Azuread/?view=azureadps-2.0>`__
 
