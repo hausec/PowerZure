@@ -42,11 +42,17 @@ Once you are signed in to Azure, you can import PowerZure:
    ipmo C:\Path\To\Powerzure.ps1
    
    
-Upon importing, it will list your current role and available subscriptions. From there, you can run
+Upon importing, it will list your current role and available subscriptions. If you're in a tenant with multiple subscriptions, you must set a default subscription with
+
+::
+   
+   Set-Subscription -Id [Subscription ID]
+
+Once set, you can run
 
 ::
 
    Get-Targets
 
    
-To get a list of resources you have access to.
+To get a list of resources you have access to and exploit them accordingly. 
