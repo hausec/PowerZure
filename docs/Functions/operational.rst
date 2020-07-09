@@ -1,6 +1,75 @@
 Operational
 ===========
 
+Set-Subscription
+----------------
+
+.. _**Synopsis**-45:
+
+**Synopsis**
+
+
+Sets default subscription. Necessary if in a tenant with multiple
+subscriptions.
+
+
+
+
+
+
+.. _**Syntax**-45:
+
+**Syntax**
+
+
+
+::
+
+  Set-Subscription -Id [Subscription ID]
+
+.. _**Description**-45:
+
+**Description**
+
+
+Sets the default subscription
+
+.. _**Examples**-45:
+
+**Examples**
+
+
+
+::
+
+  Set-Subscription -Id b049c906-7000-4899-b644-f3eb835f04d0
+
+.. _**Parameters**-45:
+
+**Parameters** 
+
+
+-Id
+
+Subscription ID
+
+.. _required-modules-47:
+
+**Required Modules**
+
+
+Azure CLI
+
+.. _**Output**-45:
+
+**Output**
+
+
+Success message
+
+
+
+
 Execute-Command
 ---------------
 
@@ -494,6 +563,81 @@ Azure PowerShell
 
 **Output** of command if successfully ran.
 
+Get-RunAsCertificate
+--------------------
+
+.. _**Synopsis**-18:
+
+**Synopsis**
+
+
+Will gather a RunAs accounts certificate which can then be used to login
+as that account.
+
+
+
+
+
+
+.. _**Syntax**-18:
+
+**Syntax**
+
+::
+
+  Get-RunAsCertificate -ResourceGroup [RG Name] -AutomationAccount [AA
+Name]
+
+.. _**Description**-18:
+
+**Description**
+
+
+Will gather a RunAs accounts certificate which can then be used to login
+as that account. By default, RunAs accounts are contributors over the
+subscription. This function does take a minute to run as it creates a
+runbook, uploads it, runs it, then parses the **Output** to gather the
+certificate.
+
+.. _**Examples**-18:
+
+**Examples**
+
+::
+
+  Get-RunAsCertificate -ResourceGroup Test_RG -AutomationAccount
+TestAccount
+
+.. _**Parameters**-18:
+
+**Parameters**
+
+
+-ResourceGroup
+
+Name of the resource group the Automation Account is located in.
+
+-AutomationAccount
+
+The name of the Automation Account.
+
+.. _required-modules-17:
+
+**Required Modules**
+
+
+Azure CLI
+
+Azure PowerShell
+
+.. _**Output**-18:
+
+**Output**
+
+
+Connection string for the RunAs account
+
+
 Upload-StorageContent
 ---------------------
 
@@ -569,6 +713,11 @@ Azure Powershell
 
 
 Success message
+
+
+
+
+
 
 Stop-VM
 -------
