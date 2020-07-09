@@ -1047,79 +1047,7 @@ Azure CLI
 
 Details of web application
 
-Get-RunAsCertificate
---------------------
 
-.. _**Synopsis**-18:
-
-**Synopsis**
-
-
-Will gather a RunAs accounts certificate which can then be used to login
-as that account.
-
-
-
-
-
-
-.. _**Syntax**-18:
-
-**Syntax**
-
-::
-
-  Get-RunAsCertificate -ResourceGroup [RG Name] -AutomationAccount [AA
-Name]
-
-.. _**Description**-18:
-
-**Description**
-
-
-Will gather a RunAs accounts certificate which can then be used to login
-as that account. By default, RunAs accounts are contributors over the
-subscription. This function does take a minute to run as it creates a
-runbook, uploads it, runs it, then parses the **Output** to gather the
-certificate.
-
-.. _**Examples**-18:
-
-**Examples**
-
-::
-
-  Get-RunAsCertificate -ResourceGroup Test_RG -AutomationAccount
-TestAccount
-
-.. _**Parameters**-18:
-
-**Parameters**
-
-
--ResourceGroup
-
-Name of the resource group the Automation Account is located in.
-
--AutomationAccount
-
-The name of the Automation Account.
-
-.. _required-modules-17:
-
-**Required Modules**
-
-
-Azure CLI
-
-Azure PowerShell
-
-.. _**Output**-18:
-
-**Output**
-
-
-Connection string for the RunAs account
 
 Get-AADRole
 -----------
@@ -1242,3 +1170,61 @@ Azure CLI
 
 
 Active roles
+
+
+Get-RunAsAccounts
+------------------
+
+.. _**Synopsis**-20:
+
+**Synopsis**
+
+
+Finds any RunAs accounts being used by an Automation Account
+
+
+
+.. _**Syntax**-20:
+
+**Syntax**
+
+::
+
+  Get-RunAsAccounts
+
+.. _**Description**-20:
+
+**Description**
+
+
+Finds any RunAs accounts being used by an Automation Account by recursively going through each resource group and Automation Account. If one is discovered, you can extract it's certificate (if you have the correct permissions) by using Get-RunAsCertificate
+
+.. _**Examples**-20:
+
+**Examples**
+
+::
+
+  Get-RunAsAccounts
+
+.. _**Parameters**-20:
+
+**Parameters**
+
+
+None
+
+.. _required-modules-19:
+
+**Required Modules**
+
+
+Azure CLI
+Azure PowerShell
+
+.. _**Output**-20:
+
+**Output**
+
+
+List of Automation Accounts, the resource group name, and the connection type

@@ -163,15 +163,11 @@ function PowerZure
 			
 			  PowerZure Version 1.2
 
-				List of Functions
-
-
-------------------Mandatory ----------------
-
-Reader                  Set-Subscription - Sets the default Subscription to operate in
+				List of Functions              
 
 ------------------Operational --------------
 
+Set-Subscription ------- Sets the default Subscription to operate in
 Execute-Command -------- Will run a command on a specified VM
 Execute-MSBuild -------- Will run a supplied MSBuild payload on a specified VM. By default, Azure VMs have .NET 4.0 installed. Requires Contributor Role. Will run as SYSTEM.
 Execute-Program -------- Executes a supplied program. 
@@ -189,7 +185,6 @@ Set-Role --------------- Adds a user to a role for a resource or a subscription
 Remove-Role ------------ Removes a user from a role on a resource or subscription
 Set-Group -------------- Adds a user to an Azure AD group
 Set-Password ----------- Sets a user's password in Azure AD
-
 
 ------------------Info Gathering -------------
 
@@ -212,15 +207,12 @@ Get-WebApps ------------ Gets running webapps
 Get-WebAppDetails ------ Gets running webapps details
 Get-RunAsCertificate --- Gets the login credentials for an Automation Accounts "RunAs" service principal
 Get-AADRoleMembers ----- Lists the active roles in Azure AD and what users are part of the role
-
----------Secret/Key/Certificate Gathering -----
-            
-Get-KeyVaults ---------- Lists the Key Vaults
-Get-KeyVaultContents --- Get the keys, secrets, and certificates from a specific Key Vault
-Get-AllKeyVaultContents -Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to 
+Get-RunAsAccounts ------ Finds any RunAs accounts being used by an Automation Account
            
 -----------------Data Exfiltration--------------
-            
+Get-KeyVaults ---------- Lists the Key Vaults
+Get-KeyVaultContents --- Get the keys, secrets, and certificates from a specific Key Vault
+Get-AllKeyVaultContents -Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to           
 Get-StorageAccounts ---- Gets all storage accounts
 Get-StorageAccountKeys - Gets the account keys for a storage account
 Get-StorageContents ---- Gets the contents of a storage container or file share. OAuth is not support to access file shares via cmdlets, so you must have access to the Storage Account's key.
@@ -2457,4 +2449,28 @@ Set-Password -Username john@contoso.com -Password newpassw0rd1
 	Set-AzureADUserPassword -objectid $Id -Password $Password
 
 
+}
+
+function Get-RunAsAccounts
+{
+<#
+.SYNOPSIS 
+Lists all RunAs accounts for all Automation Accounts
+
+.EXAMPLE
+
+Get-RunAsAccounts
+#>
+
+	$RGList = az group list | ConvertFrom-Json
+	$RGNames = $RGList.name
+	ForEach ($RGName in $RGNames)
+	{
+		$Accounts = Get-AzAutomationAccount -ResourceGroupName $RGName
+		$Accountnames = $Accounts.AutomationAccountName
+		ForEach ($Account in $Accountnames)
+		{
+			Get-AzAutomationConnection -ResourceGroupName $RGName -AutomationAccountName $Account
+		}
+	}
 }
