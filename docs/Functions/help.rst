@@ -29,7 +29,7 @@ Displays info about this script.
 **Description**
 
 
-Displays info about this script.
+Lists the functions available in the script.
 
 .. _**Examples**-46:
 

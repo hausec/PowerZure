@@ -7,62 +7,63 @@
    :alt: PowerZure logo
 
 
-What is PowerZure?
-------------------
-
 PowerZure is a PowerShell project created to assess and exploit
 resources within Microsoft’s cloud platform, Azure. PowerZure was
 created out of the need for a framework that can both perform
 reconnaissance **and** exploitation of Azure.
 
-CLI vs. Portal
---------------
-
-A common question is why use PowerZure or command line at all when you
-can just login to the Azure web portal?
-
-This is a fair question and to be honest, you can accomplish 90% of the
-functionality in PowerZure through clicking around in the portal,
-however by using the Azure PowerShell modules, you can perform tasks
-programmatically that are tedious in the portal. E.g, listing the groups
-a user belongs to. In addition, the ability to programmatically upload
-exploits instead of tinkering around with the messy web UI. Finally, if
-you compromise a user who has used the PowerShell module for Azure
-before and are able to steal the accesstoken.json file, you can
-impersonate that user which effectively bypasses multi-factor
-authentication.
-
-Why PowerShell?
+Getting Started
 ---------------
 
-While the offensive security industry has seen a decline in PowerShell
-usage due to the advancements of defensive products and solutions, this
-project does not contain any malicious code. PowerZure does not exploit
-bugs within Azure, it exploits misconfigurations.
+An overview of Azure, Azure AD, and PowerZure is covered in my blog post here https://posts.specterops.io/attacking-azure-azure-ad-and-introducing-powerzure-ca70b330511a
 
-C# was also explored for creating this project but there were two main
-problems:
+To get started with PowerZure, make sure the `requirements <https://powerzure.readthedocs.io/en/latest/Requirements/requirements.html>`__ are met. If you do not have the modules, PowerZure will ask you if you'd like to install them automatically when importing PowerZure as a module. PowerZure does require an Administrative PowerShell window, >= version 5.0. 
+There is no advantage to running PowerZure on a compromised/pwned machine. Since you're interacting with the cloud, it's opsec safe to use from a bastion operating host, or if you're feeling adventurous, your own host. Read the operational usage page `here <https://powerzure.readthedocs.io/en/latest/Operationalusage/opusage.html>`__ 
 
-1. There were at least four different APIs being used for the project.
-   MSOL, Azure REST, Azure SDK, Graph.
+Additionally, you must sign-in to Azure before PowerZure functions are made available. To sign in, use the cmdlet 
 
-2. The documentation for these APIs simply was too poor to continue.
-   Entire methods missing, namespaces typo’d, and other problems begged
-   the question of what advantage did C# give over PowerShell (Answer:
-   none)
+::
 
-Realistically, there is zero reason to ever run PowerZure on a victim’s
-machine. Authentication is done by using an existing accesstoken.json
-file or by logging in via prompt when logging into Azure CLI.
+   az login
+   
+If you are using functions that use the AzureAD module, you must additionally sign in with
 
-Author & License
-----------------
+::
 
-Author: Ryan Hausknecht (@haus3c)
+   Connect-AzureAD
+   
+If you are using functions that use the Azure PowerShell module, you must additionally sign in with
 
-License: BSD-3
+::
+
+   Connect-AzAccount
+   
+Check out the functions pages on the left to see which functions use which modules. Majority of PowerZure uses the az (Azure CLI) module.
+
+Once you are signed in to Azure, you can import PowerZure:
 
 
+::
+
+   ipmo C:\Path\To\Powerzure.ps1
+   
+   
+Upon importing, it will list your current role and available subscriptions. From there, you can run
+
+::
+
+   Get-Targets
+
+   
+To get a list of resources you have access to.
+
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: About
+   
+   About/about
    
 .. toctree::
    :maxdepth: 2
@@ -85,10 +86,8 @@ License: BSD-3
    :caption: Functions
    
    Functions/help   
-   Functions/mandatory
    Functions/infogathering
    Functions/operational
-   Functions/gathering
    Functions/exfil
 
    

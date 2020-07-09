@@ -185,65 +185,6 @@ Specifies the **Output** of the data.
 
 List of all users in AAD, optionally in a file.
 
-Get-AADRoleMembers
-------------------
-
-.. _**Synopsis**-3:
-
-**Synopsis**
-
-
-Lists the active roles in Azure AD and what users are part of the role.
-
-.. _**Syntax**-3:
-
-**Syntax**
-
-
-
-::
-
-  Get-AADRoleMembers
-
-.. _**Description**-3:
-
-**Description**
-
-
-Gathers the AAD role members. This is different than Azure RBAC roles.
-
-.. _**Examples**-3:
-
-**Examples**
-
-
-
-::
-
-   Get-AADRoleMembers
-
-.. _required-modules-3:
-
-**Required Modules**
-
-
-Azure CLI
-
-AzureAD PowerShell
-
-.. _**Parameters**-3:
-
-**Parameters**
-
-
-None
-
-.. _**Output**-3:
-
-**Output**
-
-
-List of AAD Role members
 
 **Get-User**
 

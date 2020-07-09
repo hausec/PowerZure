@@ -113,7 +113,7 @@ msbuild.exe with
 
 ::
 
-  az run-command invoke.
+  az run-command invoke
 
 .. _**Examples**-22:
 
@@ -207,8 +207,8 @@ the binary.
 **Examples**
 
 
-
 ::
+
 	Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File C:\tempbeacon.exe
 
 .. _**Parameters**-23:
@@ -646,7 +646,7 @@ Start-VM
 
 Starts a Virtual Machine
 
-****
+
 
 **Syntax**
 
@@ -696,7 +696,6 @@ Restart-VM
 
 Restarts a Virtual Machine
 
-****
 
 **Syntax**
 
@@ -901,7 +900,6 @@ Remove-Role
 
 Removes a user from a role for a specific resource or subscription
 
-****
 
 **Syntax**
 
