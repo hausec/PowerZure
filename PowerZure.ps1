@@ -202,6 +202,7 @@ Get-Roles -------------- Gets the roles of a user
 Get-ServicePrincipals -- Returns all service principals
 Get-ServicePrincipal --- Returns all info on a specified service principal
 Get-Apps --------------- Returns all applications and their Ids
+Get-AppOwners ---------- Returns all owners of every Application in AAD
 Get-AppPermissions ----- Returns the permissions of an app
 Get-WebApps ------------ Gets running webapps
 Get-WebAppDetails ------ Gets running webapps details
@@ -2480,6 +2481,29 @@ Get-RunAsAccounts
 		ForEach ($Account in $Accountnames)
 		{
 			Get-AzAutomationConnection -ResourceGroupName $RGName -AutomationAccountName $Account
+		}
+	}
+}
+function Get-AppOwners
+{
+<#
+.SYNOPSIS 
+Returns all owners of all applications in AAD
+
+.EXAMPLE
+Get- AppOwners
+#>
+
+	$Apps = Get-AzureADApplication
+	ForEach ($App in $Apps)
+	{
+		$Name = $App.DisplayName
+		$Owners = Get-AzureADApplicationOwner -ObjectId $App.ObjectId
+		If ($Owners)
+		{
+			Write-Host "Application: $Name" -ForegroundColor Yellow
+			Write-Host ""
+			$Owners
 		}
 	}
 }

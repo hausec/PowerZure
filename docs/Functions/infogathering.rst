@@ -422,6 +422,64 @@ Azure CLI
 
 Applications in AAD
 
+
+Get-AppOwners
+--------
+
+.. _**Synopsis**-7:
+
+**Synopsis**
+
+
+Returns all owners of all Applications in AAD
+
+.. _**Syntax**-7:
+
+**Syntax**
+
+::
+
+  Get-AppOwners
+
+.. _**Description**-7:
+
+**Description**
+
+Recursively looks through each application in AAD and lists the owners
+
+.. _**Examples**-7:
+
+**Examples**
+
+::
+
+  Get-AppOwners
+
+.. _**Parameters**-7:
+
+**Parameters** 
+
+
+None
+
+.. _required-modules-6:
+
+**Required Modules**
+
+
+AzureAD PowerShell
+
+.. _**Output**-7:
+
+**Output**
+
+
+Application owners in AAD
+
+
+
+
+
 Get-GroupMembers
 ----------------
 
