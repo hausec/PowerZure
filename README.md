@@ -55,20 +55,18 @@ each with a different purpose.
 
 1.  [Azure
     CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest)
-    (`az`)
 
-    The Azure CLI is the primary module used in PowerZure as throughout my
-    testing and building this project, it became clear the Azure CLI module had
-    the most functionality and decent support on Github. Azure CLI is the
-    successor to the AzureRM module and uses the Azure REST API.
+The Azure CLI is the primary module used in PowerZure as throughout my
+testing and building this project, it became clear the Azure CLI module
+had the most functionality and decent support on Github. Azure CLI uses the Azure REST API.
 
 2.  [Azure
     PowerShell](https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0)
 
-    The Azure PS module is used to fill in gaps where Azure CLI functionality
-    lacks. Specifically, Azure CLI has no cmdlets for interacting with
-    Automation Accounts or Runbooks, hence the need for Azure PS. Azure PS uses
-    the Graph API.
+The Azure PS "Az" module is used to fill in gaps where Azure CLI
+functionality lacks. Specifically, Azure CLI has no cmdlets for
+interacting with Automation Accounts or Runbooks, hence the need for
+Azure PS. Azure PS is the successor to the AzureRM module uses the Graph API.
 
 3.  [AzureAD](https://docs.microsoft.com/en-us/powershell/module/Azuread/?view=azureadps-2.0)
 
