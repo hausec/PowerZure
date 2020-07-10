@@ -2296,8 +2296,8 @@ function Get-RunAsCertificate
 
 	[CmdletBinding()]
 	 Param(
-	[Parameter(Mandatory=$false)][String]$AutomationAccount = $null,
-	[Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
+	[Parameter(Mandatory=$true)][String]$AutomationAccount = $null,
+	[Parameter(Mandatory=$true)][String]$ResourceGroup = $null)
 
 	$Usage = "Get-RunAsCertificate -ResourceGroup Test_RG -AutomationAccount TestAccount"
 	If(!$ResourceGroup)
@@ -2310,7 +2310,12 @@ function Get-RunAsCertificate
 	Write-Host "Requires an automation account name." -ForegroundColor Red
 	$Usage
 	}
-	$data1 = 'Get-AutomationConnection -Name AzureRunAsConnection' | Out-File AutomationTutorialPowerShell.ps1
+	$data1 = 'Get-AutomationConnection -Name AzureRunAsConnection' | Out-File  AutomationTutorialPowerShell.ps1
+	$data2 = '$Password = "YourStrongPasswordForTheCert" ' | Out-File -Append AutomationTutorialPowerShell.ps1
+	$data3 = '$CertPath = Join-Path $env:temp  "AzureRunAsCertificate.pfx"' | Out-File -Append AutomationTutorialPowerShell.ps1
+	$data4 = '$Cert = $RunAsCert.Export("pfx",$Password)' | Out-File -Append AutomationTutorialPowerShell.ps1
+	$data5 = 'Set-Content -Value $Cert -Path $CertPath -Force -Encoding Byte | Write-Verbose ' | Out-File -Append AutomationTutorialPowerShell.ps1
+	$data6 = '[Convert]::ToBase64String([IO.File]::ReadAllBytes($CertPath))' | Out-File -Append AutomationTutorialPowerShell.ps1
 	Write-Host "Uploading Runbook..." -ForegroundColor Green
 	Import-AzAutomationRunbook -Path .\AutomationTutorialPowerShell.ps1 -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell | Out-Null
 	Write-Host "Publishing Runbook..." -ForegroundColor Green
@@ -2320,7 +2325,7 @@ function Get-RunAsCertificate
 	$jobid = $start.JobId
 	Start-Sleep -s 10
 	$record = Get-AzAutomationJobOutput -ResourceGroupName $ResourceGroup -AutomationAccountName $AutomationAccount -Id $jobid -Stream Any | Get-AzAutomationJobOutputRecord
-	$Timeout = 60
+	$Timeout = 120
 	$timer = [Diagnostics.Stopwatch]::StartNew()
 	While (!$record -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
 	{
@@ -2329,15 +2334,19 @@ function Get-RunAsCertificate
 	$record = Get-AzAutomationJobOutput -ResourceGroupName $ResourceGroup -AutomationAccountName $AutomationAccount -Id $jobid -Stream Any | Get-AzAutomationJobOutputRecord
 	}
 	$timer.Stop()
-	If (!$record)
-	{
-	Write-host "No RunAs account configured for this Automation Account."
-	}
-	else
-	{
 	$thumbprint = $record.Value.CertificateThumbprint
 	$tenant = $record.Value.TenantId
 	$appID = $record.Value.ApplicationId
+	$b64 = $record.Value.value
+	New-item AzureRunAsCertificate.pfx
+	$Password = "YourStrongPasswordForTheCert"
+	$SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
+	[IO.File]::WriteAllBytes($Cert, [Convert]::FromBase64String($b64))
+	$cert
+	$d = pwd
+	$CertPath = $d.Path + "\AzureRunAsCertificate.pfx"
+	Write-Host "Importing Certificate" -ForegroundColor Green
+	Import-PfxCertificate -FilePath $CertPath -CertStoreLocation Cert:\LocalMachine\My -Password $SecurePassword -Exportable
 	Write-Host "Done! To login as the service principal, copy+paste the following command: " -ForegroundColor Green
 	Write-Host ""
 	Write-Host "Connect-AzAccount -CertificateThumbprint "$thumbprint" -ApplicationId "$appID" -Tenant "$tenant"" -ForegroundColor Green

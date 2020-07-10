@@ -592,12 +592,7 @@ Name]
 
 **Description**
 
-
-Will gather a RunAs accounts certificate which can then be used to login
-as that account. By default, RunAs accounts are contributors over the
-subscription. This function does take a minute to run as it creates a
-runbook, uploads it, runs it, then parses the **Output** to gather the
-certificate.
+Creates a Runbook for the RunAs account to run, which will gather the RunAs Account's certificate and write it to the job output as base64. The function then grabs the job output, decodes the base64 certificate into a .pfx certificate, and automatically imports it. The function then spits out a one-liner that can be copy+pasted to login as the RunAs account.
 
 .. _**Examples**-18:
 
