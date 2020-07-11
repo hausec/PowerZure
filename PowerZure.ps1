@@ -76,7 +76,7 @@ Write-Host @'
 888            \_ _/  \  Y88b 888 d88P Y8b.     888    d88P       Y88b 888 888     Y8b.     
 888         \_________/   "Y8888888P"   "Y8888  888   d8888888888  "Y88888 888      "Y8888                                                                                                                      
  
-'@ 
+'@ -ForegroundColor Green
 
 Write-Host 'Confused on what to do next? Check out the documentation: https://powerzure.readthedocs.io/' -ForegroundColor Green
 
@@ -2351,7 +2351,6 @@ function Get-RunAsCertificate
 	Write-Host "Done! To login as the service principal, copy+paste the following command: " -ForegroundColor Green
 	Write-Host ""
 	Write-Host "Connect-AzAccount -CertificateThumbprint "$thumbprint" -ApplicationId "$appID" -Tenant "$tenant"" -ForegroundColor Green
-	}
 	Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AutomationTutorialPowerShell -Force
 	rm AutomationTutorialPowerShell.ps1
 }
