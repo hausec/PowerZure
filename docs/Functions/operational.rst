@@ -1237,3 +1237,256 @@ AzureAD PowerShell
 
 
 Password successfully set
+
+
+Create-User
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+
+Creates a user in Azure Active Directory
+
+
+
+
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+
+
+::
+
+   Create-User -Username [User Principal Name] -Password [Password]
+
+.. _**Description**-32:
+
+**Description**
+
+
+Creates a user in Azure Active Directory. Requires AAD PS Module.
+
+.. _**Examples**-32:
+
+**Examples**
+
+
+
+::
+
+   Create-User -Username 'test@test.com' -Password Password1234
+
+
+.. _**Parameters**-32:
+
+**Parameters** 
+
+
+-Username 
+
+Name of user including domain
+
+-Password 
+
+New password for the user
+
+.. _required-modules-34:
+
+**Required Modules**
+
+
+Azure CLI
+
+AzureAD PowerShell
+
+.. _**Output**-32:
+
+**Output**
+
+
+User is created
+
+
+Add-SPSecret
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+
+Adds a secret to a service principal
+
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+
+::
+
+   Add-SPSecret -ServicePrincipal [Service principal name] -Password [new secret]
+
+.. _**Description**-32:
+
+**Description**
+
+
+Adds a secret to a service principal so you can login as that service principal.
+
+.. _**Examples**-32:
+
+**Examples**
+
+
+::
+
+   Add-SPSecret -ServicePrincipal "MyTestApp" -Password password123
+
+
+.. _**Parameters**-32:
+
+**Parameters** 
+
+-ServicePrincipal
+Name of the Service Principal or application that is using the Service principal
+
+-Password 
+New password "secret" for the Service Principal.
+
+.. _required-modules-34:
+
+**Required Modules**
+
+Azure PowerShell
+
+.. _**Output**-32:
+
+**Output**
+
+Connection string to login as new user if successful
+
+
+Set-AADRoleSP
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+
+Sets a user's role in AzureAD while logged in as a service principal
+
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+
+::
+
+   Set-AADRoleSP -App [Application Name the SP is using] -Secret [Secret for the Application] -Role [Name of desired role] -User [UserPrincipalName to be added to the role]
+
+.. _**Description**-32:
+
+**Description**
+
+
+This works by making a Graph API call because there's no possible way of doing this with the AzureAD module while logged in as a service principal. The role is also searched via API call if not using a role ID. Using a role ID will be more accurate. The token used to make the API request is gathered from Azure CLI
+
+.. _**Examples**-32:
+
+**Examples**
+
+::
+
+   Set-AADRoleSP -App MyTestApp -Secret password1234 -Role "Company Administrators" -User "Hausec@test.com"
+
+
+.. _**Parameters**-32:
+
+**Parameters** 
+
+-App 
+Name of the Application that the Service Principal is tied to
+
+-Secret 
+Secret of the Application/Service Principal
+
+-Role 
+Desired role
+
+-User 
+User Principal Name to add to role
+
+.. _required-modules-34:
+
+**Required Modules**
+
+Azure CLI
+
+.. _**Output**-32:
+
+**Output**
+
+Success message
+
+
+
+Set-ElevatedPrivileges
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+
+Elevates the user's privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
+
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+
+::
+
+   Set-ElevatedPrivileges
+
+.. _**Description**-32:
+
+**Description**
+
+
+This works by making a Graph API call because there's no possible way of doing this with any PowerShell modules. You must be logged in as a user with Global Administator role assigned. You cannot elevate if you are a service principal; It's just not possible for some reason. The token used to make the API request is gathered from Azure CLI
+
+.. _**Examples**-32:
+
+**Examples**
+
+::
+
+   Set-ElevatedPrivileges
+
+
+.. _**Parameters**-32:
+
+**Parameters** 
+
+None
+
+.. _required-modules-34:
+
+**Required Modules**
+
+Azure CLI
+
+.. _**Output**-32:
+
+**Output**
+
+Success message

@@ -64,7 +64,6 @@ if (!$AzTest)
 	}
 }
 
-$ErrorActionPreference = "silentlyContinue"
 Write-Host @' 
                                                                                                                    
 8888888b.                                              8888888888P                           
@@ -78,42 +77,54 @@ Write-Host @'
  
 '@ -ForegroundColor Green
 
-Write-Host 'Confused on what to do next? Check out the documentation: https://powerzure.readthedocs.io/' -ForegroundColor Green
+Write-Host 'Confused on what to do next? Check out the documentation: https://powerzure.readthedocs.io/ or type Powerzure -h for a function table.' -ForegroundColor yellow
+Write-Host ""
 
-Try
-{  
-    $User = az ad signed-in-user show --query '[userPrincipalName]' -o tsv
-    if ($User.Length -gt 1)
-    {                                                   
-    $Id = az ad signed-in-user show --query '[objectId]' -o tsv
+$AzUser = az account show | ConvertFrom-Json
+if ($AzUser)
+{                                                   
+	Write-Host "You are logged into Az CLI:" -ForegroundColor Yellow
 	Write-Host ""
-    Write-Host "Welcome $User"
-    Write-Host ""
-    Write-Host "Please set your default subscription with 'Set-Subscription -Id {id}' or 'az account set --subscription {id}' if you have multiple subscriptions."
-    Write-Host ""
-    Write-Host "Here are your roles and subscriptions:"
-    Write-Host ""
-	az role assignment list --all --query "[?principalName=='$User'].{Scope:scope,Role:roleDefinitionName}" -o table
-    Write-Host ""
-    Write-Host "Here are the AD groups you belong to:"
-    Write-Host ""
-    az ad user get-member-groups --id $Id -o table
-    Write-Host ""
-    Write-Host "Try PowerZure -h for a list of functions"
-    Write-Host ""
-	Write-Host "If you need to use the Azure AD functions, you must login with Connect-AzureAD" -ForegroundColor Red
-	Write-Host "If you need to use the Automation Account functions, you must login with Connect-AzAccount" -ForegroundColor Red
-    }
-    else
-    {
-    Write-Host "Please login via az login" -ForegroundColor Red
-    }
-
+	$AzUser
+	Write-Host ""
+	Write-Host "Your roles in Azure:"
+	$rolelist = az role assignment list | ConvertFrom-Json
+	$userrolelist = $rolelist | Where-Object {$_.principalName -eq $AzUser.user.name}
+	ForEach ($userrole in $userrolelist)
+	{
+	$userrole.roleDefinitionName
+	$userrole.scope
+	}
+	Write-Host ""
 }
-Catch
+else
 {
-    Write-Host "Please login via az login" -ForegroundColor Red
+	Write-Host "If you need to use the Az CLI functions, you must login with 'az login'" -ForegroundColor Red
 }
+$APSUser = Get-AzContext
+if ($AzUser)
+{                                                   
+	Write-Host "You are logged into Azure PowerShell:" -ForegroundColor Yellow
+	Write-Host ""
+	$APSUser
+	Write-Host ""
+	Write-Host "Your roles in Azure:"
+	$roles = Get-AzRoleAssignment| Where-Object {$_.SignInName -eq $APSUser.Account.Id}
+	ForEach ($Role in $Roles)
+	{
+	$role.RoleDefinitionName
+	$role.scope
+	}
+	Write-Host ""
+}
+else
+{
+	Write-Host "If you need to use the Automation Account functions, you must login with Connect-AzAccount" -ForegroundColor Red
+}
+
+Write-Host "If you need to use the Azure AD functions, you must login with Connect-AzureAD" -ForegroundColor Red
+Write-Host ""
+Write-Host "Please set your default subscription with 'Set-Subscription -Id {id} if you have multiple subscriptions." -ForegroundColor Yellow
 
 function Set-Subscription
 {
@@ -185,6 +196,10 @@ Set-Role --------------- Adds a user to a role for a resource or a subscription
 Remove-Role ------------ Removes a user from a role on a resource or subscription
 Set-Group -------------- Adds a user to an Azure AD group
 Set-Password ----------- Sets a user's password in Azure AD
+Create-User   ---------- Creates a user in Azure AD
+Set-AADRoleSP ---------- Sets a user's role in Azure AD while logged in as a Service Principal
+Add-SPSecret  ---------- Sets a secret to a Service Principal
+Add-ElevatedPrivileges - Elevates the user's privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC. 
 
 ------------------Info Gathering -------------
 
@@ -202,7 +217,7 @@ Get-Roles -------------- Gets the roles of a user
 Get-ServicePrincipals -- Returns all service principals
 Get-ServicePrincipal --- Returns all info on a specified service principal
 Get-Apps --------------- Returns all applications and their Ids
-Get-AppOwners ---------- Returns all owners of every Application in AAD
+Get-AppOwners ---------- Returns all owners of every Application in Azure AD
 Get-AppPermissions ----- Returns the permissions of an app
 Get-WebApps ------------ Gets running webapps
 Get-WebAppDetails ------ Gets running webapps details
@@ -2459,7 +2474,6 @@ Set-Password -Username john@contoso.com -Password newpassw0rd1
 
 
 }
-
 function Get-RunAsAccounts
 {
 <#
@@ -2503,6 +2517,187 @@ Get- AppOwners
 			Write-Host "Application: $Name" -ForegroundColor Yellow
 			Write-Host ""
 			$Owners
+		}
+	}
+}
+function Add-SPSecret
+{
+<# 
+.SYNOPSIS
+    Adds a secret to a service principal
+
+.PARAMETERS
+    -ServicePrincipal
+	-Password
+	
+.EXAMPLE
+	Add-SPSecret -ServicePrincipal "MyTestApp" -Password password123
+#>
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$true)][String]$ServicePrincipal = $null,
+	[Parameter(Mandatory=$true)][String]$Password = $null)
+	
+	$session = Get-AzureADCurrentSessionInfo
+	$tenant = $session.TenantId
+	$App = Get-AzureADApplication | Where-Object {$_.DisplayName -eq $ServicePrincipal}
+	$oid = $App.ObjectId
+	$aid = $App.AppId
+	$startDate = Get-Date
+	$endDate = $startDate.AddYears(3)
+	$new = New-AzureADApplicationPasswordCredential -ObjectId $oid -CustomKeyIdentifier "Secret1" -StartDate $startDate -EndDate $endDate -Value $Password
+	If($new)
+	{
+		Write-Host "Success! You can now login as the service principal using the following commands:" -ForegroundColor Green
+		Write-Host ""
+		Write-Host 'az login -u '$aid' -p '$Password' --tenant '$tenant' --allow-no-subscriptions --service-principal' -ForegroundColor Yellow
+		Write-Host ""
+		Write-Host '$Credential = Get-Credential; Connect-AzAccount -Credential $Credential -Tenant '$tenant' -ServicePrincipal' -ForegroundColor Yellow
+		Write-Host ""
+		Write-Host 'Be sure to use the Application ID as the username when prompted by Get-Credential. The application ID is: '$aid'' -ForegroundColor Red
+	}
+}
+function Create-User
+{
+<# 
+.SYNOPSIS
+    Creates a user in Azure Active Directory
+
+.PARAMETERS
+	-Username (test@test.com)
+	-Password (Password1234)
+	
+.EXAMPLE
+	Create-User -Username 'test@test.com' -Password Password1234
+#>
+    [CmdletBinding()]
+    Param(
+	[Parameter(Mandatory=$true, HelpMessage='Enter the username with the domain')][String]$Username = $null,
+	[Parameter(Mandatory=$true, HelpMessage='Enter a password for the user')][String]$Password = $null)
+
+	If($Username -notmatch '@')
+	{
+	Write-Host "Please supply the domain name the user will be added under, e.g. test@test.com" -ForegroundColor Red
+	}
+	else
+	{
+	$split = $Username.Split("@")
+	$name = $split[0]
+	$make = az ad user create --display-name $name --password $Password --user-principal-name $Username | ConvertFrom-Json
+	If($make)
+	{
+		Write-Host "Success! Please login with:" -ForegroundColor Green
+		Write-Host "az login -u $Username -p $Password --allow-no-subscriptions" -ForegroundColor Yellow
+	}
+	}
+}
+function Set-AADRoleSP
+{
+<# 
+.SYNOPSIS
+    Sets a user's role in AzureAD while logged in as a service principal
+
+.PARAMETERS
+	-App (Name of the Application that the Service Principal is tied to)
+	-Secret (Secret of the Application/Service Principal)
+    -Role (Desired role)
+	-User (User Principal Name to add to role)
+	
+.EXAMPLE
+	Set-AADRoleSP -App MyTestApp -Secret password1234 -Role "Company Administrators" -User "Hausec@test.com"
+#>
+    [CmdletBinding()]
+    Param(
+	[Parameter(Mandatory=$true, HelpMessage='Please provide the Application name the Service Principal is tied to.')][String]$App = $null,
+	[Parameter(Mandatory=$true, HelpMessage='Please provide the Application secret.')][String]$Secret = $null,
+    [Parameter(Mandatory=$false)][String]$Role = $null,
+	[Parameter(Mandatory=$false)][String]$RoleId = $null,
+	[Parameter(Mandatory=$true)][String]$User = $null)
+	
+	
+	$data = az account show | ConvertFrom-Json
+	If($data.user.type -eq 'servicePrincipal')
+	{
+		$appdata = az ad app list --display-name $App | ConvertFrom-Json
+		$userdata = az ad user show --id $User | convertfrom-json
+		$UserId = $userdata.objectId
+		$TenantId = $data.tenantId
+		$ClientId = $appdata.appId
+		$RequestAccessTokenUri = "https://login.microsoftonline.com/$TenantId/oauth2/token"	 
+		$Resource = "https://graph.microsoft.com/"
+		$AppToken = az account get-access-token --resource-type ms-graph | ConvertFrom-Json
+		$Headers = @{}
+		$Headers.Add("Authorization","$($AppToken.tokenType) "+ " " + "$($AppToken.accessToken)")	
+		If($Role)
+		{	
+			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
+			$roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
+			If($roledata)
+			{
+			$rolesId = $roledata.id
+			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$rolesId" + '/members/$ref'
+$body2 = @"
+{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
+}
+"@
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body2 -ContentType 'application/json' -Uri $uri | Convertto-Json
+			If($req -eq '""')
+			{Write-Host "Success. $Role added to $User" -ForegroundColor Green}
+			Else
+			{$req}
+			}
+			else
+			{
+			Write-Host "$Role doesn't exist. Check spelling or try by Id maybe? If you're looking for 'Global Administrator', try 'Company Administrator'" -ForegroundColor Red
+			}
+		}
+		If($RoleId)
+		{
+			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
+$body2 = @"
+{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
+}
+"@
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body2 -ContentType 'application/json' -Uri $uri | Convertto-Json
+			If($req -eq '""')
+			{Write-Host "Success. $Role added to $User" -ForegroundColor Green}
+			Else
+			{$req}
+		}
+	}
+	else
+	{
+	Write-Host "Please login to az cli as a Service Princpal using the format: " -ForegroundColor Red
+	Write-Host "az login -u [ApplicationId] -p [Secret in plain text] --service-principal --allow-no-subscriptions" -ForegroundColor Yellow
+	}
+}
+
+function Set-ElevatedPrivileges
+{
+<# 
+.SYNOPSIS
+    Elevates the user's privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
+
+.PARAMETERS
+	None
+	
+.EXAMPLE
+	Set-ElevatedPrivileges
+#>
+	$account = az account show | ConvertFrom-Json
+	If($account.user.type -eq 'servicePrincipal')
+	{
+		Write-Host "Sorry, it's not possible to elevate a service principal's access. Maybe they'll update the API one day to allow it." -ForegroundColor Red
+	}
+	else
+	{
+		$UserToken = az account get-access-token | ConvertFrom-Json
+		$Headers = @{}
+		$Headers.Add("Authorization","$($UserToken.tokenType) "+ " " + "$($UserToken.accessToken)")	
+		$req = Invoke-RestMethod -ContentType 'application/json' -Headers $Headers -Method Post -Uri https://management.azure.com/providers/Microsoft.Authorization/elevateAccess?api-version=2016-07-01 | ConvertTo-Json
+		If($req -eq '""')
+		{
+			Write-Host "Success! Re-login for permissions to take effect. You can now add yourself as an Owner to any resources in Azure!" -ForegroundColor Green
 		}
 	}
 }
