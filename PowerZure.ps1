@@ -79,51 +79,124 @@ Write-Host @'
 
 Write-Host 'Confused on what to do next? Check out the documentation: https://powerzure.readthedocs.io/ or type Powerzure -h for a function table.' -ForegroundColor yellow
 Write-Host ""
-
-$AzUser = az account show | ConvertFrom-Json
+$ErrorActionPreference = "SilentlyContinue"
+$APSUser = Get-AzContext *>&1 
+$AzUser = az ad signed-in-user show *>&1 | convertfrom-json
 if ($AzUser)
 {                                                   
 	Write-Host "You are logged into Az CLI:" -ForegroundColor Yellow
 	Write-Host ""
-	$AzUser
+	$AzUser.userPrincipalName
 	Write-Host ""
-	Write-Host "Your roles in Azure:"
+	Write-Host "Your roles in Azure:" -ForegroundColor Yellow
 	$rolelist = az role assignment list | ConvertFrom-Json
-	$userrolelist = $rolelist | Where-Object {$_.principalName -eq $AzUser.user.name}
+	$userrolelist = $rolelist | Where-Object {$_.principalName -eq $AzUser.userPrincipalName}
 	ForEach ($userrole in $userrolelist)
 	{
 	$userrole.roleDefinitionName
 	$userrole.scope
 	}
 	Write-Host ""
-}
-else
+	Write-Host "Your roles in Azure Active Directory" -ForegroundColor Yellow
+	$uid = $AzUser.objectId
+	$uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $uid + "'"
+	$data = az rest --url $uri | ConvertFrom-Json
+	$roles = $data.value
+	ForEach ($Role in $Roles)
+	{
+		If($role.resourceScope -eq "/")
+		{	
+		$roleid = $role.roleDefinitionId
+		$uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$roleid"
+		$roledef = az rest --url $uri | convertfrom-json
+		$rolename = $roledef.displayName
+		$rolename
+		}
+		else
+		{
+			$scope = $role.resourceScope
+			$scopeid = $scope.Split("/")[1]
+			$uri = "https://graph.microsoft.com/beta/applications/$scopeid"
+			$app = az rest --url $uri | convertfrom-Json
+			$appname = $app.displayName
+			$roleid = $role.roleDefinitionId
+			$uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$roleid"
+			$roledef = az rest --url $uri | convertfrom-json
+			$rolename = $roledef.displayName
+			Write-Host "User is also a role on the following applications:" -ForegroundColor Yellow
+			Write-Host "Application:" $appname
+			Write-Host "Role:" $rolename
+			Write-Host ""
+		}
+	}
+	if($APSUser)
+	{
+		Write-Host "You are also logged into Azure 'Az' PowerShell" -ForegroundColor Cyan
+	}
+}	
+if(!$AzUser)
 {
 	Write-Host "If you need to use the Az CLI functions, you must login with 'az login'" -ForegroundColor Red
+	Write-Host ""
 }
-$APSUser = Get-AzContext
-if ($AzUser)
+if(!$AzUser -and $APSUser)
 {                                                   
 	Write-Host "You are logged into Azure PowerShell:" -ForegroundColor Yellow
 	Write-Host ""
-	$APSUser
+	$APSUser.Account.Id
 	Write-Host ""
-	Write-Host "Your roles in Azure:"
+	Write-Host "Your roles in Azure:" -ForegroundColor Yellow
 	$roles = Get-AzRoleAssignment| Where-Object {$_.SignInName -eq $APSUser.Account.Id}
 	ForEach ($Role in $Roles)
 	{
-	$role.RoleDefinitionName
-	$role.scope
+		$role.RoleDefinitionName
+		$role.scope
+		Write-Host "" 
+	}
+	Write-Host "Your roles in Azure Active Directory" -ForegroundColor Yellow
+	$resource = "https://graph.microsoft.com"
+	$Token = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($APSUser.Account, $APSUser.Environment, $APSUser.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, $resource).AccessToken
+	$Headers = @{}
+	$Headers.Add("Authorization","Bearer"+ " " + "$($token)")
+	$user = Get-AzADUser -UserPrincipalName $APSUser.Account.Id
+	$uid = $user.Id
+	$uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $uid + "'"
+	$data = Invoke-RestMethod -Headers $Headers -Uri $uri 
+	$Roles = $data.value
+	ForEach ($Role in $Roles)
+	{
+		If($role.resourceScope -eq "/")
+		{
+		$roleid = $role.roleDefinitionId
+		$uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$roleid"
+		$roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
+		$rolename = $roledef.displayName
+		$rolename
+		}
+		else
+		{
+			$scope = $role.resourceScope
+			$scopeid = $scope.Split("/")[1]
+			$uri = "https://graph.microsoft.com/beta/applications/$scopeid"
+			$app = Invoke-RestMethod -Headers $Headers -Uri $uri 
+			$appname = $app.displayName
+			$roleid = $role.roleDefinitionId
+			$uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$roleid"
+			$roledef = Invoke-RestMethod -Headers $Headers -Uri $uri 
+			$rolename = $roledef.displayName
+			Write-Host "User is also a role on the following applications:" -ForegroundColor Yellow
+			Write-Host "Application: " $appname
+			Write-Host "Role: " $rolename
+		}
 	}
 	Write-Host ""
 }
-else
+if(!$APSUser)
 {
 	Write-Host "If you need to use the Automation Account functions, you must login with Connect-AzAccount" -ForegroundColor Red
 }
-
-Write-Host "If you need to use the Azure AD functions, you must login with Connect-AzureAD" -ForegroundColor Red
 Write-Host ""
+Write-Host "If you need to use the Azure AD functions, you must login with Connect-AzureAD" -ForegroundColor Red
 Write-Host "Please set your default subscription with 'Set-Subscription -Id {id} if you have multiple subscriptions." -ForegroundColor Yellow
 
 function Set-Subscription
