@@ -3,7 +3,6 @@
 ### For a list of functions, their usage, and more, check out https://powerzure.readthedocs.io
 
 
-
 ## What is PowerZure?
 
 PowerZure is a PowerShell project created to assess and exploit resources within
