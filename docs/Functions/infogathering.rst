@@ -309,9 +309,12 @@ Gets the members of a role or all roles. -All will only return roles that have u
 
 -Role
 
+
 Name of role
 
+
 -All
+
 
 Get all roles
 
@@ -391,6 +394,7 @@ Recursively goes through a storage account (or multiple) and lists the available
 
 -All
 
+
 -StorageAccountName
 
 **Output**
@@ -435,7 +439,9 @@ Recursively goes through a key vault and lists what is within the vault (secret,
 
 -VaultName
 
+
 Name of vault
+
 
 -All
 
@@ -479,6 +485,7 @@ Lists the available SQL DBs, the server they're on, and what the Administrator u
 **Parameters** 
 
 -Server
+
 
 Name of the SQL Server
 
