@@ -163,8 +163,6 @@ Uses Graph API call to gather a group, the group's ID, the member's name, and th
 
 **Parameters** 
 
--Username
-
 -All
 
 Switch; Gathers all group's members
@@ -261,9 +259,12 @@ Due to mismatch in documentation, role names my not be 100% accurate to what the
 
 -All
 
+
 List all role's members
 
+
 -Role 
+
 
 The role ID or role name of the target role
 

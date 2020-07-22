@@ -32,6 +32,7 @@ Lists the functions available in the script.
 -h
 
 Help
+
 **Output**
 
 List of functions in this script

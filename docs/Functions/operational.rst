@@ -215,9 +215,12 @@ is configured with a "RunAs" account
 
 ::
 
-  Execute-CommandRunbook -AutomationAccount [AA Name] -ResourceGroup [RGName] -VM [VM Name] -Command [Command]
+  Invoke-AzureCommandRunbook -AutomationAccount [Automation Account name] -VMName [VM Name] -Command [command]
 
+::
 
+  Invoke-AzureCommandRunbook -AutomationAccount [Automation Account name] -VMName [VM Name] -Script [Path to script]
+  
 **Description**
 
 
@@ -229,8 +232,7 @@ correct  over the VM.
 
 ::
 
-  Invoke-AzureCommandRunbook -AutomationAccount TestAccount -ResourceGroup TestRG -VMName Win10Test -Command whoami
-
+  Invoke-AzureCommandRunbook -AutomationAccount TestAccount -VMName Win10Test -Command whoami
 
 ::
 
@@ -247,12 +249,12 @@ Automation Account name
 
 VM name
 
--Command (optional)
+-Command
 
 Command to be run against the VM. Choose this or -Script if executing an
 entire script
 
--Script (optional)
+-Script
 
 Run an entire script instead of just one command.
 
@@ -302,10 +304,10 @@ Desired password for the account
 **Output**
 
 
-URI if successful,  error if failure
+Success message if successful,  error if failure
 
 
-Get-RunAsCertificate
+Get-AzureRunAsCertificate
 --------------------
 
 **Synopsis**
@@ -487,8 +489,6 @@ UPN of the user
 
 AAD Group name
 
-.. _**Output**-31:
-
 **Output**
 
 
@@ -497,14 +497,11 @@ User added to group
 Set-AzureUserPassword
 ------------
 
-.. _**Synopsis**-32:
-
 **Synopsis**
 
 
 Sets a user's password
 
-.. _**Syntax**-32:
 
 **Syntax**
 
@@ -512,14 +509,11 @@ Sets a user's password
 
   Set-AzureUserPassword -Username [UPN] -Password [new password]
 
-.. _**Description**-32:
-
 **Description**
 
 
 Sets a user’s password. 
 
-.. _**Examples**-32:
 
 **Examples**
 
@@ -527,7 +521,7 @@ Sets a user’s password.
 
   Set-AzureUserPassword -Username john@contoso.com -Password newpassw0rd1
 
-.. _**Parameters**-32:
+
 
 **Parameters** 
 
@@ -540,7 +534,7 @@ New password for user
 
 Name of user
 
-.. _**Output**-32:
+
 
 **Output**
 
@@ -551,14 +545,14 @@ Password successfully set
 New-AzureUser
 ------------
 
-.. _**Synopsis**-32:
+
 
 **Synopsis**
 
 
 Creates a user in Azure Active Directory
 
-.. _**Syntax**-32:
+
 
 **Syntax**
 
@@ -566,13 +560,13 @@ Creates a user in Azure Active Directory
 
    New-AzureUser -Username [User Principal Name] -Password [Password]
 
-.. _**Description**-32:
+
 
 **Description**
 
-Creates a user in Azure Active Directory. Requires AAD PS Module.
+Creates a user in Azure Active Directory
 
-.. _**Examples**-32:
+
 
 **Examples**
 
@@ -580,7 +574,6 @@ Creates a user in Azure Active Directory. Requires AAD PS Module.
 
    New-AzureUser -Username 'test@test.com' -Password Password1234
 
-.. _**Parameters**-32:
 
 **Parameters** 
 
@@ -593,7 +586,7 @@ Name of user including domain
 
 New password for the user
 
-.. _**Output**-32:
+
 
 **Output**
 
@@ -604,7 +597,7 @@ User is created
 Add-AzureSPSecret
 ------------
 
-.. _**Synopsis**-32:
+
 
 **Synopsis**
 
@@ -612,7 +605,6 @@ Add-AzureSPSecret
 Adds a secret to a service principal
 
 
-.. _**Syntax**-32:
 
 **Syntax**
 
@@ -620,13 +612,12 @@ Adds a secret to a service principal
 
   Add-AzureSPSecret -ApplicationName [ApplicationName name] -Password [new secret]
 
-.. _**Description**-32:
 
 **Description**
 
 Adds a secret to a service principal so you can login as that service principal.
 
-.. _**Examples**-32:
+
 
 **Examples**
 
@@ -634,17 +625,21 @@ Adds a secret to a service principal so you can login as that service principal.
 
    Add-AzureSPSecret -ApplicationName "MyTestApp" -Password password123
 
-.. _**Parameters**-32:
+
 
 **Parameters** 
 
 -ApplicationName
+
+
 Name of the Service Principal or application that is using the Service principal
 
+
 -Password 
+
+
 New password "secret" for the Service Principal.
 
-.. _**Output**-32:
 
 **Output**
 
@@ -654,7 +649,7 @@ Connection string to login as new user if successful
 Set-AzureElevatedPrivileges
 ------------
 
-.. _**Synopsis**-32:
+
 
 **Synopsis**
 
@@ -662,7 +657,7 @@ Set-AzureElevatedPrivileges
 Elevates the user's privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
 
 
-.. _**Syntax**-32:
+
 
 **Syntax**
 
@@ -670,14 +665,14 @@ Elevates the user's privileges from Global Administrator in AzureAD to include U
 
    Set-AzureElevatedPrivileges
 
-.. _**Description**-32:
+
 
 **Description**
 
 
-This works by making a Graph API call. You must be logged in as a user with Global Administator role assigned. You cannot elevate if you are a service principal; It's just not possible due to API limitiations.
+This works by making a Graph API call. You must be logged in as a user with Global Administator role assigned. You cannot elevate if you are a service principal due to API limitiations.
 
-.. _**Examples**-32:
+
 
 **Examples**
 
@@ -685,13 +680,13 @@ This works by making a Graph API call. You must be logged in as a user with Glob
 
    Set-AzureElevatedPrivileges
 
-.. _**Parameters**-32:
+
 
 **Parameters** 
 
 None
 
-.. _**Output**-32:
+
 
 **Output**
 
@@ -700,13 +695,13 @@ No Error message if successful
 Add-AzureSPSecret
 ------------
 
-.. _**Synopsis**-32:
+
 
 **Synopsis**
 
 Adds a secret to a service principal
 
-.. _**Syntax**-32:
+
 
 **Syntax**
 
@@ -714,14 +709,14 @@ Adds a secret to a service principal
 
    Add-AzureSPSecret -ApplicationName [Name of application] -Password [Password]
 
-.. _**Description**-32:
+
 
 **Description**
 
 
 Adds a secret to a service principal so a known password is set and can then be used to login as that principal.
 
-.. _**Examples**-32:
+
 
 **Examples**
 
@@ -729,17 +724,22 @@ Adds a secret to a service principal so a known password is set and can then be 
 
    Add-AzureSPSecret -ApplicationName "ApplicationName" -Password password123
 
-.. _**Parameters**-32:
+
 
 **Parameters** 
 
+
 -ApplicationName
+
+
 Name of application the Service Principal is tied to
 
+
 -Password
+
 Desired password/secret
 
-.. _**Output**-32:
+
 
 **Output**
 
@@ -748,60 +748,49 @@ No Error message if successful
 Get-AzureKeyVaultContent
 ------------
 
-.. _**Synopsis**-32:
 
 **Synopsis**
 
 Get the secrets and certificates from a specific Key Vault or all of them
 
-.. _**Syntax**-32:
+
 
 **Syntax**
 
 ::
 
-   Get-AzureKeyVaultContent -Name [Name of vault]
+   Get-AzureKeyVaultContent -VaultName [Name of vault]
 
-.. _**Description**-32:
+
 
 **Description**
 
 Searches for all available key vaults and modifies the access policy to allow downloading of the contents in the vault. Then gets the secrets and certificates from the vault. This will display the contents of any certificates. To export a key or certificate, use Export-AzureKeyVaultContent
 
-.. _**Examples**-32:
+
 
 **Examples**
 
 ::
 
-   Get-AzureKeyVaultContent -Name VaultName
+   Get-AzureKeyVaultContent -VaultName VaultName
 
-.. _**Parameters**-32:
+
 
 **Parameters** 
 
+
 -VaultName
+
+
 Key Vault Name
 
--Password
-
-New password for user
-
--Username
-
-Name of user
-
-.. _required-modules-34:
-
-**Required Modules**
-
-
-Azure CLI
 
 -All 
+
+
 All Key Vaults
 
-.. _**Output**-32:
 
 **Output**
 
@@ -810,13 +799,13 @@ Contents of the key vault contents
 Export-AzureKeyVaultContent
 ------------
 
-.. _**Synopsis**-32:
+
 
 **Synopsis**
 
 Exports a Key as PEM or Certificate as PFX from the Key Vault
 
-.. _**Syntax**-32:
+
 
 **Syntax**
 
@@ -824,13 +813,13 @@ Exports a Key as PEM or Certificate as PFX from the Key Vault
 
    Export-AzureKeyVaultContent -VaultName [Vault Name] -Type [Key or Certificate] -Name [Name of Key or Cert] -OutFilePath  [Full path of where to export]
 
-.. _**Description**-32:
+
 
 **Description**
 
 Searches for all available key vaults and modifies the access policy to allow downloading of the contents in the vault. Exports a Key as PEM or Certificate as PFX from the Key Vault
 
-.. _**Examples**-32:
+
 
 **Examples**
 
@@ -838,26 +827,38 @@ Searches for all available key vaults and modifies the access policy to allow do
 
    Export-AzureKeyVaultContent -VaultName VaultTest -Type Key -Name Testkey1234 -OutFilePath C:\Temp
 
-.. _**Parameters**-32:
+
 
 **Parameters** 
 
 -VaultName
+
+
 Key Vault Name
 
+
 -All 
+
+
 All Key Vaults
 
+
 -Type
+
 Key or Certificate
 
+
 -Name 
+
+
 Name of Key or Certificate that is being extracted
 
+
 -OutFilePath
+
 Where to extract the key or certificate
 
-.. _**Output**-32:
+
 
 **Output**
 
@@ -866,13 +867,13 @@ Successful export
 Get-AzureStorageContent
 ------------
 
-.. _**Synopsis**-32:
+
 
 **Synopsis**
 
 Gathers a file from a specific blob or File Share
 
-.. _**Syntax**-32:
+
 
 **Syntax**
 
@@ -880,13 +881,13 @@ Gathers a file from a specific blob or File Share
 
    Get-AzureStorageContent -StorageAccountName TestAcct -Type Container 
 
-.. _**Description**-32:
+
 
 **Description**
 
 Gathers a file from a specific blob or File Share
 
-.. _**Examples**-32:
+
 
 **Examples**
 
@@ -898,29 +899,41 @@ Gathers a file from a specific blob or File Share
 
    Get-AzureStorageContent -StorageAccountName TestAcct -Type Container 
    
-.. _**Parameters**-32:
+
 
 **Parameters** 
 
 -Share
+
+
 Name of the share the file is located in 
 
+
 -Path 
+
+
 Path of the file in the target share
 
 -Blob 
+
+
 Name of the blob the file is located in 
 
 -StorageAccountName
+
 Name of a specific account
 
 -ResourceGroup
+
+
 The RG the Storage account is located in
 
 -ContainerName 
+
+
 Name of the Container the file is located in
 
-.. _**Output**-32:
+
 
 **Output**
 
@@ -929,13 +942,11 @@ Display of contents
 Get-AzureStorageContent
 ------------
 
-.. _**Synopsis**-32:
 
 **Synopsis**
 
 Generates a link to download a Virtual Machiche's disk. The link is only available for 24 hours.
 
-.. _**Syntax**-32:
 
 **Syntax**
 
@@ -943,13 +954,11 @@ Generates a link to download a Virtual Machiche's disk. The link is only availab
 
   Get-AzureVMDisk -DiskName [Name of Disk]    
 
-.. _**Description**-32:
 
 **Description**
 
 The VM must be turned off/disk not in use. While the link is active, the VM cannot be turned on.
 
-.. _**Examples**-32:
 
 **Examples**
 
@@ -957,15 +966,13 @@ The VM must be turned off/disk not in use. While the link is active, the VM cann
 
   Get-AzureVMDisk -DiskName AzureWin10_OsDisk_1_c2c7da5a0838404c84a70d6ec097ebf5     
 
-   
-.. _**Parameters**-32:
 
 **Parameters** 
 
 -DiskName
-Name of the disk
 
-.. _**Output**-32:
+
+Name of the disk
 
 **Output**
 
@@ -974,13 +981,12 @@ Link to download the disk
 Get-AzureRunbookContent
 ------------
 
-.. _**Synopsis**-32:
 
 **Synopsis**
 
 Gets a specific Runbook and displays its contents or all runbook contents
 
-.. _**Syntax**-32:
+
 
 **Syntax**
 
@@ -988,13 +994,13 @@ Gets a specific Runbook and displays its contents or all runbook contents
 
   Get-AzureRunbookContent -Runbook [Name of Runbook] -OutFilePath [Path of where to export runbooks]
 
-.. _**Description**-32:
+
 
 **Description**
 
 Gets a specific Runbook and displays its contents or all runbook contents
 
-.. _**Examples**-32:
+
 
 **Examples**
 
@@ -1006,19 +1012,25 @@ Gets a specific Runbook and displays its contents or all runbook contents
 
   Get-AzureRunbookContent -All -OutFilePath 'C:\temp 
   
-.. _**Parameters**-32:
+
 
 **Parameters** 
 
 -Runbook 
+
+
 Name of Runbook
+
 
 -All 
 
+
 -OutFilePath 
+
+
 Where to save Runbook
 
-.. _**Output**-32:
+
 
 **Output**
 
