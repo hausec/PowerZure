@@ -7,7 +7,7 @@ The `Azure PowerShell Az <https://docs.microsoft.com/en-us/powershell/azure/?vie
 Az PowerShell is the successor to the AzureRM module uses the Graph API.
 
 
-PowerZure requires an Administrative PowerShell (at least 5.0) session and the `Az PowerShell` <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__ module.
+PowerZure requires an Administrative PowerShell (at least 5.0) session and the `Az PowerShell <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__  module.
 
 The Azure "Az" PowerShell module is the only module used in PowerZure, as it is the most current module for Azure. The Az module interacts using the Azure REST API.
 
