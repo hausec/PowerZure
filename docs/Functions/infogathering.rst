@@ -1,216 +1,6 @@
 Information Gathering
 =====================
 
-Get-AzureTargets
------------
-
-**Synopsis**
-
-
-Compares your role to your scope to determine what you have access to
-and what kind of access it is (Read/write/execute).
-
-**Syntax**
-
-::
-
-  Get-AzureTargets
-
-**Description**
-
-
-Looks at the current signed-in user’s roles, then looks at the role
-definitions and scope of that role. Role definitions are then compared
-to the scope of the role to determine which resources under that scope
-the role definitions are actionable against.
-
-**Examples**
-
-::
-
-  Get-AzureTargets
-
-**Parameters**
-
-
-None
-
-**Output**
-
-
-List of resources with what type of access the current user has access
-to.
-
-Show-AzureCurrentUser
----------------
-
-**Synopsis**
-
-
-Returns the current logged in user name and any owned objects
-
-
-**Syntax**
-
-
-::
-
-  Show-AzureCurrentUser
-
-**Description**
-
-
-Looks at the current logged in username and compares that to the role
-assignment list to determine what objects/resources the user has
-ownership over.
-
-**Examples**
-
-::
-
-  Show-AzureCurrentUser
-
-
-**Parameters** 
-
-None
-
-**Output**
-
-
-Current username and roles of the logged in User
-
-
-Get-AzureUser
-------------
-
-
-**Synopsis**
-
-Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
-
-**Syntax**
-
-::
-
-  Get-AzureUser -Username [Usename]
-  
-::
-
-  Get-AzureUser -All
-
-**Description**
-
-Gathers a user's Azure role by calling Get-AzRoleAssignment, then uses Graph API calls to gather their Azure AD roles. Uses Graph API call to gather assigned groups.
-
-**Examples**
-
-::
-
-  Get-AzureUser -Username john@contoso.com
-
-::
-
-  Get-AzureUser -All
-
-**Parameters** 
-
--All
-
-Switch; Gathers all users in AzureAD.
-
--Username 
-
-Full user principal name of the target user in format: name@domain.com
-
-**Output**
-
-User ID, their AAD roles, their RBAC roles, and the scope of those roles
-
-
-Get-AzureGroup
--------------
-
-**Synopsis**
-
-
-Gathers a specific group or all groups in AzureAD and lists their members. 
-
-**Syntax**
-
-::
-
-  Get-AzureGroup -Group '[Name of Group]'
-  
-::
-
-  Get-AzureGroup -All
-
-**Description**
-
-Uses Graph API call to gather a group, the group's ID, the member's name, and the member's ID.
-
-**Examples**
-  
-::
-
-  Get-AzureGroup -Group 'Sql Admins'
-
-
-::
-
-  Get-AzureGroup -All 
-
-**Parameters** 
-
--All
-
-Switch; Gathers all group's members
-
-
--Group
-
-Name of group to collect
-
-
-**Output**
-
-Group members and their IDs
-
-
-Get-AzureAppOwners
---------
-
-**Synopsis**
-
-
-Returns all owners of all Applications in AAD
-
-**Syntax**
-
-::
-
-  Get-AzureAppOwners
-
-**Description**
-
-Recursively looks through each application in AAD and lists the owners
-
-**Examples**
-
-::
-
-  Get-AzureAppOwners
-
-**Parameters** 
-
-None
-
-**Output**
-
-Application owners in AAD
-
-
 Get-AzureADRole
 ------------------
 
@@ -272,6 +62,86 @@ The role ID or role name of the target role
 
 All members of all roles, their IDs, and any Application Service Principal members.
 
+Get-AzureAppOwners
+--------
+
+**Synopsis**
+
+
+Returns all owners of all Applications in AAD
+
+**Syntax**
+
+::
+
+  Get-AzureAppOwners
+
+**Description**
+
+Recursively looks through each application in AAD and lists the owners
+
+**Examples**
+
+::
+
+  Get-AzureAppOwners
+
+**Parameters** 
+
+None
+
+**Output**
+
+Application owners in AAD
+
+Get-AzureGroup
+-------------
+
+**Synopsis**
+
+
+Gathers a specific group or all groups in AzureAD and lists their members. 
+
+**Syntax**
+
+::
+
+  Get-AzureGroup -Group '[Name of Group]'
+  
+::
+
+  Get-AzureGroup -All
+
+**Description**
+
+Uses Graph API call to gather a group, the group's ID, the member's name, and the member's ID.
+
+**Examples**
+  
+::
+
+  Get-AzureGroup -Group 'Sql Admins'
+
+
+::
+
+  Get-AzureGroup -All 
+
+**Parameters** 
+
+-All
+
+Switch; Gathers all group's members
+
+
+-Group
+
+Name of group to collect
+
+
+**Output**
+
+Group members and their IDs
 
 Get-AzureRole
 ---------------
@@ -324,7 +194,6 @@ Get all roles
 
 Members of specified role, their Ids, and the scope.
 
-
 Get-AzureRunAsAccounts
 ------------------
 
@@ -357,51 +226,192 @@ None
 
 List of RunAsAccounts and their details
 
-
-Show-AzureStorageContent
+Get-AzureRolePermission
 -------------
 
 **Synopsis**
 
-
-Lists all available storage containers, shares, and tables
-
+Finds all roles with a certain permission
 
 **Syntax**
 
 ::
 
-  Show-AzureStorageContent -All
+  Get-AzureRolePermission -Permission [role definition]
+  
+**Description**
+
+Finds all builtin roles with a certain permission
+
+**Output**
+
+Role(s) with the supplied definition present
+
+Get-AzureSQLDB
+-------------
+
+**Synopsis**
+
+
+Lists the available SQL Databases on a server
+
+**Syntax**
+
+::
+
+  Get-AzureSQLDB -All
   
 ::
 
-  Show-AzureStorageContent -StorageAccountName [Name of Storage Account]
+  Get-AzureSQLDB -Server [Name of server]
 
 **Description**
 
-Recursively goes through a storage account (or multiple) and lists the available containers + blobs, File Shares, and tables.
+Lists the available SQL DBs, the server they're on, and what the Administrator username is
 
 **Examples**
 
 ::
 
-  Show-AzureStorageContent -StorageAccountName TestAcct
+  Get-AzureSQLDB -All
 
 ::
 
-  Show-AzureStorageContent -All
+  Get-AzureSQLDB -Server 'SQLServer01'
+
+**Parameters** 
+
+-Server
+
+
+Name of the SQL Server
+
+**Output**
+
+Get-AzureTargets
+-----------
+
+**Synopsis**
+
+
+Compares your role to your scope to determine what you have access to
+and what kind of access it is (Read/write/execute).
+
+**Syntax**
+
+::
+
+  Get-AzureTargets
+
+**Description**
+
+
+Looks at the current signed-in user’s roles, then looks at the role
+definitions and scope of that role. Role definitions are then compared
+to the scope of the role to determine which resources under that scope
+the role definitions are actionable against.
+
+**Examples**
+
+::
+
+  Get-AzureTargets
+
+**Parameters**
+
+
+None
+
+**Output**
+
+
+List of resources with what type of access the current user has access
+to.
+
+Get-AzureUser
+------------
+
+
+**Synopsis**
+
+Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
+
+**Syntax**
+
+::
+
+  Get-AzureUser -Username [Usename]
   
+::
+
+  Get-AzureUser -All
+
+**Description**
+
+Gathers a user's Azure role by calling Get-AzRoleAssignment, then uses Graph API calls to gather their Azure AD roles. Uses Graph API call to gather assigned groups.
+
+**Examples**
+
+::
+
+  Get-AzureUser -Username john@contoso.com
+
+::
+
+  Get-AzureUser -All
+
 **Parameters** 
 
 -All
 
+Switch; Gathers all users in AzureAD.
 
--StorageAccountName
+-Username 
+
+Full user principal name of the target user in format: name@domain.com
 
 **Output**
 
-List of contents 
+User ID, their AAD roles, their RBAC roles, and the scope of those roles
 
+Show-AzureCurrentUser
+---------------
+
+**Synopsis**
+
+
+Returns the current logged in user name and any owned objects
+
+
+**Syntax**
+
+
+::
+
+  Show-AzureCurrentUser
+
+**Description**
+
+
+Looks at the current logged in username and compares that to the role
+assignment list to determine what objects/resources the user has
+ownership over.
+
+**Examples**
+
+::
+
+  Show-AzureCurrentUser
+
+
+**Parameters** 
+
+None
+
+**Output**
+
+
+Current username and roles of the logged in User
 
 Show-AzureKeyVaultContent
 -------------
@@ -450,66 +460,46 @@ Name of vault
 
 Vault contents
 
-
-Get-AzureSQLDB
+Show-AzureStorageContent
 -------------
 
 **Synopsis**
 
 
-Lists the available SQL Databases on a server
+Lists all available storage containers, shares, and tables
+
 
 **Syntax**
 
 ::
 
-  Get-AzureSQLDB -All
+  Show-AzureStorageContent -All
   
 ::
 
-  Get-AzureSQLDB -Server [Name of server]
+  Show-AzureStorageContent -StorageAccountName [Name of Storage Account]
 
 **Description**
 
-Lists the available SQL DBs, the server they're on, and what the Administrator username is
+Recursively goes through a storage account (or multiple) and lists the available containers + blobs, File Shares, and tables.
 
 **Examples**
 
 ::
 
-  Get-AzureSQLDB -All
+  Show-AzureStorageContent -StorageAccountName TestAcct
 
 ::
 
-  Get-AzureSQLDB -Server 'SQLServer01'
-
+  Show-AzureStorageContent -All
+  
 **Parameters** 
 
--Server
+-All
 
 
-Name of the SQL Server
-
-**Output**
-
-Get-AzureRolePermission
--------------
-
-**Synopsis**
-
-Finds all roles with a certain permission
-
-**Syntax**
-
-::
-
-  Get-AzureRolePermission -Permission [role definition]
-  
-**Description**
-
-Finds all builtin roles with a certain permission
+-StorageAccountName
 
 **Output**
 
-All members of all roles
-
+List of contents 
