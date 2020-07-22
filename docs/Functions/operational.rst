@@ -4,14 +4,10 @@ Operational
 Set-AzureSubscription
 ----------------
 
-.. _**Synopsis**-45:
-
 **Synopsis**
 
 Sets default subscription. Necessary if in a tenant with multiple
 subscriptions.
-
-.. _**Syntax**-45:
 
 **Syntax**
 
@@ -19,13 +15,9 @@ subscriptions.
 
   Set-AzureSubscription -Id [Subscription ID]
 
-.. _**Description**-45:
-
 **Description**
 
 Sets the default subscription
-
-.. _**Examples**-45:
 
 **Examples**
 
@@ -33,15 +25,11 @@ Sets the default subscription
 
   Set-AzureSubscription -Id b049c906-7000-4899-b644-f3eb835f04d0
 
-.. _**Parameters**-45:
-
 **Parameters** 
 
 -Id
 
 Subscription ID
-
-.. _**Output**-45:
 
 **Output**
 
@@ -51,16 +39,10 @@ Success message
 Invoke-AzureRunCommand
 ---------------
 
-
-.. _**Synopsis**-21:
-
 **Synopsis**
 
 
 Will run a command or script on a specified VM
-
-
-.. _**Syntax**-21:
 
 **Syntax**
 
@@ -73,18 +55,10 @@ Will run a command or script on a specified VM
 
   Invoke-AzureRunCommand -VMName [VM Name] -Script [Full Path To Script]  
 
-.. _**Description**-21:
-
 **Description**
 
 
-Executes a command on a virtual machine in Azure using 
-
-::
-
-  Invoke-AzVMRunCommand
-
-.. _**Examples**-21:
+Executes a command on a virtual machine in Azure using Invoke-AzVMRunCommand
 
 **Examples**
 
@@ -96,8 +70,6 @@ Executes a command on a virtual machine in Azure using
 ::
 
   Invoke-AzureRunCommand -VMName AzureWin10 -Script 'C:\temp\test.ps1'
-
-.. _**Parameters**-21:
 
 **Parameters** 
 
@@ -114,8 +86,6 @@ The command to be executed
 
 The path to the script to execute
 
-.. _**Output**-21:
-
 **Output**
 
 
@@ -125,7 +95,6 @@ Output of command being run or a failure message if failed
 Invoke-AzureRunMSBuild
 ---------------
 
-.. _**Synopsis**-22:
 
 **Synopsis**
 
@@ -134,7 +103,6 @@ Will run a supplied MSBuild payload on a specified VM. By default, Azure
 VMs have .NET 4.0 installed. Requires Contributor Role. Will run as
 SYSTEM.
 
-.. _**Syntax**-22:
 
 **Syntax**
 
@@ -142,7 +110,7 @@ SYSTEM.
 
   Invoke-AzureRunMSBuild -VMName [Virtual Machine name] -File [C:/path/to/payload/onyourmachine.xml]
 
-.. _**Description**-22:
+
 
 **Description**
 
@@ -154,7 +122,7 @@ msbuild.exe with
 
   Invoke-AzVMRunCommand
 
-.. _**Examples**-22:
+
 
 **Examples**
 
@@ -164,7 +132,6 @@ msbuild.exe with
 
   Invoke-AzureRunMSBuildd -VMName AzureWin10 -File 'C:\temp\build.xml'
 
-.. _**Parameters**-22:
 
 **Parameters** 
 
@@ -181,7 +148,6 @@ Name of the virtual machine to execute the command on
 
 Path location of build.xml file
 
-.. _**Output**-22:
 
 **Output**
 
@@ -192,14 +158,12 @@ message if upload failed.
 Invoke-AzureRunProgram
 ---------------
 
-.. _**Synopsis**-23:
 
 **Synopsis**
 
 
 Will run a given binary on a specified VM
 
-.. _**Syntax**-23:
 
 **Syntax**
 
@@ -207,22 +171,11 @@ Will run a given binary on a specified VM
 
   Invoke-AzureRunProgram  -VMName [Virtual Machine name] -File [C:/path/to/payload.exe]
 
-.. _**Description**-23:
 
 **Description**
 
 
-Takes a supplied binary, base64 encodes the byte stream to a file,
-uploads that file to the VM, then runs a command via
- 
-::
-
-  Invoke-AzVMRunCommand
-
-to decode the base64 byte stream to a .exe file, then executes
-the binary.
-
-.. _**Examples**-23:
+Takes a supplied binary, base64 encodes the byte stream to a file, uploads that file to the VM, then runs a command via Invoke-AzVMRunCommand to decode the base64 byte stream to a .exe file, then executes the binary.
 
 **Examples**
 
@@ -231,7 +184,6 @@ the binary.
 
 	Invoke-AzureRunProgram -VMName AzureWin10 -File C:\tempbeacon.exe
 
-.. _**Parameters**-23:
 
 **Parameters** 
 
@@ -243,7 +195,6 @@ Name of the virtual machine to execute the command on
 
 Location of executable binary
 
-.. _**Output**-23:
 
 **Output**
 
@@ -255,14 +206,10 @@ to stdout.
 Invoke-AzureCommandRunbook
 ----------------------
 
-.. _**Synopsis**-26:
-
 **Synopsis**
 
 Will execute a supplied command or script from a Runbook if the Runbook
 is configured with a "RunAs" account
-
-.. _**Syntax**-26:
 
 **Syntax**
 
@@ -270,7 +217,6 @@ is configured with a "RunAs" account
 
   Execute-CommandRunbook -AutomationAccount [AA Name] -ResourceGroup [RGName] -VM [VM Name] -Command [Command]
 
-.. _**Description**-26:
 
 **Description**
 
@@ -278,8 +224,6 @@ is configured with a "RunAs" account
 If an Automation Account is utilizing a ‘Runas’ account, this allows you
 to run commands against a virtual machine if that RunAs account has the
 correct  over the VM.
-
-.. _**Examples**-26:
 
 **Examples**
 
@@ -291,8 +235,6 @@ correct  over the VM.
 ::
 
   Invoke-AzureCommandRunbook -AutomationAccount TestAccount -VMName Win10Test -Script "C:temptest.ps1"
-
-.. _**Parameters**-26:
 
 **Parameters** 
 
@@ -314,8 +256,6 @@ entire script
 
 Run an entire script instead of just one command.
 
-.. _**Output**-26:
-
 **Output**
 
 Output of command if successfully ran.
@@ -324,14 +264,10 @@ Output of command if successfully ran.
 Create-AzureBackdoor
 ---------------
 
-.. _**Synopsis**-24:
-
 **Synopsis**
 
 
 Creates a backdoor in Azure via Service Principal
-
-.. _**Syntax**-24:
 
 **Syntax**
 
@@ -340,14 +276,10 @@ Creates a backdoor in Azure via Service Principal
 
   Create-AzureBackdoor -Username [Username] -Password [Password] 
 
-.. _**Description**-24:
-
 **Description**
 
 
 Will create a new Service Principal in Azure and assign it to the Global Administrator/Company Administrator role in AzureAD. This can then be logged into and escalated to User Administrator in Azure RBAC with Set-AzureElevatedPrivileges
-
-.. _**Examples**-24:
 
 **Examples**
 
@@ -355,8 +287,6 @@ Will create a new Service Principal in Azure and assign it to the Global Adminis
 
   Create-AzureBackdoor -Username 'testserviceprincipal' -Password 'Password!'
 
-
-.. _**Parameters**-24:
 
 **Parameters** 
 
@@ -369,8 +299,6 @@ Desired name of the Service Principal
 
 Desired password for the account
 
-.. _**Output**-24:
-
 **Output**
 
 
@@ -380,14 +308,11 @@ URI if successful,  error if failure
 Get-RunAsCertificate
 --------------------
 
-.. _**Synopsis**-18:
-
 **Synopsis**
 
 
 Will gather a RunAs accounts certificate if one is being used by an automation account, which can then be used to login as that account. By default, RunAs accounts are contributors over the subscription. This function does take a minute to run.
 
-.. _**Syntax**-18:
 
 **Syntax**
 
@@ -395,13 +320,11 @@ Will gather a RunAs accounts certificate if one is being used by an automation a
 
   Get-AzureRunAsCertificate  -AutomationAccount [AA Name]
 
-.. _**Description**-18:
 
 **Description**
 
 Creates a Runbook for the RunAs account to run, which will gather the RunAs Account's certificate and write it to the job output as base64. The function then grabs the job output, decodes the base64 certificate into a .pfx certificate, and automatically imports it. The function then spits out a one-liner that can be copy+pasted to login as the RunAs account.
 
-.. _**Examples**-18:
 
 **Examples**
 
@@ -409,7 +332,7 @@ Creates a Runbook for the RunAs account to run, which will gather the RunAs Acco
 
   Get-AzureRunAsCertificate -AutomationAccount TestAccount
 
-.. _**Parameters**-18:
+
 
 **Parameters**
 
@@ -417,7 +340,6 @@ Creates a Runbook for the RunAs account to run, which will gather the RunAs Acco
 
 The name of the Automation Account.
 
-.. _**Output**-18:
 
 **Output**
 
@@ -427,14 +349,13 @@ Connection string for the RunAs account
 Start-AzureRunbook
 -------------
 
-.. _**Synopsis**-29:
+
 
 **Synopsis**
 
 
 Starts a Runbook
 
-.. _**Syntax**-29:
 
 **Syntax**
 
@@ -442,14 +363,11 @@ Starts a Runbook
 
    Start-AzureRunbook -Account [Automation Account name] -Runbook [Runbook name] 
 
-.. _**Description**-29:
-
 **Description**
 
 
 Starts a specified Runbook
 
-.. _**Examples**-29:
 
 **Examples**
 
@@ -457,7 +375,6 @@ Starts a specified Runbook
 
    Start-AzureRunbook -Account AutoAccountTest -Runbook TestRunbook 
 
-.. _**Parameters**-29:
 
 **Parameters** 
 
@@ -469,8 +386,6 @@ Name of Automation Account the Runbook is in
 
 Name of runbook
 
-.. _**Output**-29:
-
 **Output**
 
 
@@ -479,13 +394,9 @@ Runbook Output
 Add-AzureADRole
 --------
 
-.. _**Synopsis**-30:
-
 **Synopsis**
 
 Assigns a specific Azure AD role to a User
-
-.. _**Syntax**-30:
 
 **Syntax**
 
@@ -498,14 +409,10 @@ Assigns a specific Azure AD role to a User
   Add-AzureADRole -UserId [UserId] -RoleId '[Role Id]'
   
 
-.. _**Description**-30:
-
 **Description**
 
 
 Assigns a specific Azure AD role to a User using either the role name or ID and username or user ID.
-
-.. _**Examples**-30:
 
 **Examples**
 
@@ -519,8 +426,6 @@ Assigns a specific Azure AD role to a User using either the role name or ID and 
 ::
 
   Add-AzureADRole -UserId 6eca6b85-7a3d-4fcf-b8da-c15a4380d286 -Role '4dda258a-4568-4579-abeb-07709e34e307'
-
-.. _**Parameters**-30:
 
 **Parameters** 
 
@@ -541,8 +446,6 @@ Role name (must be properly capitalized)
 
 ID of the role
 
-.. _**Output**-30:
-
 **Output**
 
 Role successfully applied
@@ -550,14 +453,10 @@ Role successfully applied
 Add-AzureADGroup 
 ---------
 
-.. _**Synopsis**-31:
-
 **Synopsis**
 
 
 Adds a user to an Azure AD Group
-
-.. _**Syntax**-31:
 
 **Syntax**
 
@@ -565,23 +464,17 @@ Adds a user to an Azure AD Group
 
   Add-AzureADGroup  -User [UPN] -Group [Group name]
 
-.. _**Description**-31:
-
 **Description**
 
 
 Adds a user to an AAD group. If the group name has spaces, put the group
 name in single quotes.
 
-.. _**Examples**-31:
-
 **Examples**
 
 ::
 
   Add-AzureADGroup  -User john@contoso.com -Group 'SQL Users' 
-
-.. _**Parameters**-31:
 
 **Parameters** 
 

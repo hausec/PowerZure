@@ -19,7 +19,7 @@ function PowerZure
 .PARAMETER 
     -h (Help)
 
-.EXAMPLE
+.EXAMPLE 
     PowerZure -h
 #>
     [CmdletBinding()]
@@ -302,7 +302,7 @@ function Set-AzureSubscription
 	Set-AzContext -SubscriptionId $Id
 }
 
-function Get-AzureADRoleMember
+function Get-AzureADRole
 {
 <# 
 .SYNOPSIS
@@ -311,9 +311,9 @@ function Get-AzureADRoleMember
 	-All (Lists all roles, even those without a user in them)
     -Role (Specific role)
 .EXAMPLE
-	Get-AzureADRoleMember -Role 'Company Administrator'
-    Get-AzureADRoleMember -Role '4dda258a-4568-4579-abeb-07709e34e307'
-	Get-AzureADRoleMember -All
+	Get-AzureADRole -Role 'Company Administrator'
+    Get-AzureADRole -Role '4dda258a-4568-4579-abeb-07709e34e307'
+	Get-AzureADRole -All
 #>
     [CmdletBinding()]
     Param(
@@ -499,7 +499,7 @@ function Get-AzureUser
     }
 }
 
-function Get-AzureGroupMember 
+function Get-AzureGroup 
 {
 <# 
 .SYNOPSIS
@@ -510,8 +510,8 @@ function Get-AzureGroupMember
 	-All (List all group members of all groups)
 
 .EXAMPLE
-	Get-AzureGroupMember -Group 'Sql Admins'
-	Get-AzureGroupMember -All 
+	Get-AzureGroup -Group 'Sql Admins'
+	Get-AzureGroup -All 
 #>
     [CmdletBinding()]
     Param(
@@ -589,6 +589,7 @@ function Add-AzureADRole
 
 .EXAMPLE
     Add-AzureADRole -Username test@test.com -Role 'Company Administrator'
+	Add-AzureADRole -UserId 6eca6b85-7a3d-4fcf-b8da-c15a4380d286 -Role '4dda258a-4568-4579-abeb-07709e34e307'
 #>
     [CmdletBinding()]
     Param(
@@ -1339,8 +1340,7 @@ function Create-AzureBackdoor
 
     Import-Module Az.Resources
     $Headers = Get-AzureGraphToken
-    $credentials = New-Object -TypeName Microsoft.Azure.Commands.ActiveDirectory.PSADPasswordCredential -Property @{
-    StartDate=Get-Date; EndDate=Get-Date -Year 2024; Password=$Password}
+    $credentials = New-Object -TypeName Microsoft.Azure.Commands.ActiveDirectory.PSADPasswordCredential -Property @{StartDate=Get-Date; EndDate=Get-Date -Year 2024; Password=$Password}
     $make = New-AzADServicePrincipal -DisplayName $Username -PasswordCredential $credentials
     $UserId = $make.Id
 	$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/4dda258a-4568-4579-abeb-07709e34e307/members/$ref'
@@ -1349,7 +1349,17 @@ $body = @"
 }
 "@
 	$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri | Convertto-Json
-
+	If($req)
+    {
+        $Context = Get-AzContext
+        $App = Get-AzADApplication -DisplayName $Username
+        $aid = $app.ApplicationId
+		Write-Host "Success! You can now login as the service principal using the following commands:" -ForegroundColor Green
+		Write-Host ""
+		Write-Host '$Credential = Get-Credential; Connect-AzAccount -Credential $Credential -Tenant '$Context.Tenant.Id' -ServicePrincipal' -ForegroundColor Yellow
+		Write-Host ""
+		Write-Host 'Be sure to use the Application ID as the username when prompted by Get-Credential. The application ID is: '$aid'' -ForegroundColor Red
+    }
 }
 
 function Get-AzureTargets
@@ -1661,7 +1671,7 @@ function Get-AzureRunAsCertificate
     -AutomationAccount
 
 .EXAMPLE
-    Get-AzureRunAsCertificate -ResourceGroup Test_RG -AutomationAccount TestAccount
+    Get-AzureRunAsCertificate -AutomationAccount TestAccount
 #>
 
 	[CmdletBinding()]
@@ -1932,4 +1942,66 @@ function Set-ElevatedPrivileges
 	{
 		Write-Host "Success! Re-login for permissions to take effect. You can now add yourself as an Owner to any resources in Azure!" -ForegroundColor Green
 	}
+}
+
+function Get-AzureRole
+{
+<# 
+.SYNOPSIS
+    Gets a role or all roles in Azure and their associated members.
+
+.PARAMETERS
+	-Role
+	-All
+	
+	
+.EXAMPLE
+	Get-AzureRole -All
+	Get-AzureRole -Role Contributor
+#>
+    [CmdletBinding()]
+    Param(
+	[Parameter(Mandatory=$false)][String]$Role = $null,
+	[Parameter(Mandatory=$false)][Switch]$All = $null)
+	
+	If($All)
+	{
+		$list = Get-AzRoleAssignment
+		$rolenames = $list.RoleDefinitionName | Sort-Object | Get-Unique
+		ForEach($rolename in $rolenames)
+		{
+
+            $definitions = Get-AzRoleDefinition -Name $rolename
+			$rolelist = Get-AzRoleAssignment -RoleDefinitionname $rolename
+			$obj = New-Object -TypeName psobject
+            $obj | Add-Member -MemberType NoteProperty -Name RoleName -Value $rolename 	
+            $obj | Add-Member -MemberType NoteProperty -Name RoleId -Value $definitions.Id 
+			$obj | Add-Member -MemberType NoteProperty -Name Username -Value $rolelist.SignInName
+			$obj | Add-Member -MemberType NoteProperty -Name UserId -Value $rolelist.ObjectId
+			$obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rolelist.Scope
+			$obj  		
+		}
+	}
+	
+	If($Role)
+	{
+        $definitions = Get-AzRoleDefinition -Name $role
+		$rolelist = Get-AzRoleAssignment -RoleDefinitionname $role
+		$obj = New-Object -TypeName psobject
+        $obj | Add-Member -MemberType NoteProperty -Name RoleName -Value $Role 	
+        $obj | Add-Member -MemberType NoteProperty -Name RoleId -Value $definitions.Id 
+		$obj | Add-Member -MemberType NoteProperty -Name Username -Value $rolelist.SignInName
+		$obj | Add-Member -MemberType NoteProperty -Name UserId -Value $rolelist.ObjectId
+		$obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rolelist.Scope
+		$obj  					
+	}
+	
+	If(!$Role -and !$All)
+	{
+	    Write-Host "Usage:" -ForegroundColor Red
+        Write-Host "Get-AzureRole -Role Contributor" -ForegroundColor Red
+        Write-Host "Get-AzureRole -All" -ForegroundColor Red
+	}
+	
+
 }
