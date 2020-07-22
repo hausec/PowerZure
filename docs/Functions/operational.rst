@@ -134,16 +134,9 @@ Will run a supplied MSBuild payload on a specified VM. By default, Azure
 VMs have .NET 4.0 installed. Requires Contributor Role. Will run as
 SYSTEM.
 
-
-
-
-
-
 .. _**Syntax**-22:
 
 **Syntax**
-
-
 
 ::
 
@@ -897,7 +890,6 @@ Searches for all available key vaults and modifies the access policy to allow do
 -VaultName
 Key Vault Name
 
-<<<<<<< Updated upstream
 -Password
 
 New password for user
@@ -913,10 +905,8 @@ Name of user
 
 Azure CLI
 
-=======
 -All 
 All Key Vaults
->>>>>>> Stashed changes
 
 .. _**Output**-32:
 
@@ -971,11 +961,8 @@ Key or Certificate
 -Name 
 Name of Key or Certificate that is being extracted
 
-<<<<<<< Updated upstream
-=======
 -OutFilePath
 Where to extract the key or certificate
->>>>>>> Stashed changes
 
 .. _**Output**-32:
 

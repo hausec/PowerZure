@@ -92,8 +92,6 @@ None
 
 Current username and roles of the logged in User
 
-<<<<<<< Updated upstream
-=======
 
 Get-AzureUser
 ------------
@@ -152,7 +150,7 @@ List of all users in AAD, optionally in a file.
 
 Get-AzureGroup
 -------------
->>>>>>> Stashed changes
+
 
 .. _**Synopsis**-5:
 
@@ -171,15 +169,8 @@ Gathers a specific group or all groups in AzureAD and lists their members.
   
 ::
 
-<<<<<<< Updated upstream
-  Get-User -Username Test@domain.com 
-
-::
-
-  Get-User -All
-=======
   Get-AzureGroup -All
->>>>>>> Stashed changes
+
 
 .. _**Description**-5:
 
@@ -193,15 +184,14 @@ Uses Graph API call to gather a group, the group's ID, the member's name, and th
 
 ::
 
-<<<<<<< Updated upstream
+
   Get-User -Username Test@domain.com
   
 ::
 
   Get-User -All
-=======
   Get-AzureGroup -Group 'Sql Admins'
->>>>>>> Stashed changes
+
 
 ::
 
@@ -211,43 +201,32 @@ Uses Graph API call to gather a group, the group's ID, the member's name, and th
 
 **Parameters** 
 
-<<<<<<< Updated upstream
+
 -Username
-=======
+
 -All
 Switch; Gathers all group's members
->>>>>>> Stashed changes
+
 
 -Group
 Name of group to collect
 
-<<<<<<< Updated upstream
+
 -All
 Gets all users
 
 
-.. _**Output**-4:
-=======
 .. _**Output**-5:
->>>>>>> Stashed changes
+
 
 **Output**
 
 Group members and their IDs
 
-<<<<<<< Updated upstream
-User's UPN, Object ID, On-premise distinguished name, and if the
-account is enabled. Also lists the roles the user has in Azure RBAC.
-
-
-
-Get-Groups
--------------
-=======
 
 Get-AzureAppOwners
 --------
->>>>>>> Stashed changes
+
 
 .. _**Synopsis**-7:
 
@@ -262,11 +241,8 @@ Returns all owners of all Applications in AAD
 
 ::
 
-<<<<<<< Updated upstream
-  Get-Groups
-=======
-  Get-AppOwners
->>>>>>> Stashed changes
+  Get-AzureAppOwners
+
 
 .. _**Description**-7:
 
@@ -278,19 +254,11 @@ Recursively looks through each application in AAD and lists the owners
 
 **Examples**
 
-<<<<<<< Updated upstream
 
-
-::
-
-  Get-Groups
-
-
-=======
 ::
 
   Get-AzureAppOwners
->>>>>>> Stashed changes
+
 
 .. _**Parameters**-7:
 
@@ -298,21 +266,12 @@ Recursively looks through each application in AAD and lists the owners
 
 
 None
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 
 .. _**Output**-7:
 
 **Output**
 
-
-<<<<<<< Updated upstream
-List of group names, IDs, onprem Domain name, onprem Account name, and onprem SID.
-=======
 Application owners in AAD
->>>>>>> Stashed changes
 
 
 Get-AzureADRoleMember
@@ -357,18 +316,13 @@ Due to mismatch in documentation, role names my not be 100% accurate to what the
 
   Get-AzureADRoleMember -All
 
-
-
 ::
 
   Get-AzureADRoleMember -Role '4dda258a-4568-4579-abeb-07709e34e307'
 
-
-
 ::
 
   Get-AzureADRoleMember -Role 'Company Administrator'
-
 
 .. _**Parameters**-10:
 
@@ -495,17 +449,9 @@ None
 
 List of Automation Accounts, the resource group name, and the connection type
 
-<<<<<<< Updated upstream
-Application owners in AAD
-
-
-
-Get-GroupMembers
-----------------
-=======
 Show-AzureStorageContent
 -------------
->>>>>>> Stashed changes
+
 
 .. _**Synopsis**-5:
 
@@ -550,33 +496,12 @@ Recursively goes through a storage account (or multiple) and lists the available
 **Parameters** 
 
 -All
-Switch; Gathers all group's members
-
--Group
-Name of group to collect
-
-<<<<<<< Updated upstream
-Group name
-
--OutFile
-
-Output file
-
-.. _required-modules-7:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-8:
-=======
-.. _**Output**-5:
->>>>>>> Stashed changes
+-StorageAccountName
 
 **Output**
 
-Group members and their IDs
+List of contents 
+
 
 Show-AzureKeyVaultContent
 -------------
@@ -595,7 +520,7 @@ Lists all available content in a key vault
 
 ::
 
-  Show-AzureStorageContent -All
+  Show-AzureKeyVaultContent -All
   
 ::
 
@@ -623,30 +548,17 @@ Recursively goes through a key vault and lists what is within the vault (secret,
 
 **Parameters** 
 
--All
-Switch; Gathers all group's members
 
-<<<<<<< Updated upstream
--OutFile
-
-Output filename/type
-
-.. _required-modules-8:
-
-**Required Modules**
-
-
-Azure CLI
-=======
 -VaultName
 Name of vault
->>>>>>> Stashed changes
+
+-All
 
 .. _**Output**-5:
 
 **Output**
 
-Name of vault contents
+vault contents
 
 Get-AzureSQLDB
 -------------
@@ -693,26 +605,12 @@ Lists the available SQL DBs, the server they're on, and what the Administrator u
 
 **Parameters** 
 
--All
-Switch; Gathers all group's members
-
-<<<<<<< Updated upstream
-  Get-AllRoleMembers -OutFile users.csv
-=======
 -Server
 Name of the SQL Server
 
 .. _**Output**-5:
->>>>>>> Stashed changes
 
 **Output**
-
-<<<<<<< Updated upstream
-  Get-AllRoleMembers -OutFile users.txt
-  
-=======
-Name of vault contents
->>>>>>> Stashed changes
 
 Get-AzureRolePermission
 -------------
@@ -723,11 +621,9 @@ Get-AzureRolePermission
 
 Finds all roles with a certain permission
 
-<<<<<<< Updated upstream
-Output filename/type
-=======
+
 .. _**Syntax**-5:
->>>>>>> Stashed changes
+
 
 **Syntax**
 
@@ -741,556 +637,9 @@ Output filename/type
 
 Finds all builtin roles with a certain permission
 
-<<<<<<< Updated upstream
+
 **Output**
 
 
 All members of all roles
 
-Get-RoleMembers
----------------
-
-.. _**Synopsis**-11:
-
-**Synopsis**
-
-
-Gets the members of a role.
-
-.. _**Syntax**-11:
-
-**Syntax**
-
-::
-
-  Get-RoleMembers -Role [Role name]
-
-.. _**Description**-11:
-
-**Description**
-
-
-Gets the members of a role. Capitalization matters (i.e. reader vs
-Reader <---correct)
-
-.. _**Examples**-11:
-
-**Examples**
-
-::
-
-  Get-RoleMembers -Role Reader
-
-.. _**Parameters**-11:
-
-**Parameters**
-
-
--Role
-
-Name of role. Needs to be properly capitalized
-
-.. _required-modules-10:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-11:
-
-**Output**
-
-
-Members of specified role.
-
-
-Get-ServicePrincipals
----------------------
-
-.. _**Synopsis**-13:
-
-**Synopsis**
-
-
-Returns all service principals
-
-.. _**Syntax**-13:
-
-**Syntax**
-
-
-
-::
-
-  Get-ServicePrincipals
-
-.. _**Description**-13:
-
-**Description**
-
-
-Returns all service principals in AAD.
-
-.. _**Examples**-13:
-
-**Examples**
-
-
-
-::
-
-  Get-ServicePrincipals
-
-.. _**Parameters**-13:
-
-**Parameters**
-
-
-None
-
-.. _required-modules-12:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-13:
-
-**Output**
-
-
-List of SPs in AAD
-
-Get-ServicePrincipal
---------------------
-
-
-.. _**Synopsis**-14:
-
-**Synopsis**
-
-
-Returns all info on a service principal
-
-.. _**Syntax**-14:
-
-**Syntax**
-
-
-
-::
-
-  Get-ServicePrincipal –id [SP ID]
-
-.. _**Description**-14:
-
-**Description**
-
-
-Returns all details on a service principal via the SP’s ID.
-
-.. _**Examples**-14:
-
-**Examples**
-
-
-
-::
-
-  Get-ServicePrincipal -id fdb54b57-a416-4115-8b21-81c73d2c2deb
-
-.. _**Parameters**-14:
-
-**Parameters** 
-
-
--id
-
-ID of the Service Principal
-
-.. _required-modules-13:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-14:
-
-**Output**
-
-
-Details of specified service principal
-
-Get-App
-------------------
-
-
-.. _**Synopsis**-15:
-
-**Synopsis**
-
-
-Returns the  of an app
-
-.. _**Syntax**-15:
-
-**Syntax**
-
-
-
-::
-
-   Get-App -Id [App ID]
-
-.. _**Description**-15:
-
-**Description**
-
-
-Gathers the  an application has.
-
-.. _**Examples**-15:
-
-**Examples**
-
-
-
-::
-
-  Get-App -Id fdb54b57-a416-4115-8b21-81c73d2c2deb
-
-.. _**Parameters**-15:
-
-**Parameters**
-
-
--Id
-
-ID of the Application
-
-.. _required-modules-14:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-15:
-
-**Output**
-
-
-Application’s 
-
-Get-WebApps
------------
-
-.. _**Synopsis**-16:
-
-**Synopsis**
-
-
-Gets running webapps
-
-.. _**Syntax**-16:
-
-**Syntax**
-
-
-
-::
-
-  Get-WebApps
-
-.. _**Description**-16:
-
-**Description**
-
-
-Gathers the names of the running web applications
-
-.. _**Examples**-16:
-
-**Examples**
-
-
-
-::
-
-  Get-WebApps
-
-.. _**Parameters**-16:
-
-**Parameters**
-
-
-None
-
-.. _required-modules-15:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-16:
-
-**Output**
-
-
-Web application names
-
-Get-WebAppDetails
------------------
-
-.. _**Synopsis**-17:
-
-**Synopsis**
-
-
-Gets running webapps details
-
-
-
-
-.. _**Syntax**-17:
-
-**Syntax**
-
-
-
-::
-
-  Get-WebAppDetails -Name [WebAppName]
-
-.. _**Description**-17:
-
-**Description**
-
-
-Gets the details of a web application
-
-.. _**Examples**-17:
-=======
-.. _**Examples**-5:
->>>>>>> Stashed changes
-
-**Examples**
-
-::
-
-  Get-AzureRolePermission -Permission 'virtualMachines/*'
-
-.. _**Parameters**-5:
-
-**Parameters** 
-
--Permission
-The permission to search for
-
-<<<<<<< Updated upstream
--name
-
-Name of web application
-
-.. _required-modules-16:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-17:
-
-**Output**
-
-
-Details of web application
-
-
-
-Get-AADRole
------------
-
-.. _**Synopsis**-19:
-
-**Synopsis**
-
-
-Finds a specified AAD Role and its definitions
-
-
-
-
-
-
-
-.. _**Syntax**-19:
-
-**Syntax**
-
-::
-
-   Get-AADRole -Role [Role]
-
-.. _**Description**-19:
-
-**Description**
-
-
-Finds a specified AAD Role and its definitions. Role must be properly capitalized. If role has a space in the name, use single quotes around the name.
-
-
-.. _**Examples**-19:
-
-**Examples**
-
-::
-
-  Get-AADRole -Role 'Company Administrator'
-
-.. _**Parameters**-19:
-
-**Parameters**
-
-
-None
-
-.. _required-modules-18:
-
-**Required Modules**
-
-
-Azure CLI
-
-
-.. _**Output**-19:
-
-**Output**
-
-
-Active roles
-
-Get-AADRoles
-------------------
-
-.. _**Synopsis**-20:
-
-**Synopsis**
-
-
-Lists the active roles in Azure AD and what users are part of the role.
-
-
-
-.. _**Syntax**-20:
-
-**Syntax**
-
-::
-
-  Get-AADRoleMembers
-
-.. _**Description**-20:
-
-**Description**
-
-
-Uses the Graph API to get a list of the roles, then checks for a member in each of those roles.
-
-.. _**Examples**-20:
-
-**Examples**
-
-::
-
-  Get-AADRoles 
-  
-::
-
-  Get-AADRoles -All
-
-.. _**Parameters**-20:
-
-**Parameters**
-
--All 
-
-Lists all roles, even those without a user in them
-
-
-.. _required-modules-19:
-
-**Required Modules**
-
-
-Azure CLI
-
-.. _**Output**-20:
-
-**Output**
-
-
-AAD Role name, AAD Role Id, and the users with that role
-
-Get-RunAsAccounts
-------------------
-
-.. _**Synopsis**-20:
-
-**Synopsis**
-
-
-Finds any RunAs accounts being used by an Automation Account
-
-
-
-.. _**Syntax**-20:
-
-**Syntax**
-
-::
-
-  Get-RunAsAccounts
-
-.. _**Description**-20:
-
-**Description**
-
-
-Finds any RunAs accounts being used by an Automation Account by recursively going through each resource group and Automation Account. If one is discovered, you can extract it's certificate (if you have the correct permissions) by using Get-RunAsCertificate
-
-.. _**Examples**-20:
-
-**Examples**
-
-::
-
-  Get-RunAsAccounts
-
-.. _**Parameters**-20:
-
-**Parameters**
-
-
-None
-
-.. _required-modules-19:
-
-**Required Modules**
-
-
-Azure CLI
-Azure PowerShell
-
-.. _**Output**-20:
-=======
-.. _**Output**-5:
->>>>>>> Stashed changes
-
-**Output**
-
-Any roles containing that permission/definition
