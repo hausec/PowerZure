@@ -137,16 +137,18 @@ Gathers a user's Azure role by calling Get-AzRoleAssignment, then uses Graph API
 **Parameters** 
 
 -All
+
 Switch; Gathers all users in AzureAD.
 
 -Username 
+
 Full user principal name of the target user in format: name@domain.com
 
 .. _**Output**-2:
 
 **Output**
 
-List of all users in AAD, optionally in a file.
+User ID, their AAD roles, their RBAC roles, and the scope of those roles
 
 Get-AzureGroup
 -------------
@@ -181,15 +183,9 @@ Uses Graph API call to gather a group, the group's ID, the member's name, and th
 .. _**Examples**-5:
 
 **Examples**
-
-::
-
-
-  Get-User -Username Test@domain.com
   
 ::
 
-  Get-User -All
   Get-AzureGroup -Group 'Sql Admins'
 
 
@@ -210,13 +206,6 @@ Switch; Gathers all group's members
 
 -Group
 Name of group to collect
-
-
--All
-Gets all users
-
-
-.. _**Output**-5:
 
 
 **Output**
