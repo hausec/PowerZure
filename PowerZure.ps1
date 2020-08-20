@@ -110,6 +110,7 @@ Set-AzureElevatedPrivileges ----- Elevates the user’s privileges from Global A
 Set-AzureSubscription ----------- Sets default subscription. Necessary if in a tenant with multiple subscriptions.
 Set-AzureUserPassword ----------- Sets a user’s password
 Start-AzureRunbook -------------- Starts a Runbook	
+
 "@
 
         }
