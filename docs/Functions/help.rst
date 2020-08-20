@@ -4,13 +4,17 @@ Help
 **PowerZure**
 -------------
 
+<<<<<<< HEAD
 .. _**Synopsis**-46:
 
+=======
+>>>>>>> Dev
 **Synopsis**
 
 
 Displays info about this script.
 
+<<<<<<< HEAD
 
 
 
@@ -18,29 +22,41 @@ Displays info about this script.
 
 .. _**Syntax**-46:
 
+=======
+>>>>>>> Dev
 **Syntax**
 
 ::
 
   PowerZure -h
 
+<<<<<<< HEAD
 .. _**Description**-46:
 
+=======
+>>>>>>> Dev
 **Description**
 
 
 Lists the functions available in the script.
 
+<<<<<<< HEAD
 .. _**Examples**-46:
 
 **Examples**
 
 
 
+=======
+
+**Examples**
+
+>>>>>>> Dev
 ::
 
   PowerZure -h
 
+<<<<<<< HEAD
 .. _**Parameters**-46:
 
 **Parameters** 
@@ -60,4 +76,14 @@ Azure CLI
 **Output**
 
 
+=======
+**Parameters** 
+
+-h
+
+Help
+
+**Output**
+
+>>>>>>> Dev
 List of functions in this script

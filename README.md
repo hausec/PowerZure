@@ -3,6 +3,10 @@
 ### For a list of functions, their usage, and more, check out https://powerzure.readthedocs.io
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> Dev
 ## What is PowerZure?
 
 PowerZure is a PowerShell project created to assess and exploit resources within
@@ -47,6 +51,7 @@ in via prompt when logging into Azure CLI.
 
 # Requirements
 
+<<<<<<< HEAD
 Azure has many different PowerShell modules, each using a different API. Some
 have been deprecated and some do not have nearly as much functionality as the
 others, despite all being Microsoft-made. PowerZure uses three Azure modules,
@@ -79,6 +84,9 @@ Azure PS. Azure PS is the successor to the AzureRM module uses the Graph API.
     need to interact with AAD or Automation Accounts, then Azure CLI is the only
     module needed. With this being said, PowerZure should also be run from an
     elevated PowerShell window.
+=======
+The "Az" [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0) module is the only module used in PowerZure, as it is the most current module for Azure. The Az module interacts using the Azure REST API.
+>>>>>>> Dev
 
 ## Author & License
 

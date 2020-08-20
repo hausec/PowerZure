@@ -1,5 +1,6 @@
 Requirements
 ============
+<<<<<<< HEAD
 
 Azure has many different PowerShell modules, each using a different API.
 Some have been deprecated and some do not have nearly as much
@@ -34,12 +35,20 @@ These three modules are needed to **fully** use PowerZure. If you do not
 need to interact with AAD or Automation Accounts, then Azure CLI is the
 only module needed. With this being said, PowerZure should also be run
 from an elevated PowerShell window.
+=======
+The `Azure PowerShell Az <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__  module is the successor to the AzureRM module and the only module used in PowerZure, as it is the most current module for Azure. The Az module interacts using the Azure REST API.
+
+
+PowerZure requires an Administrative PowerShell (at least 5.0) session and the `Az PowerShell <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__  module.
+
+>>>>>>> Dev
 
 ****
 
 If you are in a tenant with multiple subscriptions, you must set your default subscription with
 
 
+<<<<<<< HEAD
 Set-Subscription
 ----------------
 
@@ -48,10 +57,19 @@ Set-Subscription
 **Synopsis**
 
 
+=======
+Set-AzureSubscription
+----------------
+
+
+**Synopsis**
+
+>>>>>>> Dev
 Sets default subscription. Necessary if in a tenant with multiple
 subscriptions.
 
 
+<<<<<<< HEAD
 
 
 
@@ -88,10 +106,33 @@ Sets the default subscription
 **Parameters** 
 
 
+=======
+**Syntax**
+
+::
+
+  Set-AzureSubscription -Id [Subscription ID]
+
+**Description**
+
+Sets the default subscription
+
+
+**Examples**
+
+::
+
+  Set-AzureSubscription -Id b049c906-7000-4899-b644-f3eb835f04d0
+
+
+**Parameters** 
+
+>>>>>>> Dev
 -Id
 
 Subscription ID
 
+<<<<<<< HEAD
 .. _required-modules-47:
 
 **Required Modules**
@@ -104,4 +145,8 @@ Azure CLI
 **Output**
 
 
+=======
+**Output**
+
+>>>>>>> Dev
 Success message
