@@ -154,7 +154,7 @@ Write-Host @'
 		        $obj = New-Object -TypeName psobject
 		        $username = $APSUser.Account
 		        $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
-		        $userid=$user.userprincipalname
+		        $userid=$user.Id
 		        $rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1
 		        $obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
 		        $obj | Add-Member -MemberType NoteProperty -Name objectId -Value $userId
