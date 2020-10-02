@@ -154,7 +154,7 @@ Write-Host @'
 		        $obj = New-Object -TypeName psobject
 		        $username = $APSUser.Account
 		        $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
-		        $userid=$user.userprincipalname
+		        $userid=$user.id
 		        $rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1
 		        $obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
 		        $obj | Add-Member -MemberType NoteProperty -Name objectId -Value $userId
@@ -216,7 +216,7 @@ function Show-AzureCurrentUser
      {         						  
 		$obj = New-Object -TypeName psobject
 		$username = $APSUser.Account
-		$user = Get-AzADUser -UserPrincipalName $Username 
+		$user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me' 
 		$userid=$user.id
 		$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1
 		$obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
@@ -1505,9 +1505,9 @@ function Get-AzureTargets
     Checks your role against the scope of your role to determine what you have access to. 
 #>
     $Context = Get-AzContext
-    $user = Get-AzADUser -UserPrincipalName $Context.Account
-    $userid=$user.id
     $Headers = Get-AzureGraphToken
+    $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
+    $userid=$user.id
     $uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
     $data = Invoke-RestMethod -Headers $Headers -Uri $uri 
     $aadroles = $data.value
