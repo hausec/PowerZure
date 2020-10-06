@@ -155,7 +155,7 @@ Write-Host @'
 		        $username = $APSUser.Account
 		        $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
 		        $userid=$user.id
-		        $rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1
+		        try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
 		        $obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
 		        $obj | Add-Member -MemberType NoteProperty -Name objectId -Value $userId
 		        $rolearray = @()
