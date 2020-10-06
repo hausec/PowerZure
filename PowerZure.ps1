@@ -1146,20 +1146,23 @@ function Get-AzureRunbookContent
     [CmdletBinding()]
      Param(
     [Parameter(Mandatory=$false)][String]$Runbook = $null,
-    [Parameter(Mandatory=$true)][String]$OutFilePath = $null,
+    [Parameter(Mandatory=$false)][String]$OutFilePath = $null,
     [Parameter(Mandatory=$false)][Switch]$All = $null)
-
+	If(!$OutFilePath){
+	$OutFilePath = pwd
+	}
     If($Runbook)
     {
         $Book = Get-AzAutomationAccount | Get-AzAutomationRunbook | Where-Object {$_.Name -eq $Runbook}
-        Export-AzAutomationRunbook -ResourceGroupName $Book.ResourceGroupName -AutomationAccountName $Book.AutomationAccountName -Name $Runbook -OutputFolder $OutFilePath
+        Export-AzAutomationRunbook -ResourceGroupName $Book.ResourceGroupName -AutomationAccountName $Book.AutomationAccountName -Name $Runbook -OutputFolder "$OutFilePath" -Force
+		$OutFilePath
     }
     If($All)
     {
         $Books = Get-AzAutomationAccount | Get-AzAutomationRunbook
         ForEach($Book in $Books)
         {
-            Export-AzAutomationRunbook -ResourceGroupName $Book.ResourceGroupName -AutomationAccountName $Book.AutomationAccountName -Name $Book.Name
+            Export-AzAutomationRunbook -ResourceGroupName $Book.ResourceGroupName -AutomationAccountName $Book.AutomationAccountName -Name $Book.Name -OutputFolder "$OutFilePath" -Force
         }
     }
     If(!$All -and !$Runbook)
