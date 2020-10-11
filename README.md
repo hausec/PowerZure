@@ -48,7 +48,9 @@ in via prompt when logging into Azure CLI.
 
 # Requirements
 
-The "Az" [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0) module is the only module used in PowerZure, as it is the most current module for Azure. The Az module interacts using the Azure REST API.
+The "Az" [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0) module is the primary module used in PowerZure, as it handles most requests interacting with Azure resources. The Az module interacts using the Azure REST API.
+
+The AzureAD PowerShell Module is also used and is for handling AzureAD requests. The AzureAD module uses the Microsoft Graph API.
 
 ## Author & License
 
