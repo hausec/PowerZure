@@ -629,7 +629,7 @@ function Get-AzureTargets
         } 
     }  
 }
-Get-AzureTargets
+
 function Show-AzureKeyVaultContent
 {
 <# 
