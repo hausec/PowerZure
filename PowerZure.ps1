@@ -10,6 +10,71 @@ function Get-AzureGraphToken
     $Headers
 }
 
+function Connect-AADUser {
+    $ConnectionTest = try{ [Microsoft.Open.Azure.AD.CommonLibrary.AzureSession]::AccessTokens['AccessToken']}
+    catch{"Error"}
+    If($ConnectionTest -eq 'Error'){ 
+    $context = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile.DefaultContext
+	$aadToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.windows.net").AccessToken
+    Connect-AzureAD -AadAccessToken $aadToken -AccountId $context.Account.Id -TenantId $context.tenant.id}
+}
+
+function Show-AzureCurrentUser
+{
+    $APSUser = Get-AzContext
+    $Headers = Get-AzureGraphToken
+    if($APSUser)
+     {         						  
+        $Headers = Get-AzureGraphToken 
+        $Login = Connect-AADUser			  
+		$obj = New-Object -TypeName psobject
+		$username = $APSUser.Account
+        If($APSUser.Subscription){
+        $activesub = $APSUser.Subscription.Name + ' (' + $APSUser.Subscription.Id + ')'
+        }
+        $Subscriptions = get-azsubscription *>&1
+        $subcoll =@()
+        If ($Subscriptions){
+            ForEach ($Subscription in $Subscriptions){
+            $sub = $Subscription.Name + ' (' + $Subscription.Id + ')'
+            $subcoll += $sub
+            }
+        }
+		$user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
+		$userid=$user.id
+        $Memberships = Get-AzureADUserMembership -ObjectId $userid
+        $Groups = @()
+        $AADRoles = @()
+        ForEach ($Membership in $Memberships){
+            If($Membership.ObjectType -eq 'Group'){
+            $GroupName = $Membership.DisplayName
+            $Groups += $GroupName                  
+            }else{
+            $AADRoles += $Membership.DisplayName
+            }
+        } 
+        $coll = @()           
+		try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
+        If($rbacroles){                                     
+            ForEach ($rbacrole in $rbacroles){
+            $RBACRoleCollection = $rbacrole.RoleDefinitionName + ' (' +  $rbacrole.scope + ')'
+            $coll += $RBACRoleCollection
+            }
+        }
+		$obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
+		$obj | Add-Member -MemberType NoteProperty -Name ObjectId -Value $userId
+        $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
+        $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
+		$obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $coll
+        $obj | Add-Member -MemberType NoteProperty -Name 'Active Subscription' -Value $activesub
+        $obj | Add-Member -MemberType NoteProperty -Name 'Available Subscriptions' -Value $subcoll
+		$obj
+        }
+    else{
+	Write-Error "Please login with Connect-AzAccount" -Category ConnectionError
+    }  
+}
+
 function PowerZure
 {
 <# 
@@ -61,7 +126,36 @@ function PowerZure
                     Exit
 	            }
             }
-        } 
+            if ($Modules.Name -notcontains 'AzureADPreview'){
+	            Write-host "Install AzureAD PowerShell Module?" -ForegroundColor Yellow 
+                $Readhost = Read-Host " ( y / n ) " 
+                if ($ReadHost -eq 'y' -or $Readhost -eq 'yes') 
+                {
+	                Install-Module -Name Az -AllowClobber -Scope CurrentUser
+	                $Modules = Get-InstalledModule       
+		            if ($Modules.Name -contains 'AzureADPreview')
+		            {
+			            Write-Host "Successfully installed AzureAD module. Please open a new PowerShell window and re-import PowerZure to continue" -ForegroundColor Yellow
+                        Exit
+		            }
+                }
+	
+	            if ($ReadHost -eq 'n' -or $Readhost -eq 'no') 
+	            {
+		            Write-Host "AzureAD PowerShell not installed, PowerZure cannot operate without this module." -ForegroundColor Red
+                    Exit
+	            }
+            }
+            #Login Check
+            $APSUser = Get-AzContext
+            if(!$APSUser){
+            Write-Error "Please login with Connect-AzAccount" -Category ConnectionError
+            Pause
+            Exit
+            }
+
+    }
+     
     if($h -eq $true)
     {
             Write-Host @"
@@ -131,146 +225,21 @@ Write-Host @'
 
             Write-Host 'Confused on what to do next? Check out the documentation: https://powerzure.readthedocs.io/ or type Powerzure -h for a function table.' -ForegroundColor yellow
             Write-Host ""
-        }
+    }
     if($Welcome)
     {
-
-        $APSUser = Get-AzContext *>&1 
-        if(!$APSUser)
-        {
-	            Write-host "Login to Azure?" -ForegroundColor Yellow 
-                $Readhost = Read-Host " ( y / n ) " 
-                if ($ReadHost -eq 'y' -or $Readhost -eq 'yes')
-                {
-                    $a = Connect-AzAccount *>&1 
-                    PowerZure -Checks -Welcome 
-                }
-
-            }
-        if($APSUser)
-            {
-                $Headers = Get-AzureGraphToken 
-		        Write-Host "You are logged into Azure PowerShell" -ForegroundColor Yellow							  
-		        $obj = New-Object -TypeName psobject
-		        $username = $APSUser.Account
-		        $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
-		        $userid=$user.id
-		        try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
-		        $obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
-		        $obj | Add-Member -MemberType NoteProperty -Name objectId -Value $userId
-		        $rolearray = @()
-                $scopearray = @()
-	            $uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
-	            $data = Invoke-RestMethod -Headers $Headers -Uri $uri 
-	            $aadroles = $data.value
-		        ForEach ($aadrole in $aadroles)
-		        {
-			        $id = $aadrole.roleDefinitionId
-			        $uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
-			        $roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
-			        $rolearray += $roledef.displayName
-                    $scopearray += $roledef.resourceScopes
-		        }
-		        $obj | Add-Member -MemberType NoteProperty -Name AADRole -Value $rolearray
-                $obj | Add-Member -MemberType NoteProperty -Name AADRoleScope -Value $scopearray
-		        $uri = "https://graph.microsoft.com/v1.0/Users/$userid/getMemberGroups"
-		        $body =
-@"
-{	"securityEnabledOnly": "False"
-}
-"@
-		        $grouparray = @()
-		        $groupdata = Invoke-RestMethod -Headers $Headers -Uri $uri -Body $body -Method Post -Contenttype application/json			
-		        $groupids = $groupdata.value
-		        foreach ($groupid in $groupids)
-		        {
-			        $groupstuff= Get-AzADGroup -Objectid $groupid
-			        $grouparray += $groupstuff.DisplayName
-		        }
-
-		        $obj | Add-Member -MemberType NoteProperty -Name Groups -Value $grouparray	
-		        $obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbacroles.roleDefinitionName
-		        $obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rbacroles.scope	
-                $obj | Add-Member -MemberType NoteProperty -Name SubscriptionName -Value $APSUser.Subscription.Name
-                $obj | Add-Member -MemberType NoteProperty -Name SubscriptionId -Value $APSUser.Subscription.Id
-		        $obj
+            Show-AzureCurrentUser
             Write-Host ""
             Write-Host "Please set your default subscription with 'Set-Subscription -Id {id} if you have multiple subscriptions." -ForegroundColor Yellow
 		
-            }
+    }
         if(!$Welcome -and !$Checks -and !$h)
             {
 	            Write-Host "Please login with Connect-AzAccount" -ForegroundColor Red
-            }
-            
-    }
+            }            
 }
 
 PowerZure -Checks -Banner -Welcome 
-
-function Show-AzureCurrentUser
-{
-    $APSUser = Get-AzContext
-    $Headers = Get-AzureGraphToken
-    if($APSUser)
-     {         						  
-		$obj = New-Object -TypeName psobject
-		$username = $APSUser.Account
-		$user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me' 
-		$userid=$user.id
-		$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1
-		$obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
-		$obj | Add-Member -MemberType NoteProperty -Name objectId -Value $user.Id
-		$obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbacroles.roleDefinitionName
-		$obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rbacroles.scope
-		$rolearray = @()
-        $scopearray = @()
-	    $uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
-	    $data = Invoke-RestMethod -Headers $Headers -Uri $uri 
-	    $aadroles = $data.value
-		ForEach ($aadrole in $aadroles)
-		{
-			$id = $aadrole.roleDefinitionId
-			$uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
-			$roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
-			$rolearray += $roledef.displayName
-            If($aadrole.resourceScope.length -gt 2)
-            {
-                $roleid = $aadrole.resourceScope.Split('/')[1]
-                $appdata = Get-AzADApplication -ObjectId $roleid
-                $scopearray += $appdata.DisplayName
-            }
-            else
-            {
-                $scopearray += $aadrole.resourceScope
-            }
-		}
-		$obj | Add-Member -MemberType NoteProperty -Name AADRole -Value $rolearray
-        $obj | Add-Member -MemberType NoteProperty -Name AADRoleScope -Value $scopearray
-		$uri = "https://graph.microsoft.com/v1.0/Users/$userid/getMemberGroups"
-		$body =
-@"
-{	"securityEnabledOnly": "False"
-}
-"@
-		$grouparray = @()
-		$groupdata = Invoke-RestMethod -Headers $Headers -Uri $uri -Body $body -Method Post -Contenttype application/json			
-		$groupids = $groupdata.value
-		foreach ($groupid in $groupids)
-		{
-			$groupstuff= Get-AzADGroup -Objectid $groupid
-			$grouparray += $groupstuff.DisplayName
-		}
-
-		$obj | Add-Member -MemberType NoteProperty -Name Groups -Value $grouparray		
-		$obj
-		
-    }
-    else
-        {
-	Write-Host "Please login with Connect-AzAccount" -ForegroundColor Red
-    }  
-}
 
 function Set-AzureSubscription
 {
@@ -306,59 +275,52 @@ function Get-AzureADRole
     Param(
     [Parameter(Mandatory=$False)][String]$Role = $null,
     [Parameter(Mandatory=$False)][Switch]$All = $null)
-    $Headers = Get-AzureGraphToken
-	$Uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions'
-	$roledata = Invoke-RestMethod -Headers $Headers -Uri $Uri
-	$roles = $roledata.value
+    $ConnectAAD = Connect-AADUser
+    $roles = Get-AzureADDirectoryRole
     
     If($All)
     {
 	    ForEach ($AADRole in $Roles)
 	    {
-		    $Uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter=roleDefinitionId eq ' + "'" + $AADRole.id + "'" + '&$expand=principal'
-		    $members = Invoke-RestMethod -Headers $Headers -Uri $Uri
-		    If ($members.value.principal.userPrincipalName -and $Roledata)
-		    {
-			    $obj = New-Object -TypeName psobject
-			    $obj | Add-Member -MemberType NoteProperty -Name Role -Value $AADRole.displayName
-			    $obj | Add-Member -MemberType NoteProperty -Name RoleID -Value $AADRole.id
-			    $obj | Add-Member -MemberType NoteProperty -Name Members -Value $members.value.principal.userPrincipalName
-                $obj | Add-Member -MemberType NoteProperty -Name ApplicationMembers -Value $members.value.principal.appDisplayname
-			    $obj | fl			    	
-		    }
-		    elseIf ($Roledata -and $All)
-		    {			
-			    $obj = New-Object -TypeName psobject
-			    $obj | Add-Member -MemberType NoteProperty -Name Role -Value $AADRole.displayName
-			    $obj | Add-Member -MemberType NoteProperty -Name RoleID -Value $AADRole.id
-			    $obj | Add-Member -MemberType NoteProperty -Name Members -Value $members.value.principal.userPrincipalName
-                $obj | Add-Member -MemberType NoteProperty -Name ApplicationMembers -Value $members.value.principal.appDisplayname
-			    $obj | fl 			    	
-		    }
-	    }
+	      $roleid = $AADRole.ObjectId
+          $members = Get-AzureADDirectoryRoleMember -ObjectId $roleid          
+          $obj = New-Object -TypeName psobject
+          $obj | Add-Member -MemberType NoteProperty -Name Role -Value $AADRole.DisplayName
+          $obj | Add-Member -MemberType NoteProperty -Name UserMember -Value $members.UserPrincipalName
+          $obj | Add-Member -MemberType NoteProperty -Name MemberType -Value $members.ObjectType
+          If($members.objectType -eq 'ServicePrincipal'){
+          $obj | Add-Member -MemberType NoteProperty -Name ServicePrincipalMember -Value $members.AppDisplayName
+          }
+          $obj
+        }	
     }
     If($Role)
     {
         If($Role.length -eq 36)
         {
-            $Uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter=roleDefinitionId eq ' + "'" + $Role + "'" + '&$expand=principal'
-	        $result = Invoke-RestMethod -Headers $Headers -Uri $Uri 
+            $members = Get-AzureADDirectoryRoleMember -ObjectId $Role
             $obj = New-Object -TypeName psobject
-            $obj | Add-Member -MemberType NoteProperty -Name Role -Value $Role
-            $obj | Add-Member -MemberType NoteProperty -Name UserMembers -Value $result.value.principal.userPrincipalName
-            $obj | Add-Member -MemberType NoteProperty -Name ApplicationMembers -Value $result.value.principal.appDisplayname
+            $obj | Add-Member -MemberType NoteProperty -Name UserMember -Value $members.UserPrincipalName
+            $obj | Add-Member -MemberType NoteProperty -Name MemberType -Value $members.ObjectType
+            If($members.objectType -eq 'ServicePrincipal'){
+            $obj | Add-Member -MemberType NoteProperty -Name ServicePrincipalMember -Value $members.AppDisplayName
+            }
             $obj | fl
         }
         else
         {
-            $roles = $roledata.value | Where-Object {$_.DisplayName -eq "$Role"}
-            $Uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter=roleDefinitionId eq ' + "'" + $roles.id + "'" + '&$expand=principal'
-	        $result = Invoke-RestMethod -Headers $Headers -Uri $Uri 
+            
+            $roledata = Get-AzureADDirectoryRole | Where-Object {$_.DisplayName -eq "$Role"}
+            $roleid = $roledata.ObjectId 
+            $members = Get-AzureADDirectoryRoleMember -ObjectId $RoleId
             $obj = New-Object -TypeName psobject
-            $obj | Add-Member -MemberType NoteProperty -Name Role -Value $Role
-            $obj | Add-Member -MemberType NoteProperty -Name UserMembers -Value $result.value.principal.userPrincipalName
-            $obj | Add-Member -MemberType NoteProperty -Name ApplicationMembers -Value $result.value.principal.appDisplayname
-            $obj | fl
+            $obj | Add-Member -MemberType NoteProperty -Name UserMember -Value $members.UserPrincipalName
+            $obj | Add-Member -MemberType NoteProperty -Name MemberType -Value $members.ObjectType
+            If($members.objectType -eq 'ServicePrincipal'){
+            $obj | Add-Member -MemberType NoteProperty -Name ServicePrincipalMember -Value $members.AppDisplayName
+            }
+            $obj | fl 
+
         }  
     }
     If(!$All -and !$Role)
@@ -389,130 +351,85 @@ function Get-AzureUser
     Param(
     [Parameter(Mandatory=$false,HelpMessage='Enter the username with the domain')][String]$Username = $null,
 	[Parameter(Mandatory=$false)][Switch]$All = $null)
-    $Headers = Get-AzureGraphToken	
+    $ConnectAAD = Connect-AADUser
 	If($All)
 	{
 		$users = Get-AzADUser
-		ForEach ($user in $users)
-		{
-			$userid = $user.id
-			$rbacroles = Get-AzRoleAssignment -ObjectId $user.id
-			$uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
-			$data = Invoke-RestMethod -Headers $Headers -Uri $uri
-			$aadroles = $data.value	
-			$obj = New-Object -TypeName psobject			
-			$obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
-			$obj | Add-Member -MemberType NoteProperty -Name objectId -Value $user.Id
-			$obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbacroles.roleDefinitionName
-			$obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rbacroles.scope
-			$rolearray = @()
-            $scopearray = @()
-			ForEach ($aadrole in $aadroles)
-			{
-				$id = $aadrole.roleDefinitionId
-				$uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
-				$roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
-				$rolearray += $roledef.displayName
-                If($aadrole.resourceScope.length -gt 2)
-                {
-                    $roleid = $aadrole.resourceScope.Split('/')[1]
-                    $appdata = Get-AzADApplication -ObjectId $roleid
-                    $scopearray += $appdata.DisplayName
+		    ForEach ($user in $users)
+		    {
+                $obj = New-Object -TypeName psobject
+			    $userid = $user.id
+                $Memberships = Get-AzureADUserMembership -ObjectId $userid
+                $Groups = @()
+                $AADRoles = @()
+                ForEach ($Membership in $Memberships){
+                    If($Membership.ObjectType -eq 'Group'){
+                    $GroupName = $Membership.DisplayName
+                    $Groups += $GroupName                  
+                    }else{
+                    $AADRoles += $Membership.DisplayName
+                    }
+                } 
+                $rbac = @()           
+		        try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
+                If($rbacroles){                                     
+                    ForEach ($rbacrole in $rbacroles){
+                    $RBACRoleCollection = $rbacrole.RoleDefinitionName + ' (' +  $rbacrole.scope + ')'
+                    $rbac += $RBACRoleCollection
+                    }
                 }
-                else
-                {
-                    $scopearray += $aadrole.resourceScope
-                }
-			}
-			$obj | Add-Member -MemberType NoteProperty -Name AADRole -Value $rolearray
-            $obj | Add-Member -MemberType NoteProperty -Name AADRoleScope -Value $scopearray
-			$uri = "https://graph.microsoft.com/v1.0/Users/$userid/getMemberGroups"
-			$body =
-@"
-{	"securityEnabledOnly": "False"
-}
-"@
-			$grouparray = @()
-			$groupdata = Invoke-RestMethod -Headers $Headers -Uri $uri -Body $body -Method Post -Contenttype application/json			
-			$groupids = $groupdata.value
-			foreach ($groupid in $groupids)
-			{
-				$groupstuff= Get-AzADGroup -Objectid $groupid
-				$grouparray += $groupstuff.DisplayName
-			}	
-			$obj | Add-Member -MemberType NoteProperty -Name Groups -Value $grouparray
-			$obj
-			
+		        $obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
+		        $obj | Add-Member -MemberType NoteProperty -Name ObjectId -Value $userId
+                $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
+                $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
+		        $obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbac
+                $obj
 		}
 	}
 	
-	If($Username)
-	{
-			  
-		$obj = New-Object -TypeName psobject
-		$user = Get-AzADUser -UserPrincipalName $Username
-        If($user)
-        { 
-		    $userid=$user.id
-		    $rbacroles = Get-AzRoleAssignment -ObjectId $user.id
-		    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
-		    $obj | Add-Member -MemberType NoteProperty -Name objectId -Value $user.Id
-		    $obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbacroles.roleDefinitionName
-		    $obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rbacroles.scope
-		    $rolearray = @()
-            $scopearray = @()
-	        $uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
-	        $data = Invoke-RestMethod -Headers $Headers -Uri $uri 
-	        $aadroles = $data.value
-		    ForEach ($aadrole in $aadroles)
-		    {
-			    $id = $aadrole.roleDefinitionId
-			    $uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
-			    $roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
-			    $rolearray += $roledef.displayName
-                If($aadrole.resourceScope.length -gt 2)
-                {
-                    $roleid = $aadrole.resourceScope.Split('/')[1]
-                    $appdata = Get-AzADApplication -ObjectId $roleid
-                    $scopearray += $appdata.DisplayName
-                }
-                else
-                {
-                    $scopearray += $aadrole.resourceScope
-                }
-		    }
-		    $obj | Add-Member -MemberType NoteProperty -Name AADRole -Value $rolearray
-            $obj | Add-Member -MemberType NoteProperty -Name AADRoleScope -Value $scopearray
-		    $uri = "https://graph.microsoft.com/v1.0/Users/$userid/getMemberGroups"
-		$body =
-@"
-{	"securityEnabledOnly": "False"
-}
-"@
-		    $grouparray = @()
-		    $groupdata = Invoke-RestMethod -Headers $Headers -Uri $uri -Body $body -Method Post -Contenttype application/json			
-		    $groupids = $groupdata.value
-		    foreach ($groupid in $groupids)
-		    {
-			    $groupstuff= Get-AzADGroup -Objectid $groupid
-			    $grouparray += $groupstuff.DisplayName
-		    }
+	If($Username){
+        If($Username -notcontains '@'){
+            Write-Error 'Please supply the full userprincipalname (user@domain.com)'-Category InvalidArgument
+	    }
+        else{
+	    $obj = New-Object -TypeName psobject
+	    $userdata = Get-AzADUser -UserPrincipalName $Username
+        $userid = $userdata.Id
+        $Memberships = Get-AzureADUserMembership -ObjectId $userid
+        $Groups = @()
+        $AADRoles = @()
+        ForEach ($Membership in $Memberships){
+            If($Membership.ObjectType -eq 'Group'){
+            $GroupName = $Membership.DisplayName
+            $Groups += $GroupName                  
+            }else{
+            $AADRoles += $Membership.DisplayName
+            }
+        } 
+        $rbac = @()           
+	    try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
+        If($rbacroles){                                     
+            ForEach ($rbacrole in $rbacroles){
+            $RBACRoleCollection = $rbacrole.RoleDefinitionName + ' (' +  $rbacrole.scope + ')'
+            $rbac += $RBACRoleCollection
+            }
+        }
+	    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $username
+	    $obj | Add-Member -MemberType NoteProperty -Name ObjectId -Value $userId
+        $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
+        $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
+	    $obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbac
+        $obj	  
 
-		    $obj | Add-Member -MemberType NoteProperty -Name Groups -Value $grouparray		
-		    $obj
-        }
-        If(!$user)
-        {
-            Write-Host "$Username does not exist in this tenant" -ForegroundColor Red
-        }
     }
-
+    }
     If(!$Username -and !$All)
     {
         Write-Host "Usage:" -ForegroundColor Red
         Write-Host "Get-AzureUser -Username Test@domain.com" -ForegroundColor Red
         Write-Host "Get-AzureUser -All" -ForegroundColor Red
     }
+    
 }
 
 function Get-AzureGroup 
@@ -566,7 +483,7 @@ function Get-AzureGroup
 	}	
 	if(!$All -and !$Group)
 	{
-		Write-Host "Must supply a group name or use -All switch" -ForegroundColor Red
+		Write-Error "Must supply a group name or use -All switch" -Category InvalidArgument
 	}
 }
 
@@ -610,189 +527,109 @@ function Add-AzureADRole
 #>
     [CmdletBinding()]
     Param(
-    [Parameter(Mandatory=$false)][String]$Username = $null,
-	[Parameter(Mandatory=$false)][Switch]$ServicePrincipal = $null,
+	[Parameter(Mandatory=$false)][String]$ServicePrincipal = $null,
     [Parameter(Mandatory=$false)][String]$UserId = $null,
+    [Parameter(Mandatory=$false)][String]$Uesername = $null,
     [Parameter(Mandatory=$false)][String]$RoleId = $null,
     [Parameter(Mandatory=$false)][String]$Role = $null)
+    $ConnectAAD = Connect-AADUser
 
-     
-	If(!$ServicePrincipal)
-	{
-		$Headers = Get-AzureGraphToken
-		If($Username)
-		{
-			If($Role)
-			{
-				$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-				$roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
-				$userdata = Get-AzADUser -UserPrincipalName $username
-				$UsersId = $userdata.Id
-				$RolesId = $roledata.id
-				$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
-$body = @"
-{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UsersId"
-}
-"@
-			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-			If($req -eq "")
-			{
-				Write-Host "Successfully added $Username to $Role" -ForegroundColor Green
-			}
-		}
-		If($RoleID)
-		{
-			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-			$userdata = Get-AzADUser -UserPrincipalName $username
-			$UsersId = $userdata.Id
-			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
-$body = @"
-{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UsersId"
-}
-"@
-			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-			If($req -eq "")
-			{
-				Write-Host "Successfully added $Username to $RoleID" -ForegroundColor Green
-			}
-		}
-	}
-	If($UserId)
-	{
-		If($Role)
-		{
-			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-			$roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
-			$RolesId = $roledata.id
-			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
-$body = @"
-{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
-}
-"@
-			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-			If($req -eq "")
-			{
-				Write-Host "Successfully added $UsedID to $Role"
-			}
-		}
-		If($RoleID)
-		{
-			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
-$body = @"
-{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
-}
-"@
-			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-			If($req -eq "")
-			{
-				Write-Host "Successfully added $UsedID to $RoleID"
-			}
-		}
-	}
-		If(!$Role -and $RoleId -and !$Username -and !$UserId)
-		{
-			Write-Host "Usage" -ForegroundColor Red
-			Write-Host "Add-AzureADRole -Username test@test.com -Role 'Company Administrator'" -ForegroundColor Red
-			Write-Host "Add-AzureADRole -UserId 1234567-4568-4579-dede-97709e94e300 -RoleId '4dda258a-4568-4579-abeb-07709e34e307'" -ForegroundColor Red
-		}
-	}
-	If($ServicePrincipal)
-	{
-		$TenantId = 'ba8c4db2-44fa-427a-a380-6e59cb50bb88'
-		$ClientId = 'e6b9bb83-fa0f-4694-92ae-d8e8c8144489'
-		$ClientSecret = 'TopSecret!'
-		$RequestAccessTokenUri = "https://login.microsoftonline.com/$TenantId/oauth2/token"	 
-		#REST Resource
-		#$Resource = "https://management.azure.com/"
-		#Graph Resource
-		$Resource = "https://graph.microsoft.com/"
-		$body = "grant_type=client_credentials&client_id=$ClientId&client_secret=$ClientSecret&resource=$Resource"
-		$AppToken = Invoke-RestMethod -Method Post -Uri $RequestAccessTokenUri -Body $body -ContentType 'application/x-www-form-urlencoded'
-
-		$Headers = @{}
-
-		#For Service Principals
-		$Headers.Add("Authorization","$($AppToken.token_type) "+ " " + "$($AppToken.access_token)")	
-		If($Username)
-		{
-			If($Role)
-			{
-				$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-				$roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
-				$userdata = Get-AzADUser -UserPrincipalName $username
-				$UsersId = $userdata.Id
-				$RolesId = $roledata.id
-				$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
-$body = @"
-{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UsersId"
-}
-"@
-			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-			If($req -eq "")
-			{
-				Write-Host "Successfully added $Username to $Role" -ForegroundColor Green
-			}
-		}
-		If($RoleID)
-		{
-			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-			$userdata = Get-AzADUser -UserPrincipalName $username
-			$UsersId = $userdata.Id
-			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
-$body = @"
-{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UsersId"
-}
-"@
-			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-			If($req -eq "")
-			{
-				Write-Host "Successfully added $Username to $RoleID" -ForegroundColor Green
-			}
-		}
-	}
-	If($UserId)
-	{
-		If($Role)
-		{
-			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-			$roledata = $rolelist.value |  Where-Object {$_.displayName -eq $Role}
-			$RolesId = $roledata.id
-			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RolesId" + '/members/$ref'
-$body = @"
-{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
-}
-"@
-			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-			If($req -eq "")
-			{
-				Write-Host "Successfully added $UsedID to $Role"
-			}
-		}
-		If($RoleID)
-		{
-			$rolelist = Invoke-RestMethod -Headers $Headers -Method Get -ContentType 'application/json' -Uri 'https://graph.microsoft.com/v1.0/directoryRoles'
-			$uri = 'https://graph.microsoft.com/v1.0/directoryRoles/' + "$RoleId" + '/members/$ref'
-$body = @"
-{	"@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
-}
-"@
-			$req = Invoke-RestMethod -Headers $Headers -Method Post -Body $body -ContentType 'application/json' -Uri $uri
-			If($req -eq "")
-			{
-				Write-Host "Successfully added $UsedID to $RoleID"
-			}
-		}
-	}
-		If(!$Role -and $RoleId -and !$Username -and !$UserId)
-		{
-			Write-Host "Usage" -ForegroundColor Red
-			Write-Host "Add-AzureADRole -Username test@test.com -Role 'Company Administrator'" -ForegroundColor Red
-			Write-Host "Add-AzureADRole -UserId 1234567-4568-4579-dede-97709e94e300 -RoleId '4dda258a-4568-4579-abeb-07709e34e307'" -ForegroundColor Red
-		}
-	}
+    If($Role)
+    {
+        $roledata = Get-AzureADDirectoryRole | Where-Object {$_.DisplayName -eq "$Role"}
+        $roleid = $roledata.ObjectId
+    }
+    If($Username){
+        If($Username -notcontains '@')
+        {
+         Write-Error 'Please supply the full userprincipalname (user@domain.com)'-Category InvalidArgument
+        }
+        else{
+            $userdata = Get-AzADUser -UserPrincipalName $Username
+            $userid = $userdata.Id
+            Add-AzureADDirectoryRoleMember -ObjectId $RoleId -RefObjectId $UserId
+        }
+    }
+    If($ServicePrincipal)
+    {
+        $spdata = Get-AzADServicePrincipal -DisplayName $ServicePrincipal
+        $spid = $spdata.Id
+        Add-AzureADDirectoryRoleMember -ObjectId $RoleId -RefObjectId $spid
+    }
+    If(!$ServicePrincipal -and !$Username)
+    {
+     Write-Error 'Please supply a userprincipalname (user@domain.com) or service principal name'-Category InvalidArgument
+    }
+    If(!$Role -and !$RoldID)
+    {
+     Write-Error 'Please supply a role or roleId'-Category InvalidArgument
+    }
 }
 
+function Get-AzureTargets
+{
+<#
+.SYNOPSIS 
+    Checks your role against the scope of your role to determine what you have access to. 
+#>
+    $ConnectAAD = Connect-AADUser
+    $Context = Get-AzContext
+    $Headers = Get-AzureGraphToken
+    $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
+    $userid=$user.id
+    $aadroles = Get-AzureADUserMembership -ObjectId $userid
+    $Memberships = Get-AzureADUserMembership -ObjectId $userid
+    $Groups = @()
+    $AADRoles = @()
+    $AADRolesDetailed = @()
+    ForEach ($Membership in $Memberships){
+        If($Membership.ObjectType -eq 'Group'){
+        $GroupName = $Membership.DisplayName
+        $Groups += $GroupName                  
+        }else{
+        $AADRoles += $Membership.DisplayName
+        $AADRolesDetailed += $Membership
+        }
+    }           
+	try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
+    Write-Host "Your AzureAD Roles:" -ForegroundColor Yellow
+    Write-Host ""
+    ForEach ($aadrole in $AADRolesDetailed){
+    $aadrolename = $aadrole.DisplayName
+    $aadroledescription = $AADRole.Description
+    Write-Host "$aadrolename" -ForegroundColor Green -nonewline
+    Write-Host " - $aadroledescription"
+    }
+    Write-Host ""
+    Write-Host "Your Azure Resources Roles:" -ForegroundColor Yellow
+    Write-Host ""
+    If($rbacroles){    
+        $resources = Get-AzResource                                  
+        ForEach ($rbacrole in $rbacroles){           
+            $rolename = $rbacrole.RoleDefinitionName
+            $roledef = Get-AzRoleDefinition -Name $rbacrole.RoleDefinitionName
+            $roledesc = $roledef.Description
+            $rolescope = $rbacrole.scope
+            Write-Host "$rolename" -ForegroundColor Green -NoNewline
+            Write-Host " - $roledesc"
+            Write-Host "Scope: $rolescope"    
+            Write-Host ""  
+            Write-Host "Resources under that scope: " -ForegroundColor yellow
+            $coll = @()
+            ForEach ($resource in $resources){                          
+                If($resource.resourceId -match $rolescope){
+                        $obj = New-Object -TypeName psobject
+                        $obj | Add-Member -MemberType NoteProperty -Name 'Resource Name' -Value $resource.ResourceName
+                        $obj | Add-Member -MemberType NoteProperty -Name 'Resource Group Name' -Value $resource.ResourceGroupName
+                        $obj | Add-Member -MemberType NoteProperty -Name 'Resource Type' -Value $resource.Type
+                        $coll += $obj 
+                }       
+               
+           } $coll | ft               
+        } 
+    }  
+}
+Get-AzureTargets
 function Show-AzureKeyVaultContent
 {
 <# 
@@ -852,8 +689,8 @@ function Show-AzureKeyVaultContent
 	}
 	If(!$VaultName -and !$All)
 	{
-	Write-Host "Usage: Show-KeyVaultContent -Name VaultName" -ForegroundColor Red
-	Write-Host "Usage: Show-KeyVaultContent -All" -ForegroundColor Red
+	Write-Error "Usage: Show-KeyVaultContent -Name VaultName" -Category InvalidArgument
+	Write-Error "Usage: Show-KeyVaultContent -All" -Category InvalidArgument
 	}
 	
 	
@@ -918,8 +755,8 @@ function Get-AzureKeyVaultContent
 	}
 	If(!$VaultName -and !$All)
 	{
-	Write-Host "Usage: Get-KeyVaultContents -Name VaultName" -ForegroundColor Red
-	Write-Host "Usage: Get-KeyVaultContents -All" -ForegroundColor Red
+	Write-Error "Usage: Get-KeyVaultContents -Name VaultName" -Category InvalidArgument
+	Write-Error "Usage: Get-KeyVaultContents -All" -Category InvalidArgument
 	}
 	
 }
@@ -959,7 +796,7 @@ function Export-AzureKeyVaultContent
 		}
 		else
 		{
-			Write-Host "Failed to export Key"
+			Write-Host "Failed to export Key" -Foregroundcolor Red
 		}
 	}
 	If($Type -eq 'Certificate')
@@ -985,8 +822,8 @@ function Export-AzureKeyVaultContent
 	}
 	elseif($Type -ne 'Certificate' -and $Type -ne 'Key')
 	{
-		Write-Host "-Type must be a Certificate or Key!" -Foregroundcolor Red
-		Write-Host "Usage: Export-KeyVaultContent -VaultName VaultTest -Type Key -Name Testkey1234 -OutFilePath C:\Temp" -Foregroundcolor Red
+		Write-Error "-Type must be a Certificate or Key!" -Category InvalidArgument
+		Write-Error "Usage: Export-KeyVaultContent -VaultName VaultTest -Type Key -Name Testkey1234 -OutFilePath C:\Temp" -Category InvalidArgument
 	}
 }
     
@@ -1499,66 +1336,6 @@ $body = @"
 		Write-Host ""
 		Write-Host 'Be sure to use the Application ID as the username when prompted by Get-Credential. The application ID is: '$aid'' -ForegroundColor Red
     }
-}
-
-function Get-AzureTargets
-{
-<#
-.SYNOPSIS 
-    Checks your role against the scope of your role to determine what you have access to. 
-#>
-    $Context = Get-AzContext
-    $Headers = Get-AzureGraphToken
-    $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
-    $userid=$user.id
-    $uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter+=+principalId eq' + " " + "'" + $userid + "'"
-    $data = Invoke-RestMethod -Headers $Headers -Uri $uri 
-    $aadroles = $data.value
-    Write-Host "Your AzureAD Roles and their scopes" -ForegroundColor Green 
-    ForEach ($aadrole in $aadroles)
-    {
-	    $id = $aadrole.roleDefinitionId
-	    $uri = "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$id"
-	    $roledef = Invoke-RestMethod -Headers $Headers -Uri $uri
-        Write-Host ""
-        Write-Host $roledef.DisplayName -ForegroundColor Yellow
-        If($aadrole.resourceScope.length -gt 2)
-        {
-            $roleid = $aadrole.resourceScope.Split('/')[1]
-            $appdata = Get-AzADApplication -ObjectId $roleid
-            $appdata.DisplayName
-
-        }
-        else
-        {
-            $aadrole.resourceScope
-        }
-    }
-    Write-host ""
-    Write-Host "Your Azure Roles and their scopes" -ForegroundColor Green 
-    $roleassignments = Get-AzRoleAssignment | Where-Object {$_.Objectid -eq "$userid"}
-    ForEach($role in $roleassignments)
-    {
-        $scope = $role.scope
-        Write-Host $role.RoleDefinitionName -ForegroundColor Yellow   
-        $definitions = Get-AzRoleDefinition -Name $role.RoleDefinitionName  
-        Write-Host $definitions.Description    
-        Write-Host ""
-        Write-Host "Scope: " $scope
-        Write-Host ""
-        Write-Host "Resources in scope"   
-        $Resources = Get-AzResource | Where-Object {$_.ResourceId -match "$scope"}
-        ForEach($resource in $resources)
-        {
-            Write-Host "Resource name: " $resource.Name
-            Write-Host "Resource type: " $resource.ResourceType
-            write-host ""
-        }
-
-
-    }
-
-
 }
 
 function Get-AzureRolePermission
