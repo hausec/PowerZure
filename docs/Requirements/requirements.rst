@@ -1,6 +1,8 @@
 Requirements
 ============
-The `Azure PowerShell Az <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__  module is the successor to the AzureRM module and the only module used in PowerZure, as it is the most current module for Azure. The Az module interacts using the Azure REST API.
+The `Azure PowerShell Az <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__  module is the successor to the AzureRM module and is the primary module used in PowerZure, as it is handles the requests interacting with Azure resources.. The Az module interacts using the Azure REST API.
+
+The AzureAD PowerShell module is also required. This module is used to make some AzureAD requests.
 
 
 PowerZure requires an Administrative PowerShell (at least 5.0) session and the `Az PowerShell <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__  module.
