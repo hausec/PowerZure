@@ -572,6 +572,7 @@ function Get-AzureTargets
 .SYNOPSIS 
     Checks your role against the scope of your role to determine what you have access to. 
 #>
+    $Connect = Connect-AADUser
     $ConnectAAD = Connect-AADUser
     $Context = Get-AzContext
     $Headers = Get-AzureGraphToken
