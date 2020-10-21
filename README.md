@@ -43,8 +43,8 @@ problems:
     of what advantage did C\# give over PowerShell (Answer: none)
 
 Realistically, there is zero reason to ever run PowerZure on a victim’s machine.
-Authentication is done by using an existing accesstoken.json file or by logging
-in via prompt when logging into Azure CLI.
+Authentication is done by using an existing accesstoken file lifted from a victim's computer or by logging
+in interactively with Az PowerShell (Connect-AzAccount).
 
 # Requirements
 
