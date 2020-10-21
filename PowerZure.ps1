@@ -168,6 +168,7 @@ function PowerZure
 
 Get-AzureADRole -------------------- Gets the members of one or all Azure AD role. Roles does not mean groups.
 Get-AzureAppOwners ----------------- Returns all owners of all Applications in AAD
+Get-AzureDeviceOwners -------------- Lists the owners of devices in AAD. This will only show devices that have an owner.
 Get-AzureGroup --------------------- Gathers a specific group or all groups in AzureAD and lists their members.
 Get-AzureIntuneScript -------------- Lists available Intune scripts in Azure Intune
 Get-AzureLogicAppConnector --------- Lists the connector APIs in Azure
@@ -1823,5 +1824,35 @@ function Get-AzureLogicAppConnector
 #>
 
 Get-AzResource | Where-Object {$_.ResourceType -eq 'Microsoft.Web/Connections' -and $_.ResourceId -match 'azuread'}
+}
+function Get-AzureDeviceOwners
+{
+<# 
+.SYNOPSIS
+    Lists the owners of devices in AAD. This will only show devices that have an owner.
+	
+.EXAMPLE
+	Get-AzureDeviceOwners
+#>
 
+    $AADDevices =  Get-AzureADDevice | ?{$_.DeviceOSType -Match "Windows" -Or $_.DeviceOSType -Match "Mac"}
+	$AADDevices | ForEach-Object {
+
+        $Device = $_
+        $DisplayName = $Device.DisplayName
+        $Owner = Get-AzureADDeviceRegisteredOwner -ObjectID $Device.ObjectID   
+        If($Owner){    
+            $AzureDeviceOwner = [PSCustomObject]@{
+                DeviceDisplayname   = $Device.Displayname
+                DeviceID            = $Device.ObjectID
+                DeviceOS            = $Device.DeviceOSType
+                OwnerDisplayName    = $Owner.Displayname
+                OwnerID             = $Owner.ObjectID
+                OwnerType           = $Owner.ObjectType
+                OwnerOnPremID       = $Owner.OnPremisesSecurityIdentifier
+            
+            }
+            $AzureDeviceOwner
+        }       
+	}
 }

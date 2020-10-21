@@ -94,6 +94,40 @@ None
 
 Application owners in AAD
 
+
+Get-AzureDeviceOwners
+--------
+
+**Synopsis**
+
+
+Lists the owners of devices in AAD. This will only show devices that have an owner.
+
+**Syntax**
+
+::
+
+  Get-AzureDeviceOwners
+
+**Description**
+
+Lists the owners of devices in AAD. This will only show devices that have an owner.
+
+**Examples**
+
+::
+
+  Get-AzureDeviceOwners
+
+**Parameters** 
+
+None
+
+**Output**
+
+Device owners from AAD
+
+
 Get-AzureGroup
 -------------
 
