@@ -131,7 +131,7 @@ function PowerZure
                 $Readhost = Read-Host " ( y / n ) " 
                 if ($ReadHost -eq 'y' -or $Readhost -eq 'yes') 
                 {
-	                Install-Module -Name Az -AllowClobber -Scope CurrentUser
+	                Install-module -Name AzureADPreview -AllowClobber
 	                $Modules = Get-InstalledModule       
 		            if ($Modules.Name -contains 'AzureADPreview')
 		            {
