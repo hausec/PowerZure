@@ -61,6 +61,7 @@ function Show-AzureCurrentUser
             $coll += $RBACRoleCollection
             }
         }
+        $obj | Add-Member -MemberType NoteProperty -Name TenantID -Value $APSUser.Tenant.id
 		$obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
 		$obj | Add-Member -MemberType NoteProperty -Name ObjectId -Value $userId
         $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
@@ -231,7 +232,7 @@ Write-Host @'
     {
             Show-AzureCurrentUser
             Write-Host ""
-            Write-Host "Please set your default subscription with 'Set-Subscription -Id {id} if you have multiple subscriptions." -ForegroundColor Yellow
+            Write-Host "Please set your default subscription with 'Set-AzureSubscription -Id {id} if you have multiple subscriptions." -ForegroundColor Yellow
 		
     }
         if(!$Welcome -and !$Checks -and !$h)
