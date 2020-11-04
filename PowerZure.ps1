@@ -168,8 +168,8 @@ function PowerZure
 ------------------Info Gathering -------------
 
 Get-AzureADRole -------------------- Gets the members of one or all Azure AD role. Roles does not mean groups.
-Get-AzureAppOwners ----------------- Returns all owners of all Applications in AAD
-Get-AzureDeviceOwners -------------- Lists the owners of devices in AAD. This will only show devices that have an owner.
+Get-AzureAppOwner ----------------- Returns all owners of all Applications in AAD
+Get-AzureDeviceOwner -------------- Lists the owners of devices in AAD. This will only show devices that have an owner.
 Get-AzureGroup --------------------- Gathers a specific group or all groups in AzureAD and lists their members.
 Get-AzureIntuneScript -------------- Lists available Intune scripts in Azure Intune
 Get-AzureLogicAppConnector --------- Lists the connector APIs in Azure
@@ -1826,7 +1826,7 @@ function Get-AzureLogicAppConnector
 
 Get-AzResource | Where-Object {$_.ResourceType -eq 'Microsoft.Web/Connections' -and $_.ResourceId -match 'azuread'}
 }
-function Get-AzureDeviceOwners
+function Get-AzureDeviceOwner
 {
 <# 
 .SYNOPSIS

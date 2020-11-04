@@ -62,7 +62,7 @@ The role ID or role name of the target role
 
 All members of all roles, their IDs, and any Application Service Principal members.
 
-Get-AzureAppOwners
+Get-AzureAppOwner
 --------
 
 **Synopsis**
@@ -74,7 +74,7 @@ Returns all owners of all Applications in AAD
 
 ::
 
-  Get-AzureAppOwners
+  Get-AzureAppOwner
 
 **Description**
 
@@ -84,7 +84,7 @@ Recursively looks through each application in AAD and lists the owners
 
 ::
 
-  Get-AzureAppOwners
+  Get-AzureAppOwner
 
 **Parameters** 
 
@@ -95,7 +95,7 @@ None
 Application owners in AAD
 
 
-Get-AzureDeviceOwners
+Get-AzureDeviceOwner
 --------
 
 **Synopsis**
@@ -107,7 +107,7 @@ Lists the owners of devices in AAD. This will only show devices that have an own
 
 ::
 
-  Get-AzureDeviceOwners
+  Get-AzureDeviceOwner
 
 **Description**
 
@@ -117,7 +117,7 @@ Lists the owners of devices in AAD. This will only show devices that have an own
 
 ::
 
-  Get-AzureDeviceOwners
+  Get-AzureDeviceOwner
 
 **Parameters** 
 
