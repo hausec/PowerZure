@@ -1072,7 +1072,7 @@ function Invoke-AzureRunCommand
     [Parameter(Mandatory=$false)][String]$Command = $null,
     [Parameter(Mandatory=$true)][String]$VMName = $null)
 
-    if($VM)
+    if($VMName)
     {
         $details = Get-AzVM -Name $VMName
 
