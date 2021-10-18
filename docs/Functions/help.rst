@@ -13,7 +13,7 @@ Displays info about this script.
 
 ::
 
-  PowerZure -h
+  Invoke-PowerZure -h
 
 **Description**
 
@@ -25,7 +25,7 @@ Lists the functions available in the script.
 
 ::
 
-  PowerZure -h
+  Invoke-PowerZure -h
 
 **Parameters** 
 

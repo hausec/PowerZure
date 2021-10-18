@@ -32,7 +32,7 @@ Once you are signed in to Azure, you can import PowerZure:
 
 ::
 
-   ipmo C:\Path\To\Powerzure.ps1
+   ipmo C:\Path\To\Powerzure.psd1
    
    
 Upon importing, it will list your current role and available subscriptions. From there, you can run

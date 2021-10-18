@@ -1,7 +1,7 @@
 ![powerzure](https://i.imgur.com/d5B0U0B.png)
 
-### For a list of functions, their usage, and more, check out https://powerzure.readthedocs.io
 
+### For a list of functions, their usage, and more, check out https://powerzure.readthedocs.io
 
 
 ## What is PowerZure?
@@ -46,11 +46,18 @@ Realistically, there is zero reason to ever run PowerZure on a victim’s machin
 Authentication is done by using an existing accesstoken file lifted from a victim's computer or by logging
 in interactively with Az PowerShell (Connect-AzAccount).
 
-# Requirements
+## Requirements
 
 The "Az" [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0) module is the primary module used in PowerZure, as it handles most requests interacting with Azure resources. The Az module interacts using the Azure REST API.
 
 The AzureAD PowerShell Module is also used and is for handling AzureAD requests. The AzureAD module uses the Microsoft Graph API.
+
+
+## Usage
+
+RTFM: https://powerzure.readthedocs.io
+
+`ipmo C:\path\to\PowerZure.psd1`
 
 ## Author & License
 

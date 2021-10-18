@@ -154,7 +154,7 @@ New password "secret" for the Service Principal.
 
 Connection string to login as new user if successful
 
-Create-AzureBackdoor
+New-AzureBackdoor
 ---------------
 
 **Synopsis**
@@ -167,7 +167,7 @@ Creates a backdoor in Azure via Service Principal
 
 ::
 
-  Create-AzureBackdoor -Username [Username] -Password [Password] 
+  New-AzureBackdoor -Username [Username] -Password [Password] 
 
 **Description**
 
@@ -178,7 +178,7 @@ Will create a new Service Principal in Azure and assign it to the Global Adminis
 
 ::
 
-  Create-AzureBackdoor -Username 'testserviceprincipal' -Password 'Password!'
+  New-AzureBackdoor -Username 'testserviceprincipal' -Password 'Password!'
 
 
 **Parameters** 
