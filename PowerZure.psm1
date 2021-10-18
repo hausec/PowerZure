@@ -225,14 +225,14 @@ Write-Host @'
  
 '@ -ForegroundColor Magenta
 
-            Write-Host 'Confused on what to do next? Check out the documentation: https://powerzure.readthedocs.io/ or type Powerzure -h for a function table.' -ForegroundColor yellow
+            Write-Host 'Confused on what to do next? Check out the documentation: https://powerzure.readthedocs.io/ or type Invoke-Powerzure -h for a function table.' -ForegroundColor yellow
             Write-Host ""
     }
     if($Welcome)
     {
             Show-AzureCurrentUser
             Write-Host ""
-            Write-Host "Please set your default subscription with 'Set-AzureSubscription -Id {id} if you have multiple subscriptions." -ForegroundColor Yellow
+            Write-Host "Please set your default subscription with 'Set-AzureSubscription -Id {id} if you have multiple subscriptions. Functions WILL fail if you do not do this. Use Show-AzureCurrentUser to get a list of Subscriptions." -ForegroundColor Yellow
 		
     }
         if(!$Welcome -and !$Checks -and !$h)
