@@ -518,7 +518,7 @@ function Add-AzureADRole
     Param(
 	[Parameter(Mandatory=$false)][String]$ServicePrincipal = $null,
     [Parameter(Mandatory=$false)][String]$UserId = $null,
-    [Parameter(Mandatory=$false)][String]$Uesername = $null,
+    [Parameter(Mandatory=$false)][String]$Username = $null,
     [Parameter(Mandatory=$false)][String]$RoleId = $null,
     [Parameter(Mandatory=$false)][String]$Role = $null)
     $ConnectAAD = Connect-AADUser
