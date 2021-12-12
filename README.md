@@ -12,9 +12,9 @@ framework that can both perform reconnaissance **and** exploitation of Azure, Az
 
 ## Requirements
 
-The "Az" [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0) module is the primary module used in PowerZure, as it handles most requests interacting with Azure resources. The Az module interacts using the Azure REST API.
+The "Az" [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0) module is the primary module used in PowerZure, as it handles most requests interacting with Azure resources. The Az module interacts using the Azure REST API. It can be installed via PowerShell command `Install-Module -Name Az`
 
-The AzureAD PowerShell Module is also used and is for handling AzureAD requests. The AzureAD module uses the Microsoft Graph API.
+The AzureAD PowerShell Module is also used and is for handling AzureAD requests. The AzureAD module uses the Microsoft Graph API and can be installed via the PowerShell command `Install-Module -Name AzureAD`
 
 ## Usage
 
