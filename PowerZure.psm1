@@ -1597,21 +1597,28 @@ function Add-AzureSPSecret
 #>
     [CmdletBinding()]
     Param(
-    [Parameter(Mandatory=$true)][String]$ApplicationName = $null,
-	[Parameter(Mandatory=$true)][String]$Password = $null)
-	$startDate = Get-Date
-    $endDate = $startDate.AddYears(3)  
-    $SecurePassword =  ConvertTo-SecureString $Password -AsPlainText -Force
-	$new = New-AzADAppCredential -DisplayName $ApplicationName -StartDate $startDate -EndDate $endDate -Password $SecurePassword
-    $App = Get-AzADApplication -DisplayName $ApplicationName 
-    $aid = $App.Applicationid
+    [Parameter(Mandatory=$true)][String]$ApplicationName = $null)
+    $Headers = Get-AzureGraphToken 
+    $App = Get-AzADApplication -DisplayName $ApplicationName    
+    $Uri = 'https://graph.microsoft.com/beta/applications/' + $App.ObjectId + '/addPassword'
+    $Body = [PSCustomObject]@{
+        passwordCredential = @{displayName="TestPass"}
+    }
+    $json = $Body | ConvertTo-Json
+    $Req = Invoke-RestMethod -Method POST -Uri $Uri -Body $json -Headers $Headers -ContentType 'application/json'
     $Context = Get-AzContext
-
-	If($new)
+    $f1 = '$ApplicationId = "' + $App.ApplicationId + '"'
+    $f2 = '$SecurePassword = "' + $Req.secretText + '"'
+    $f3 = '$SecurePassword = ConvertTo-SecureString -String $SecurePassword -AsPlainText -Force'
+	If($Req)
 	{
-		Write-Host "Success! You can now login as the service principal using the following commands:" -ForegroundColor Green
+		Write-Host "Success! You can now login as the service principal using the following command block:" -ForegroundColor Green
 		Write-Host ""
-		Write-Host '$Credential = Get-Credential; Connect-AzAccount -Credential $Credential -Tenant '$Context.Tenant.Id' -ServicePrincipal' -ForegroundColor Yellow
+        Write-Host $f1 -ForegroundColor Yellow
+        Write-Host $f2 -ForegroundColor Yellow
+        Write-Host $f3 -ForegroundColor Yellow
+        Write-Host '$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $ApplicationId, $SecurePassword' -ForegroundColor Yellow
+		Write-Host 'Connect-AzAccount -Credential $Credential -Tenant '$Context.Tenant.Id' -ServicePrincipal' -ForegroundColor Yellow
 		Write-Host ""
 		Write-Host 'Be sure to use the Application ID as the username when prompted by Get-Credential. The application ID is: '$aid'' -ForegroundColor Red
 	}
@@ -2146,11 +2153,9 @@ function Invoke-AzureCustomScriptExtension {
 <# 
 .SYNOPSIS
     Runs a PowerShell script by uploading it as a Custom Script Extension
-
 .PARAMETER 
     -Uri (URI/URL where the script is located)
     -VM (VM to run the script on)
-
 .EXAMPLE
 	Invoke-AzureCustomScriptExtension -VM 'Windows10' -Uri https://gist.githubusercontent.com/hausec/fa38e7005be29f959df90044ef4bcc29/raw/18aadb137a660e0c7393a999136685b8d8ab5b87/test.ps1
 #>
@@ -2163,5 +2168,5 @@ function Invoke-AzureCustomScriptExtension {
     $VMData = Get-AzVM -Name $VM
     Set-AzVMCustomScriptExtension -ResourceGroupName $VMData.ResourceGroupName -VMName $VMData.Name -Location $VMData.Location -FileUri $Uri -Name MicrosoftMonitorAgent
     }
-
 }
+
