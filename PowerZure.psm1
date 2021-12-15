@@ -1586,14 +1586,13 @@ function Add-AzureSPSecret
 {
 <# 
 .SYNOPSIS
-    Adds a secret to a service principal
+    Adds a secret to a service principal. The secret is auto generated and will be shown. It is not retrievable after being displayed.
 
 .PARAMETERS
     -ApplicationName (Name of Application the SP is tied to)
-	-Password
 	
 .EXAMPLE
-	Add-AzureSPSecret -ApplicationName "ApplicationName" -Password password123
+	Add-AzureSPSecret -ApplicationName "ApplicationName"
 #>
     [CmdletBinding()]
     Param(
@@ -1619,8 +1618,6 @@ function Add-AzureSPSecret
         Write-Host $f3 -ForegroundColor Yellow
         Write-Host '$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $ApplicationId, $SecurePassword' -ForegroundColor Yellow
 		Write-Host 'Connect-AzAccount -Credential $Credential -Tenant '$Context.Tenant.Id' -ServicePrincipal' -ForegroundColor Yellow
-		Write-Host ""
-		Write-Host 'Be sure to use the Application ID as the username when prompted by Get-Credential. The application ID is: '$aid'' -ForegroundColor Red
 	}
 }
 
