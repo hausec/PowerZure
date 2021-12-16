@@ -8,7 +8,13 @@ function Get-AzureGraphToken
     $Headers.Add("Authorization","Bearer"+ " " + "$($token.token)")    
     $Headers
 }
-
+function Get-AzureRESTToken
+{
+    $token = Get-AzAccessToken
+    $Headers = @{}
+    $Headers.Add("Authorization","Bearer"+ " " + "$($token.token)")    
+    $Headers
+}
 function Connect-AADUser {
     $ConnectionTest = try{ [Microsoft.Open.Azure.AD.CommonLibrary.AzureSession]::AccessTokens['AccessToken']}
     catch{"Error"}
@@ -171,6 +177,7 @@ Get-AzureDeviceOwner -------------- Lists the owners of devices in AAD. This wil
 Get-AzureADGroup --------------------- Gathers a specific group or all groups in AzureAD and lists their members.
 Get-AzureIntuneScript -------------- Lists available Intune scripts in Azure Intune
 Get-AzureLogicAppConnector --------- Lists the connector APIs in Azure
+Get-AzurePIMAssignment ------------- Gathers the Privileged Identity Management assignments. Currently, only AzureRM roles are returned.
 Get-AzureRole ---------------------- Gets the members of an Azure RBAC role.
 Get-AzureRunAsAccounts ------------- Finds any RunAs accounts being used by an Automation Account
 Get-AzureRolePermission ------------ Finds all roles with a certain permission
@@ -2166,4 +2173,37 @@ function Invoke-AzureCustomScriptExtension {
     Set-AzVMCustomScriptExtension -ResourceGroupName $VMData.ResourceGroupName -VMName $VMData.Name -Location $VMData.Location -FileUri $Uri -Name MicrosoftMonitorAgent
     }
 }
-
+function Get-AzurePIMAssignment{
+<# 
+.SYNOPSIS
+   Gathers the Privileged Identity Management assignments. Currently, only AzureRM roles are returned.
+#>
+    $headers = Get-AzureRESTToken
+    $Context = Get-AzContext
+    $subid = $Context.Subscription.id   
+    $uri = 'https://management.azure.com/providers/Microsoft.Subscription/subscriptions/'+$subid+ '/providers/Microsoft.Authorization/roleEligibilityScheduleRequests?api-version=2020-10-01-preview'
+    $ARMPIMData = Invoke-RestMethod -Method GET -Uri $uri -Header $Headers
+    $ARMPIMS = $ARMPIMData.Value.Properties  
+    ForEach ($ARMPIM in $ARMPIMS){
+        If($ARMPIM.principalType -eq 'User'){
+            $Username = Get-AzADUser -ObjectId $ARMPIM.principalId
+            $name = $Username.userprincipalname
+        }
+        If($ARMPIM.principalType -eq 'Group'){ 
+            $Groupname = Get-AzADGroup -ObjectId $ARMPIM.principalId
+            $name = $Groupname.displayname
+        }       
+        $role = $ARMPIM.roleDefinitionId
+        $split = $role.split('/')
+        $defid = $split[-1]
+        $rolename = Get-AzRoleDefinition -Id $defid
+    	$Obj = [PSCustomObject]@{
+		PrincipalName = $name
+		PrincipalType = $ARMPIM.principalType
+		Role = $rolename.name
+		Scope = $ARMPIM.scope
+		Status = $ARMPIM.status
+        }
+        $Obj | fl
+    }
+}
