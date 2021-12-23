@@ -27,7 +27,7 @@ You compromise a domain-joined machine and you can now generate an Access Token 
 ![GenerateAT](https://i.imgur.com/YNvPIsT.png)
 
 This token can then be copy and pasted to your non-domain joined host and login using the Access Token.
-![Success](https://i.imgur.com/R2UkjeN.png)
+![Success](https://i.imgur.com/e5WBcbe.png)
 
 ## Author & License
 
