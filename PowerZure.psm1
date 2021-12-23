@@ -184,6 +184,7 @@ Get-AzureRunAsAccounts ------------- Finds any RunAs accounts being used by an A
 Get-AzureRolePermission ------------ Finds all roles with a certain permission
 Get-AzureSQLDB --------------------- Lists the available SQL Databases on a server
 Get-AzureTargets ------------------- Compares your role to your scope to determine what you have access to
+Get-AzureTenantId ------------------ Returns the ID of a tenant belonging to a domain
 Get-AzureUser ---------------------- Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
 Show-AzureCurrentUser -------------- Returns the current logged in user name and any owned objects
 Show-AzureKeyVaultContent ---------- Lists all available content in a key vault
@@ -2123,7 +2124,9 @@ rm C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.9\Downloads\*
 	}
 	rm $path
 }
-function Invoke-AzureCustomScriptExtension {
+
+function Invoke-AzureCustomScriptExtension 
+{
 <# 
 .SYNOPSIS
     Runs a PowerShell script by uploading it as a Custom Script Extension
@@ -2143,7 +2146,9 @@ function Invoke-AzureCustomScriptExtension {
     Set-AzVMCustomScriptExtension -ResourceGroupName $VMData.ResourceGroupName -VMName $VMData.Name -Location $VMData.Location -FileUri $Uri -Name MicrosoftMonitorAgent
     }
 }
-function Get-AzurePIMAssignment{
+
+function Get-AzurePIMAssignment 
+{
 <# 
 .SYNOPSIS
    Gathers the Privileged Identity Management assignments. Currently, only AzureRM roles are returned.
@@ -2176,4 +2181,21 @@ function Get-AzurePIMAssignment{
         }
         $Obj | fl
     }
+}
+function Get-AzureTenantId {
+<# 
+.SYNOPSIS
+   Gathers the ID of a tenant from a supplied domain name.
+.PARAMETER
+    -Domain (Name of the domain)
+.EXAMPLE
+    Get-AzureTenantId -Domain 'testdomain.onmicrosoft.com'
+#>
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$True)][String]$Domain = $null)
+    $uri = 'https://login.windows.net/' + $Domain + '/.well-known/openid-configuration'
+    $data = Invoke-RestMethod -Method GET -Uri $Uri
+    $TenantData = $data.token_endpoint
+    $TenantId = $TenantData.Split('/')[3]
 }
