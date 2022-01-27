@@ -2125,26 +2125,42 @@ rm C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.9\Downloads\*
 	rm $path
 }
 
-function Invoke-AzureCustomScriptExtension 
-{
+function Invoke-AzureCustomScriptExtension {
 <# 
 .SYNOPSIS
-    Runs a PowerShell script by uploading it as a Custom Script Extension
+    Runs a command by updating the CustomScriptExtension extension on an Azure VM
 .PARAMETER 
-    -Uri (URI/URL where the script is located)
+    -Command (Command to run)
     -VM (VM to run the script on)
+    -ResourceGroup (Name of the RG)
 .EXAMPLE
-	Invoke-AzureCustomScriptExtension -VM 'Windows10' -Uri https://gist.githubusercontent.com/hausec/fa38e7005be29f959df90044ef4bcc29/raw/18aadb137a660e0c7393a999136685b8d8ab5b87/test.ps1
+	Invoke-AzureCustomScriptExtension -VM 'Windows10' -ResourceGroup 'Defaultresourcegroup-cus' -Command 'powershell.exe -c mkdir C:\test'
 #>
     [CmdletBinding()]
     Param(
-	[Parameter(Mandatory=$true,HelpMessage='VM name')][String]$VM = $null,
-	[Parameter(Mandatory=$false,HelpMessage='Uri where the script is located')][String]$Uri = $false)
-    
-    If ($Uri){
-    $VMData = Get-AzVM -Name $VM
-    Set-AzVMCustomScriptExtension -ResourceGroupName $VMData.ResourceGroupName -VMName $VMData.Name -Location $VMData.Location -FileUri $Uri -Name MicrosoftMonitorAgent
+	[Parameter(Mandatory=$True,HelpMessage='VM name')][String]$VM = $null,
+    [Parameter(Mandatory=$True,HelpMessage='ResourceGroup name')][String]$ResourceGroup = $null,
+	[Parameter(Mandatory=$True,HelpMessage='Command to run')][String]$Command = $null)
+    $VMData = Get-AzVM -Name $VM -ResourceGroupName $ResourceGroup
+    $id = $VMData.Id
+    $Uri = 'https://management.azure.com' + $id + '/extensions/CustomScriptExtension?api-version=2021-07-01'
+    $Headers = Get-AzureRESTToken 
+    $Body = [PSCustomObject]@{
+        location = $VMData.Location
+        properties = @{publisher="Microsoft.Compute";autoUpgradeMinorVersion="true";typeHandlerVersion="1.9";type="CustomScriptExtension"}
     }
+    $json = $Body | ConvertTo-Json
+    $Put = Invoke-RestMethod -ContentType 'application/json' -Headers $Headers -Method PUT -Uri $Uri -Body $json
+    $Get = Invoke-RestMethod -Headers $Headers -Method GET -Uri $Uri
+    If(!$Get){
+    $Put}
+    $CommandBody = [PSCustomObject]@{
+        location = $VMData.location
+        properties = @{protectedSettings=@{commandToExecute="$command"}}
+    }
+    $json = $CommandBody | ConvertTo-Json
+    Invoke-RestMethod -ContentType 'application/json' -Headers $Headers -Method PATCH -Uri $Uri -Body $json
+
 }
 
 function Get-AzurePIMAssignment 
