@@ -3,7 +3,7 @@ Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
 
 function Get-AzureGraphToken
 {
-    $token = Get-AzAccessToken -ResourceTypeName MSGraph
+    $token = Get-AzAccessToken -ResourceUrl "https://graph.microsoft.com/"
     $Headers = @{}
     $Headers.Add("Authorization","Bearer"+ " " + "$($token.token)")    
     $Headers
