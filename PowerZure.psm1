@@ -1,4 +1,4 @@
-﻿Set-ExecutionPolicy Bypass
+# Cloudshell Modifications to Work
 Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
 
 function Get-AzureGraphToken
@@ -99,66 +99,6 @@ function Invoke-PowerZure
     [Parameter(Mandatory=$false)][switch]$Checks = $null,
     [Parameter(Mandatory=$false)][switch]$Banner = $null)
 
-    If($Checks)
-    {
-            $ErrorActionPreference = "Stop"
-            $Version = $PSVersionTable.PSVersion.Major
-            If ($Version -lt 5)
-            {
-                Write-Host "Az requires at least PowerShell 5.1"
-                Exit
-            }
-            #Module Check
-            $Modules = Get-InstalledModule
-            if ($Modules.Name -notcontains 'Az.Accounts')
-            {
-	            Write-host "Install Az PowerShell Module?" -ForegroundColor Yellow 
-                $Readhost = Read-Host " ( y / n ) " 
-                if ($ReadHost -eq 'y' -or $Readhost -eq 'yes') 
-                {
-	                Install-Module -Name Az -AllowClobber -Scope CurrentUser
-	                $Modules = Get-InstalledModule       
-		            if ($Modules.Name -contains 'Az.Accounts')
-		            {
-			            Write-Host "Successfully installed Az module. Please open a new PowerShell window and re-import PowerZure to continue" -ForegroundColor Yellow
-                        Exit
-		            }
-                }
-	
-	            if ($ReadHost -eq 'n' -or $Readhost -eq 'no') 
-	            {
-		            Write-Host "Az PowerShell not installed, PowerZure cannot operate without this module." -ForegroundColor Red
-                    Exit
-	            }
-            }
-            if ($Modules.Name -notcontains 'AzureAD'){
-	            Write-host "Install AzureAD PowerShell Module?" -ForegroundColor Yellow 
-                $Readhost = Read-Host " ( y / n ) " 
-                if ($ReadHost -eq 'y' -or $Readhost -eq 'yes') 
-                {
-	                Install-module -Name AzureADPreview -AllowClobber
-	                $Modules = Get-InstalledModule       
-		            if ($Modules.Name -contains 'AzureADPreview')
-		            {
-			            Write-Host "Successfully installed AzureAD module. Please open a new PowerShell window and re-import PowerZure to continue" -ForegroundColor Yellow
-                        Exit
-		            }
-                }
-	
-	            if ($ReadHost -eq 'n' -or $Readhost -eq 'no') 
-	            {
-		            Write-Host "AzureAD PowerShell not installed, PowerZure cannot operate without this module." -ForegroundColor Red
-                    Exit
-	            }
-            }
-            #Login Check
-            $APSUser = Get-AzContext
-            if(!$APSUser){
-            Write-Error "Please login with Connect-AzAccount" -Category ConnectionError
-            Pause
-            Exit
-            }
-
     }
      
     if($h -eq $true)
@@ -230,7 +170,7 @@ Write-Host @'
 8888888P"  d88""88b 888  888  888 d8P  Y8b 888P"  .'____    ,'     d88P     888  888 888P"   d8P  Y8b   
 888        888  888 888  888  888 88888888 888         /  ,'      d88P      888  888 888     88888888 
 888        Y88..88P Y88b 888 d88P Y8b.     888        / ,'       d88P       Y88b 888 888     Y8b.   
-888         "Y88P"   "Y8888888P"   "Y8888  888       /,'        d8888888888  "Y88888 888      "Y8888  version 2.1
+888         "Y88P"   "Y8888888P"   "Y8888  888       /,'        d8888888888  "Y88888 888      "Y8888  version 2.1.1 (Cloudshell Edition)
                                                     /'                                                													
 '@ -ForegroundColor Cyan
 
