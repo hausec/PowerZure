@@ -1,4 +1,3 @@
-# Cloudshell Modifications to Work
 Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
 
 function Get-AzureGraphToken
@@ -98,8 +97,6 @@ function Invoke-PowerZure
     [Parameter(Mandatory=$false)][switch]$h = $null,
     [Parameter(Mandatory=$false)][switch]$Checks = $null,
     [Parameter(Mandatory=$false)][switch]$Banner = $null)
-
-    }
      
     if($h -eq $true)
     {
@@ -170,7 +167,7 @@ Write-Host @'
 8888888P"  d88""88b 888  888  888 d8P  Y8b 888P"  .'____    ,'     d88P     888  888 888P"   d8P  Y8b   
 888        888  888 888  888  888 88888888 888         /  ,'      d88P      888  888 888     88888888 
 888        Y88..88P Y88b 888 d88P Y8b.     888        / ,'       d88P       Y88b 888 888     Y8b.   
-888         "Y88P"   "Y8888888P"   "Y8888  888       /,'        d8888888888  "Y88888 888      "Y8888  version 2.1.1 (Cloudshell Edition)
+888         "Y88P"   "Y8888888P"   "Y8888  888       /,'        d8888888888  "Y88888 888      "Y8888  version 2.1
                                                     /'                                                													
 '@ -ForegroundColor Cyan
 
