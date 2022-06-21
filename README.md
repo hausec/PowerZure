@@ -24,7 +24,7 @@ RTFM: https://powerzure.readthedocs.io
 
 If you have multiple subscriptions, you must set the main subscription with `Set-AzureSubscription`. If you do not do this, things will fail. 
 
-### Additonial Information
+### Additional Information
 Cloudshell_Powerzure contains modifications to enable powerzure to run within Azure Cloudshell. 
 
 ## Additional Resources
