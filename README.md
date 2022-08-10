@@ -14,8 +14,6 @@ framework that can both perform reconnaissance **and** exploitation of Azure, Az
 
 The "Az" [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0) module is the primary module used in PowerZure, as it handles most requests interacting with Azure resources. The Az module interacts using the Azure REST API. It can be installed via PowerShell command `Install-Module -Name Az`
 
-The AzureAD PowerShell Module is also used and is for handling AzureAD requests. The AzureAD module uses the Microsoft Graph API and can be installed via the PowerShell command `Install-Module -Name AzureAD`
-
 ## Usage
 
 RTFM: https://powerzure.readthedocs.io
@@ -26,9 +24,9 @@ If you have multiple subscriptions, you must set the main subscription with `Set
 
 ## Additional Resources
 
-You can type `Show-AzureCurrentUser` to view the current signed-in user's roles in Azure and Azure AD.
+You can type `Get-AzureCurrentUser` to view the current signed-in user's roles in Azure and Azure AD.
 
-You can also type `Get-AzureTargets` to compare your current signed-in user's roles and their scope to resources within Azure. 
+You can also type `Get-AzureTarget` to compare your current signed-in user's roles and their scope to resources within Azure. 
 
 For target finding, I recommend using [AzureHound](https://posts.specterops.io/introducing-bloodhound-4-0-the-azure-update-9b2b26c5e350), the Azure component to [BloodHound](https://github.com/BloodHoundAD/BloodHound).
 
