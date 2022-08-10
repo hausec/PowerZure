@@ -16,8 +16,7 @@ Set-AzureSubscription
 
 **Synopsis**
 
-Sets default subscription. Necessary if in a tenant with multiple
-subscriptions.
+Sets default subscription. This command must be run for Azure functions to properly work. 
 
 
 **Syntax**
@@ -28,7 +27,7 @@ subscriptions.
 
 **Description**
 
-Sets the default subscription
+Sets the default subscription via an interactive menu or via subscription Id.
 
 
 **Examples**
@@ -42,7 +41,7 @@ Sets the default subscription
 
 -Id
 
-Subscription ID
+Subscription ID (optional)
 
 **Output**
 
