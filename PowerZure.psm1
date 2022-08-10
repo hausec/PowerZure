@@ -1,37 +1,48 @@
 ﻿Set-ExecutionPolicy Bypass
 Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
 
-function Get-AzureGraphToken
+
+function Get-AzureToken
 {
-    $token = Get-AzAccessToken -ResourceUrl "https://graph.microsoft.com/"
-    $Headers = @{}
+
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$false)][String]$tenantid = $null,
+    [Parameter(Mandatory=$false)][Switch]$KV = $false,
+    [Parameter(Mandatory=$false)][String]$Username = $null,
+    [Parameter(Mandatory=$false)][String]$Domain = $null,
+    [Parameter(Mandatory=$false)][Switch]$Office = $false,
+    [Parameter(Mandatory=$false)][Switch]$AAD = $false,
+    [Parameter(Mandatory=$false)][Switch]$REST = $false,
+    [Parameter(Mandatory=$false)][Switch]$Graph = $false,
+    [Parameter(Mandatory=$false)][String]$Password = $null)
+    $headers = @{}
+    If($Office){
+        $headers.Add("Content-Type", "application/x-www-form-urlencoded")
+        $scope = 'https://graph.microsoft.com/.default'
+        If($kv){$scope="https://vault.azure.net/.default"}
+        $d = "grant_type=password&username=$Username&password=$Password&client_id=d3590ed6-52b3-4102-aeff-aad2292ab01c&scope=$scope&expiresIn=3599"
+        $c = 'https://login.microsoftonline.com/' + $tenantid + '/oauth2/v2.0/token'
+        $a = Invoke-RestMethod -Uri $c -Method 'POST' -Headers $headers -Body $d
+        $OfficeGraphToken = $a.access_token
+        If($OfficeGraphToken){
+            $global:GraphToken = $OfficeGraphToken
+        }
+    }
+    If($AAD){$token = Get-AzAccessToken -ResourceTypeName AadGraph}
+    If($REST){$token = Get-AzAccessToken}
+    If($Graph){$token = Get-AzAccessToken -ResourceUrl "https://graph.microsoft.com/"}
     $Headers.Add("Authorization","Bearer"+ " " + "$($token.token)")    
     $Headers
-}
-function Get-AzureRESTToken
-{
-    $token = Get-AzAccessToken
-    $Headers = @{}
-    $Headers.Add("Authorization","Bearer"+ " " + "$($token.token)")    
-    $Headers
-}
-function Connect-AADUser {
-    $ConnectionTest = try{ [Microsoft.Open.Azure.AD.CommonLibrary.AzureSession]::AccessTokens['AccessToken']}
-    catch{"Error"}
-    If($ConnectionTest -eq 'Error'){ 
-    $context = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile.DefaultContext
-	$token = Get-AzAccessToken -ResourceTypeName AadGraph
-    Connect-AzureAD -AadAccessToken $token.token -AccountId $context.Account.Id -TenantId $context.tenant.id}
 }
 
-function Show-AzureCurrentUser
+function Get-AzureCurrentUser
 {
     $APSUser = Get-AzContext
-    $Headers = Get-AzureGraphToken
+    $Headers = Get-AzureToken -Graph
     if($APSUser)
      {         						  
-        $Headers = Get-AzureGraphToken 
-        $Login = Connect-AADUser			  
+        $Headers = Get-AzureToken -Graph 		  
 		$obj = New-Object -TypeName psobject 
 		$username = $APSUser.Account
         If($APSUser.Subscription){
@@ -47,11 +58,12 @@ function Show-AzureCurrentUser
         }
 		$user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
 		$userid=$user.id
-        $Memberships = Get-AzureADUserMembership -ObjectId $userid
+        $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid/memberOf" 
+        $Memberships = $MembershipsReq.value
         $Groups = @()
         $AADRoles = @()
         ForEach ($Membership in $Memberships){
-            If($Membership.ObjectType -eq 'Group'){
+            If($Membership."@odata.type" -eq '#microsoft.graph.group'){
             $GroupName = $Membership.DisplayName
             $Groups += $GroupName                  
             }else{
@@ -120,34 +132,13 @@ function Invoke-PowerZure
 	                $Modules = Get-InstalledModule       
 		            if ($Modules.Name -contains 'Az.Accounts')
 		            {
-			            Write-Host "Successfully installed Az module. Please open a new PowerShell window and re-import PowerZure to continue" -ForegroundColor Yellow
-                        Exit
+			            Write-Host "Successfully installed Az module. Please open a new PowerShell window and re-import PowerZure to continue" -ForegroundColor Yellow                      
 		            }
                 }
 	
 	            if ($ReadHost -eq 'n' -or $Readhost -eq 'no') 
 	            {
 		            Write-Host "Az PowerShell not installed, PowerZure cannot operate without this module." -ForegroundColor Red
-                    Exit
-	            }
-            }
-            if ($Modules.Name -notcontains 'AzureAD'){
-	            Write-host "Install AzureAD PowerShell Module?" -ForegroundColor Yellow 
-                $Readhost = Read-Host " ( y / n ) " 
-                if ($ReadHost -eq 'y' -or $Readhost -eq 'yes') 
-                {
-	                Install-module -Name AzureADPreview -AllowClobber
-	                $Modules = Get-InstalledModule       
-		            if ($Modules.Name -contains 'AzureADPreview')
-		            {
-			            Write-Host "Successfully installed AzureAD module. Please open a new PowerShell window and re-import PowerZure to continue" -ForegroundColor Yellow
-                        Exit
-		            }
-                }
-	
-	            if ($ReadHost -eq 'n' -or $Readhost -eq 'no') 
-	            {
-		            Write-Host "AzureAD PowerShell not installed, PowerZure cannot operate without this module." -ForegroundColor Red
                     Exit
 	            }
             }
@@ -165,59 +156,59 @@ function Invoke-PowerZure
     {
             Write-Host @"
 			
-			  PowerZure Version 2.1
+			  PowerZure Version 2.2
 
 				List of Functions              
 
 ------------------Info Gathering -------------
 
-Get-AzureADRole -------------------- Gets the members of one or all Azure AD role. Roles does not mean groups.
-Get-AzureAppOwner ----------------- Returns all owners of all Applications in AAD
-Get-AzureDeviceOwner -------------- Lists the owners of devices in AAD. This will only show devices that have an owner.
-Get-AzureADGroup --------------------- Gathers a specific group or all groups in AzureAD and lists their members.
+Get-AzureADRoleMember -------------- Gets the members of one or all Azure AD role. Roles does not mean groups.
+Get-AzureADAppOwner ---------------- Returns all owners of all Applications in AAD
+Get-AzureADDeviceOwner ------------- Lists the owners of devices in AAD. This will only show devices that have an owner.
+Get-AzureADGroupMember ------------- Gathers a specific group or all groups in AzureAD and lists their members.
 Get-AzureIntuneScript -------------- Lists available Intune scripts in Azure Intune
 Get-AzureLogicAppConnector --------- Lists the connector APIs in Azure
-Get-AzureManagedIdentities --------- Gets a list of all Managed Identities and their roles.
+Get-AzureManagedIdentity ----------- Gets a list of all Managed Identities and their roles.
 Get-AzurePIMAssignment ------------- Gathers the Privileged Identity Management assignments. Currently, only AzureRM roles are returned.
 Get-AzureRole ---------------------- Gets the members of an Azure RBAC role.
-Get-AzureRunAsAccounts ------------- Finds any RunAs accounts being used by an Automation Account
+Get-AzureRunAsAccount -------------- Finds any RunAs accounts being used by an Automation Account
 Get-AzureRolePermission ------------ Finds all roles with a certain permission
 Get-AzureSQLDB --------------------- Lists the available SQL Databases on a server
-Get-AzureTargets ------------------- Compares your role to your scope to determine what you have access to
+Get-AzureTarget -------------------- Compares your role to your scope to determine what you have access to
 Get-AzureTenantId ------------------ Returns the ID of a tenant belonging to a domain
-Get-AzureUser ---------------------- Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
-Show-AzureCurrentUser -------------- Returns the current logged in user name and any owned objects
+Get-AzureADUser -------------------- Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
+Get-AzureCurrentUser --------------- Returns the current logged in user name and any owned objects
 Show-AzureKeyVaultContent ---------- Lists all available content in a key vault
 Show-AzureStorageContent ----------- Lists all available storage containers, shares, and tables
 
 ------------------Operational --------------
 
-Add-AzureADGroup ---------------- Adds a user to an Azure AD Group
-Add-AzureADRole ----------------- Assigns a specific Azure AD role to a User
-Add-AzureSPSecret --------------- Adds a secret to a service principal
-Add-AzureRole ------------------- Adds a role to a user in Azure
-Connect-AzureJWT ---------------- Logins to Azure using a JWT access token. 
-New-AzureBackdoor --------------- Creates a backdoor in Azure via Service Principal
-Export-AzureKeyVaultContent ----- Exports a Key as PEM or Certificate as PFX from the Key Vault
-Get-AzureKeyVaultContent -------- Get the secrets and certificates from a specific Key Vault or all of them
-Get-AzureRunAsCertificate ------- Will gather a RunAs accounts certificate if one is being used by an automation account, which can then be used to login as that account. 
-Get-AzureRunbookContent --------- Gets a specific Runbook and displays its contents or all runbook contents
-Get-AzureStorageContent --------- Gathers a file from a specific blob or File Share
-Get-AzureVMDisk ----------------- Generates a link to download a Virtual Machiche’s disk. The link is only available for 24 hours.
-Invoke-AzureCommandRunbook ------ Will execute a supplied command or script from a Runbook if the Runbook is configured with a “RunAs” account
-Invoke-AzureCustomScriptExtension Runs a PowerShell script by uploading it as a Custom Script Extension
-Invoke-AzureMIBackdoor ---------- Creates a managed identity for a VM and exposes the REST API on it to make it a persistent JWT backdoor generator.
-Invoke-AzureRunCommand ---------- Will run a command or script on a specified VM
-Invoke-AzureRunMSBuild ---------- Will run a supplied MSBuild payload on a specified VM. 
-Invoke-AzureRunProgram ---------- Will run a given binary on a specified VM
-Invoke-AzureVMUserDataAgent ----- Deploys the agent used by Invoke-AzureVMUserDataCommand
-Invoke-AzureVMUserDataCommand --- Executes a command using the userData channel on a specified Azure VM.
-New-AzureUser ------------------- Creates a user in Azure Active Directory
-New-AzureIntuneScript ----------- Uploads a PS script to Intune
-Set-AzureElevatedPrivileges ----- Elevates the user’s privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
-Set-AzureSubscription ----------- Sets default subscription. Necessary if in a tenant with multiple subscriptions.
-Set-AzureUserPassword ----------- Sets a user’s password
-Start-AzureRunbook -------------- Starts a Runbook	
+Add-AzureADGroupMember ------------- Adds a user to an Azure AD Group
+Add-AzureADRole -------------------- Assigns a specific Azure AD role to a User
+Add-AzureADSPSecret ---------------- Adds a secret to a service principal
+Add-AzureRole ---------------------- Adds a role to a user in Azure
+Connect-AzureJWT ------------------- Logins to Azure using a JWT access token. 
+New-AzureBackdoor ------------------ Creates a backdoor in Azure via Service Principal
+Export-AzureKeyVaultContent -------- Exports a Key as PEM or Certificate as PFX from the Key Vault
+Get-AzureKeyVaultContent ----------- Get the secrets and certificates from a specific Key Vault or all of them
+Get-AzureRunAsCertificate ---------- Will gather a RunAs accounts certificate if one is being used by an automation account, which can then be used to login as that account. 
+Get-AzureRunbookContent ------------ Gets a specific Runbook and displays its contents or all runbook contents
+Get-AzureStorageContent ------------ Gathers a file from a specific blob or File Share
+Get-AzureVMDisk -------------------- Generates a link to download a Virtual Machiche’s disk. The link is only available for 24 hours.
+Invoke-AzureCommandRunbook --------- Will execute a supplied command or script from a Runbook if the Runbook is configured with a “RunAs” account
+Invoke-AzureCustomScriptExtension -- Runs a PowerShell script by uploading it as a Custom Script Extension
+Invoke-AzureMIBackdoor ------------- Creates a managed identity for a VM and exposes the REST API on it to make it a persistent JWT backdoor generator.
+Invoke-AzureRunCommand ------------- Will run a command or script on a specified VM
+Invoke-AzureRunMSBuild ------------- Will run a supplied MSBuild payload on a specified VM. 
+Invoke-AzureRunProgram ------------- Will run a given binary on a specified VM
+Invoke-AzureVMUserDataAgent -------- Deploys the agent used by Invoke-AzureVMUserDataCommand
+Invoke-AzureVMUserDataCommand ------ Executes a command using the userData channel on a specified Azure VM.
+New-AzureADUser -------------------- Creates a user in Azure Active Directory
+New-AzureIntuneScript -------------- Uploads a PS script to Intune
+Set-AzureElevatedPrivileges -------- Elevates the user’s privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
+Set-AzureSubscription -------------- Sets default subscription. Necessary if in a tenant with multiple subscriptions.
+Set-AzureADUserPassword ------------ Sets a user’s password
+Start-AzureRunbook ----------------- Starts a Runbook	
 "@
         }
     if($Banner)
@@ -230,7 +221,7 @@ Write-Host @'
 8888888P"  d88""88b 888  888  888 d8P  Y8b 888P"  .'____    ,'     d88P     888  888 888P"   d8P  Y8b   
 888        888  888 888  888  888 88888888 888         /  ,'      d88P      888  888 888     88888888 
 888        Y88..88P Y88b 888 d88P Y8b.     888        / ,'       d88P       Y88b 888 888     Y8b.   
-888         "Y88P"   "Y8888888P"   "Y8888  888       /,'        d8888888888  "Y88888 888      "Y8888  version 2.1
+888         "Y88P"   "Y8888888P"   "Y8888  888       /,'        d8888888888  "Y88888 888      "Y8888  version 2.2
                                                     /'                                                													
 '@ -ForegroundColor Cyan
 
@@ -243,7 +234,7 @@ Write-Host @'
             Write-Host 'Please set your default subscription with ' -ForegroundColor yellow -NoNewline 
             Write-Host 'Set-AzureSubscription ' -ForegroundColor Magenta -NoNewline
             Write-Host 'if you have multiple subscriptions. Functions WILL fail if you do not do this. Use '  -ForegroundColor yellow -NoNewline 
-            Write-Host 'Show-AzureCurrentUser' -ForegroundColor Magenta -NoNewline
+            Write-Host 'Get-AzureCurrentUser' -ForegroundColor Magenta -NoNewline
 			Write-Host ' to get list your accounts roles & permissions'-ForegroundColor Yellow
    		
     }
@@ -283,87 +274,57 @@ function Set-AzureSubscription
     Set-AzContext -SubscriptionId $choice.Id
 }
 
-function Get-AzureADRole
+function Get-AzureADRoleMember
 {
 <# 
 .SYNOPSIS
-    Lists the roles in Azure AD and what users are part of the role. 
-.PARAMETER
-	-All (Lists all roles, even those without a user in them)
-    -Role (Specific role)
+    Lists the members of a given role in AAD
+
+.PARAMETER Role
+    Name of a specific role to gather
+
 .EXAMPLE
-	Get-AzureADRole -Role 'Global Administrator'
-    Get-AzureADRole -Role '4dda258a-4568-4579-abeb-07709e34e307'
-	Get-AzureADRole -All
+	Get-AzureADRoleMember -Role 'Global Administrator'
 #>
     [CmdletBinding()]
     Param(
-    [Parameter(Mandatory=$False)][String]$Role = $null,
-    [Parameter(Mandatory=$False)][Switch]$All = $null)
-    $ConnectAAD = Connect-AADUser
-    $roles = Get-AzureADDirectoryRole
-    
-    If($All)
-    {
-	    ForEach ($AADRole in $Roles)
-	    {
-	      $roleid = $AADRole.ObjectId
-          $members = Get-AzureADDirectoryRoleMember -ObjectId $roleid          
-          $obj = New-Object -TypeName psobject
-          $obj | Add-Member -MemberType NoteProperty -Name Role -Value $AADRole.DisplayName
-          $obj | Add-Member -MemberType NoteProperty -Name UserMember -Value $members.UserPrincipalName
-          $obj | Add-Member -MemberType NoteProperty -Name MemberType -Value $members.ObjectType
-          If($members.objectType -eq 'ServicePrincipal'){
-          $obj | Add-Member -MemberType NoteProperty -Name ServicePrincipalMember -Value $members.AppDisplayName
-          }
-          $obj
-        }	
-    }
-    If($Role)
-    {
-        If($Role.length -eq 36)
-        {
-            Get-AzureADDirectoryRoleMember -ObjectId $Role
-        }
-        else
-        {
-            
-            $roledata = Get-AzureADDirectoryRole | Where-Object {$_.DisplayName -eq "$Role"}
-            $roleid = $roledata.ObjectId 
-            Get-AzureADDirectoryRoleMember -ObjectId $roleid
-           
+    [Parameter(Mandatory=$True)][String]$Role = $null)
+    $Headers = Get-AzureToken -Graph
+    $rolesreq = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/directoryRoles'
+    $roles = $rolesreq.value
+    $roledata = $roles | Where-Object {$_.displayName -eq $Role}
+    $id = $roledata.id
+    $membersreq = Invoke-RestMethod -Headers $Headers -Uri https://graph.microsoft.com/beta/directoryRoles/$id/members
+    $membersreq.value | Select-Object -Property '@odata.type', userPrincipalName, id
 
-        }  
-    }
-    If(!$All -and !$Role)
-    {
-        Write-Host "Usage:" -ForegroundColor Red
-        Write-Host "Get-AzureADRoleMember -Role '4dda258a-4568-4579-abeb-07709e34e307'" -ForegroundColor Red
-        Write-Host "Get-AzureADRoleMember -All" -ForegroundColor Red
-        Write-Host "Get-AzureADRoleMember -Role 'Global Administrator'" -ForegroundColor Red
-
-    }
 }
 
-function Get-AzureUser
+function Get-AzureADUser
 {
 <# 
 .SYNOPSIS
-    Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
+    Gathers info on a specific user or all users including their groups and roles in AzureAD
 
-.PARAMETER 
-    -Username (User Principal Name)
-	-All (Switch)
+.PARAMETER Username
+    User principal name
+
+.PARAMETER Id
+    User's object ID
+
+.PARAMETER All
+    Switch; gathers all users (Warning: May take awhile if in a large tenant)
 
 .EXAMPLE
-    Get-AzureUser -Username Test@domain.com
-	Get-AzureUser -All
+    Get-AzureADUser -Username Test@domain.com
+    Get-AzureADUser -Id 8fc3e9a3-3e8e-447a-8bcc-cc33db6b9728
+	Get-AzureADUser -All
 #>
     [CmdletBinding()]
     Param(
     [Parameter(Mandatory=$false,HelpMessage='Enter the username with the domain')][String]$Username = $null,
+    [Parameter(Mandatory=$false,HelpMessage='User ID')][String]$Id = $null,
 	[Parameter(Mandatory=$false)][Switch]$All = $null)
-    $ConnectAAD = Connect-AADUser
+    $Headers = Get-AzureToken -Graph    
 	If($All)
 	{
 		$users = Get-AzADUser
@@ -371,138 +332,148 @@ function Get-AzureUser
 		    {
                 $obj = New-Object -TypeName psobject
 			    $userid = $user.id
-                $Memberships = Get-AzureADUserMembership -ObjectId $userid
+                $userdata = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid" 
+                $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid/memberOf" 
+                $Memberships = $MembershipsReq.value
                 $Groups = @()
                 $AADRoles = @()
                 ForEach ($Membership in $Memberships){
-                    If($Membership.ObjectType -eq 'Group'){
+                    If($Membership."@odata.type" -eq '#microsoft.graph.group'){
                     $GroupName = $Membership.DisplayName
                     $Groups += $GroupName                  
                     }else{
                     $AADRoles += $Membership.DisplayName
                     }
                 } 
-                $rbac = @()           
-		        try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
-                If($rbacroles){                                     
-                    ForEach ($rbacrole in $rbacroles){
-                    $RBACRoleCollection = $rbacrole.RoleDefinitionName + ' (' +  $rbacrole.scope + ')'
-                    $rbac += $RBACRoleCollection
-                    }
-                }
-		        $obj | Add-Member -MemberType NoteProperty -Name Username -Value $user.userPrincipalName
-		        $obj | Add-Member -MemberType NoteProperty -Name ObjectId -Value $userId
+	            $obj | Add-Member -MemberType NoteProperty -Name Username -Value $userdata.UserPrincipalName
+	            $obj | Add-Member -MemberType NoteProperty -Name ObjectId -Value $userId
+                $obj | Add-Member -MemberType NoteProperty -Name Title -Value $userdata.jobTitle
+                If($userdata.onPremisesDistinguishedName){
+                $obj | Add-Member -MemberType NoteProperty -Name OnPremDN -Value $userdata.onPremisesDistinguishedName}
                 $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
                 $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
-		        $obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbac
-                $obj
+                $obj	
 		}
-	}
-	
+	}	
 	If($Username){
-        If($Username -notcontains '@'){
+        If($Username -notmatch '@'){
             Write-Error 'Please supply the full userprincipalname (user@domain.com)'-Category InvalidArgument
 	    }
         else{
 	    $obj = New-Object -TypeName psobject
 	    $userdata = Get-AzADUser -UserPrincipalName $Username
         $userid = $userdata.Id
-        $Memberships = Get-AzureADUserMembership -ObjectId $userid
+        $userdata = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid" 
+        $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid/memberOf" 
+        $Memberships = $MembershipsReq.value
         $Groups = @()
         $AADRoles = @()
         ForEach ($Membership in $Memberships){
-            If($Membership.ObjectType -eq 'Group'){
+            If($Membership."@odata.type" -eq '#microsoft.graph.group'){
             $GroupName = $Membership.DisplayName
             $Groups += $GroupName                  
             }else{
             $AADRoles += $Membership.DisplayName
             }
         } 
-        $rbac = @()           
-	    try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
-        If($rbacroles){                                     
-            ForEach ($rbacrole in $rbacroles){
-            $RBACRoleCollection = $rbacrole.RoleDefinitionName + ' (' +  $rbacrole.scope + ')'
-            $rbac += $RBACRoleCollection
-            }
-        }
-	    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $username
+	    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $userdata.UserPrincipalName
 	    $obj | Add-Member -MemberType NoteProperty -Name ObjectId -Value $userId
+        $obj | Add-Member -MemberType NoteProperty -Name Title -Value $userdata.jobTitle
+        If($userdata.onPremisesDistinguishedName){
+        $obj | Add-Member -MemberType NoteProperty -Name OnPremDN -Value $userdata.onPremisesDistinguishedName}
         $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
         $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
-	    $obj | Add-Member -MemberType NoteProperty -Name AzureRoles -Value $rbac
+        $obj		  
+        }
+    }
+    If($Id){
+	    $obj = New-Object -TypeName psobject
+	    $userdata = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id" 
+        $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id/memberOf" 
+        $Memberships = $MembershipsReq.value
+        $Groups = @()
+        $AADRoles = @()
+        ForEach ($Membership in $Memberships){
+            If($Membership."@odata.type" -eq '#microsoft.graph.group'){
+            $GroupName = $Membership.DisplayName
+            $Groups += $GroupName                  
+            }else{
+            $AADRoles += $Membership.DisplayName
+            }
+        } 
+	    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $userdata.UserPrincipalName
+	    $obj | Add-Member -MemberType NoteProperty -Name ObjectId -Value $Id
+        $obj | Add-Member -MemberType NoteProperty -Name Title -Value $userdata.jobTitle
+        If($userdata.onPremisesDistinguishedName){
+        $obj | Add-Member -MemberType NoteProperty -Name OnPremDN -Value $userdata.onPremisesDistinguishedName}
+        $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
+        $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
         $obj	  
+    }  
+    else{
+        $Context = Get-AzContext
+        $UserType = $Context.Account.Type
+        If($UserType -eq 'User'){
+	        $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
+	        $id=$user.id
+            $upn = $user.userPrincipalName
+        }
+        If($UserType -eq 'ServicePrincipal'){
+            $id=$Context.Acccount.id
+        }
+	    $obj = New-Object -TypeName psobject
+	    $userdata = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id" 
+        $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id/memberOf" 
+        $Memberships = $MembershipsReq.value
+        $Groups = @()
+        $AADRoles = @()
+        ForEach ($Membership in $Memberships){
+            If($Membership."@odata.type" -eq '#microsoft.graph.group'){
+            $GroupName = $Membership.DisplayName
+            $Groups += $GroupName                  
+            }else{
+            $AADRoles += $Membership.DisplayName
+            }
+        } 
+	    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $userdata.UserPrincipalName
+	    $obj | Add-Member -MemberType NoteProperty -Name ObjectId -Value $Id
+        $obj | Add-Member -MemberType NoteProperty -Name Title -Value $userdata.jobTitle
+        If($userdata.onPremisesDistinguishedName){
+        $obj | Add-Member -MemberType NoteProperty -Name OnPremDN -Value $userdata.onPremisesDistinguishedName}
+        $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
+        $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
+        $obj	  
+    }          
+} 
 
-    }
-    }
-    If(!$Username -and !$All)
-    {
-        Write-Host "Usage:" -ForegroundColor Red
-        Write-Host "Get-AzureUser -Username Test@domain.com" -ForegroundColor Red
-        Write-Host "Get-AzureUser -All" -ForegroundColor Red
-    }
-    
-}
-
-function Get-AzureADGroup 
+function Get-AzureADGroupMember 
 {
 <# 
 .SYNOPSIS
-    Gets all the members of a specific group or all members of all groups. Group does NOT mean role.
+    Gets all the members of a specific group
 
 .PARAMETER 
-    -Group (Group name)
-	-All (List all group members of all groups)
+    -Group (Name or Id)
 
 .EXAMPLE
-	Get-AzureADGroup -Group 'Sql Admins'
-	Get-AzureADGroup -All 
+	Get-AzureADGroupMember -Group 'Sql Admins'
 #>
     [CmdletBinding()]
     Param(
-	[Parameter(Mandatory=$false,HelpMessage='Group name')][String]$Group = $null,
-	[Parameter(Mandatory=$false)][Switch]$All = $false)
-    Connect-AADUser
-	If($All)
-	{
-		Write-Host ""
-		$groups=Get-AzADGroup
-		ForEach ($g in $groups)
-		{
-            $obj = New-Object -TypeName psobject
-			$obj | Add-Member -MemberType NoteProperty -Name GroupName -Value $g.displayname
-			$obj | Add-Member -MemberType NoteProperty -Name GroupId -Value $g.Id
-			$obj | Add-Member -MemberType NoteProperty -Name MemberName -Value ''
-			$obj | Add-Member -MemberType NoteProperty -Name MemberId -Value ''         
-			$members = Get-AzADGroupMember -GroupObjectId $g.id 
-			ForEach ($member in $members)
-			{ 
-			    $obj | Add-Member -MemberType NoteProperty -Name MemberName -Value $member.userPrincipalName -Force
-			    $obj | Add-Member -MemberType NoteProperty -Name MemberId -Value $member.Id -Force
-                				
-			}
-            $obj
-		} 
-	}
-	If($group)
-	{
-		$groupdata = Get-AzADGroup -DisplayName $Group
-		$obj = New-Object -TypeName psobject
-		$obj | Add-Member -MemberType NoteProperty -Name GroupName -Value $Group
-		$obj | Add-Member -MemberType NoteProperty -Name GroupId -Value $groupdata.id
-		$members = Get-AzADGroupMember -GroupDisplayName $Group
-		$obj | Add-Member -MemberType NoteProperty -Name Members -Value $members.UserPrincipalName
-		$obj | Add-Member -MemberType NoteProperty -Name Members -Value $members.Id
-		$obj	
-	
-	}	
-	if(!$All -and !$Group)
-	{
-		Write-Error "Must supply a group name or use -All switch" -Category InvalidArgument
-	}
+	[Parameter(Mandatory=$True,HelpMessage='Group name or Id')][String]$Group = $null)
+    If($Group.length -eq 36){
+    $id = $Group
+    }
+    else{
+    $groupdata = Get-AzADGroup -DisplayName $Group
+    $id = $groupdata.id   
+    }
+    $Headers = Get-AzureToken -Graph  
+	$membersREQ = Invoke-RESTMethod -uri https://graph.microsoft.com/beta/groups/$id/members -Headers $Headers
+    $membersREQ.value
 }
 
-function Add-AzureADGroup 
+function Add-AzureADGroupMember
 {
 <# 
 .SYNOPSIS
@@ -513,7 +484,7 @@ function Add-AzureADGroup
     -Group (AAD Group name)
 
 .EXAMPLE
-    Add-AzureADGroup -User john@contoso.com -Group 'SQL Users'
+    Add-AzureADGroupMember -User john@contoso.com -Group 'SQL Users'
 #>
     [CmdletBinding()]
     Param(
@@ -542,108 +513,141 @@ function Add-AzureADRole
 #>
     [CmdletBinding()]
     Param(
-	[Parameter(Mandatory=$false)][String]$ServicePrincipal = $null,
     [Parameter(Mandatory=$false)][String]$UserId = $null,
     [Parameter(Mandatory=$false)][String]$Username = $null,
     [Parameter(Mandatory=$false)][String]$RoleId = $null,
     [Parameter(Mandatory=$false)][String]$Role = $null)
-    $ConnectAAD = Connect-AADUser
 
-    If($Role)
-    {
-        $roledata = Get-AzureADDirectoryRole | Where-Object {$_.DisplayName -eq "$Role"}
-        $roleid = $roledata.ObjectId
-    }
+    $Headers = Get-AzureToken -Graph
     If($Username){
-        If($Username -notcontains '@')
-        {
-         Write-Error 'Please supply the full userprincipalname (user@domain.com)'-Category InvalidArgument
-        }
-        else{
-            $userdata = Get-AzADUser -UserPrincipalName $Username
-            $userid = $userdata.Id
-            Add-AzureADDirectoryRoleMember -ObjectId $RoleId -RefObjectId $UserId
-        }
+        If($Username -notmatch '@'){Write-Error "Username must contain the domain, e.g. user@domain.com";break}
+        $userdata = Invoke-RestMethod -Headers $Headers -Uri https://graph.microsoft.com/beta/users/$username
+        $Userid = $userdata.id
     }
-    If($ServicePrincipal)
-    {
-        $spdata = Get-AzADServicePrincipal -DisplayName $ServicePrincipal
-        $spid = $spdata.Id
-        Add-AzureADDirectoryRoleMember -ObjectId $RoleId -RefObjectId $spid
+    If(!$RoleID){
+        $uri = 'https://graph.microsoft.com/beta/directoryRoles?$filter=displayName eq ' +"'"+ $role + "'"
+        $roles = Invoke-RestMethod -Headers $Headers -Uri $uri
+        $roleid = $roles.value.id
     }
-    If(!$ServicePrincipal -and !$Username)
-    {
-     Write-Error 'Please supply a userprincipalname (user@domain.com) or service principal name'-Category InvalidArgument
-    }
-    If(!$Role -and !$RoldID)
-    {
-     Write-Error 'Please supply a role or roleId'-Category InvalidArgument
-    }
+
+    $body = [PSCustomObject]@{
+            roleDefinitionId = $roleid
+            principalId = $userid
+            directoryScopeId = '/'
+            }
+    $json = $body | convertto-json
+    Invoke-RestMethod -Headers $Headers -ContentType 'application/json' -Method POST -Body $json -Uri https://graph.microsoft.com/beta/roleManagement/entitlementManagement/roleAssignment  
 }
 
-function Get-AzureTargets
+function Get-AzureTarget
 {
 <#
 .SYNOPSIS 
-    Checks your role against the scope of your role to determine what you have access to. 
+    Checks your role against the scope of your role to determine what you have access to.
+
+.DESCRIPTION
+    Gathers your AAD roles and ARM roles then lists the resources that pertain to that scope. 
+     
+.PARAMETER list 
+    Switch; List view
+
+.PARAMETER Id
+    Search the access a specific user or principal has via their object ID
+
+.EXAMPLE
+    Get-AzureTarget
+    Get-AzureTarget -ID 11624683-bea6-4b07-86c4-576a4ce6e1c8
+
 #>
-    $Connect = Connect-AADUser
-    $Context = Get-AzContext
-    $Headers = Get-AzureGraphToken
-    $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
-    $userid=$user.id
-    $Memberships = Get-AzureADUserMembership -ObjectId $userid
-    $aadroles = Get-AzureADUserMembership -ObjectId $userid
-    $Groups = @()
-    $AADRoles = @()
-    $AADRolesDetailed = @()
-    ForEach ($Membership in $Memberships){
-        If($Membership.ObjectType -eq 'Group'){
-        $GroupName = $Membership.DisplayName
-        $Groups += $GroupName                  
-        }else{
-        $AADRoles += $Membership.DisplayName
-        $AADRolesDetailed += $Membership
-        }
-    }           
-	
-    Write-Host "AzureAD Roles:" -ForegroundColor Magenta
-    Write-Host ""
-    ForEach ($aadrole in $AADRolesDetailed){
-    $aadrolename = $aadrole.DisplayName
-    $aadroledescription = $AADRole.Description
-    Write-Host "$aadrolename" -ForegroundColor Green -nonewline
-    Write-Host " - $aadroledescription"
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$false)][Switch]$List=$false,
+    [Parameter(Mandatory=$false)][String]$Id=$null)
+    $Headers = Get-AzureToken -Graph   
+    If($Id){
+        $user = Invoke-RestMethod -Headers $Headers -Uri "https://graph.microsoft.com/beta/users/$id"
+        $upn = $user.userPrincipalName
     }
-    Write-Host ""
-    Write-Host "Azure RBAC Roles:" -ForegroundColor Magenta
-    Write-Host ""
-    try{$rbacroles = Get-AzRoleAssignment -ObjectId $userid *>&1}catch{}
-    If($rbacroles){    
-        $resources = Get-AzResource                                  
-        ForEach ($rbacrole in $rbacroles){           
-            $rolename = $rbacrole.RoleDefinitionName
-            $roledef = Get-AzRoleDefinition -Name $rolename
-            $roledesc = $roledef.Description
-            $rolescope = $rbacrole.scope
-            Write-Host "$rolename" -ForegroundColor Green -NoNewline
-            Write-Host " - $roledesc"
-            Write-Host "Scope: $rolescope"    
-            Write-Host ""  
-            Write-Host "Resources under that scope: " -ForegroundColor yellow
-            $coll = @()
-            ForEach ($resource in $resources){                          
-                If($resource.resourceId -match $rolescope){
-                        $obj = New-Object -TypeName psobject
-                        $obj | Add-Member -MemberType NoteProperty -Name 'Resource Name' -Value $resource.ResourceName
-                        $obj | Add-Member -MemberType NoteProperty -Name 'Resource Group Name' -Value $resource.ResourceGroupName
-                        $obj | Add-Member -MemberType NoteProperty -Name 'Resource Type' -Value $resource.Type
-                        $coll += $obj 
-                }       
-               
-           } $coll | ft               
-        } 
-    }  
+    else{
+        $Context = Get-AzContext
+        $UserType = $Context.Account.Type
+        If($UserType -eq 'User'){
+	        $user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
+	        $id=$user.id
+            $upn = $user.userPrincipalName
+        }
+        If($UserType -eq 'ServicePrincipal'){
+            $id=$Context.Acccount.id
+        }
+    }
+    $Memberships = Invoke-RestMethod -Headers $Headers -Uri https://graph.microsoft.com/v1.0/users/$Id/MemberOf
+    $gids = $Memberships.value.id 
+    $Headers.Add('ConsistencyLevel','eventual')
+    $appcount = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/applications/$count'
+    If($AppCount -gt 100){
+        $prompt = Read-Host "There are $AppCount Applications, this may take awhile. Do you want to continue? [Y/N]"
+        If($prompt -match 'y'){
+            $appdata = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/applications'
+	        $apps = $appdata.value
+	        ForEach($app in $apps){   
+                $appobj = New-Object -TypeName psobject 
+                $appid = $app.id
+                $OwnedApps = Invoke-RestMethod -Headers $Headers -Uri "https://graph.microsoft.com/beta/applications/$appid/owners"
+                $OwnedByUser=$OwnedApps.value | Where-Object {$_.userPrincipalName -eq $upn}
+                $coll=@()
+		        If($OwnedByUser)
+		        {       
+                  $appobj | Add-Member -MemberType NoteProperty -Name 'OwnedAppName' -Value $app.DisplayName
+                  $appobj | Add-Member -MemberType NoteProperty -Name 'OwnedAppID' -Value $appid  
+                  $coll += $appobj               
+		        } $coll | ft        
+	        } 
+        }
+        else{}
+    }
+    else{
+        $appdata = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/applications'
+	    $apps = $appdata.value
+	    ForEach($app in $apps){   
+            $appobj = New-Object -TypeName psobject 
+            $appid = $app.id
+            $OwnedApps = Invoke-RestMethod -Headers $Headers -Uri "https://graph.microsoft.com/beta/applications/$appid/owners"
+            $OwnedByUser=$OwnedApps.value | Where-Object {$_.userPrincipalName -eq $upn}
+            $coll=@()
+		    If($OwnedByUser)
+		    {       
+              $appobj | Add-Member -MemberType NoteProperty -Name 'OwnedAppName' -Value $app.DisplayName
+              $appobj | Add-Member -MemberType NoteProperty -Name 'OwnedAppID' -Value $appid  
+              $coll += $appobj               
+		    } $coll | ft      
+	    } 
+    }
+    $Headers = Get-AzureToken -REST 
+    $Subs = Get-AzSubscription
+    ForEach($Sub in $Subs){
+        Set-AzContext $Sub.Id | Out-Null
+        $ResourceCollection = Get-AzResource     
+        $Result=@()
+        ForEach($Resource in $ResourceCollection){
+            $ResourceID = $Resource.ResourceId            
+            $Assignments = Get-AzRoleAssignment -Scope $ResourceID | Where-Object {$_.ObjectId -eq "$id" -or $gids -match $_.ObjectId}
+            ForEach($Assignment in $Assignments){            
+                $AccessibleResources = [PSCustomObject]@{
+                    Role = $Assignment.RoleDefinitionName       
+                    Subscription = $Sub.Name 
+                    ResourceGroup = $Resource.ResourceGroupName    
+                    ResourceName = $Resource.Name
+                    ResourceType = $Resource.ResourceType                                                       
+                    AssignedFrom = $Assignment.ObjectType
+                    GroupName = $Assignment.DisplayName
+                    Scope = $ResourceId                          
+                }
+            $Result+=$AccessibleResources
+            }           
+        }
+        If($List){$Result}
+        else{$Result | ft}
+    }
 }
 
 function Show-AzureKeyVaultContent
@@ -1333,7 +1337,7 @@ function New-AzureBackdoor
     [Parameter(Mandatory=$true)][String]$Password = $null)
 
     Import-Module Az.Resources
-    $Headers = Get-AzureGraphToken
+    $Headers = Get-AzureToken -Graph
     $credentials = New-Object -TypeName Microsoft.Azure.Commands.ActiveDirectory.PSADPasswordCredential -Property @{StartDate=Get-Date; EndDate=Get-Date -Year 2024; Password=$Password}
     $make = New-AzADServicePrincipal -DisplayName $Username -PasswordCredential $credentials
     $UserId = $make.Id
@@ -1508,7 +1512,7 @@ Get-AzureSQLDB -Server 'SQLServer01'
     }
 }
 
-function Set-AzureUserPassword
+function Set-AzureADUserPassword
 {
 <#
 .SYNOPSIS 
@@ -1520,7 +1524,7 @@ Username - Name of user
 
 .EXAMPLE
 
-Set-AzureUserPassword -Username john@contoso.com -Password newpassw0rd1
+Set-AzureADUserPassword -Username john@contoso.com -Password newpassw0rd1
 #>
 	[CmdletBinding()]
 	 Param(
@@ -1535,7 +1539,7 @@ Set-AzureUserPassword -Username john@contoso.com -Password newpassw0rd1
 	}
 }
 
-function Get-AzureRunAsAccounts
+function Get-AzureRunAsAccount
 {
 <#
 .SYNOPSIS 
@@ -1564,16 +1568,16 @@ Get-AzureRunAsAccounts
     }
 }
 
-function Get-AzureAppOwner
+function Get-AzureADAppOwner
 {
 <#
 .SYNOPSIS 
 Returns all owners of all applications in AAD
 
 .EXAMPLE
-Get-AzureAppOwners
+Get-AzureADAppOwners
 #>
-    $Headers = Get-AzureGraphToken
+    $Headers = Get-AzureToken -Graph
 	$Uri = 'https://graph.microsoft.com/beta/applications'
 	$appdata = Invoke-RestMethod -Headers $Headers -Uri $Uri
 	$apps = $appdata.value
@@ -1591,7 +1595,7 @@ Get-AzureAppOwners
 	}
 }
 
-function Add-AzureSPSecret
+function Add-AzureADSPSecret
 {
 <# 
 .SYNOPSIS
@@ -1601,21 +1605,21 @@ function Add-AzureSPSecret
     -ApplicationName (Name of Application the SP is tied to)
 	
 .EXAMPLE
-	Add-AzureSPSecret -ApplicationName "ApplicationName"
+	Add-AzureADSPSecret -ApplicationName "ApplicationName"
 #>
     [CmdletBinding()]
     Param(
     [Parameter(Mandatory=$true)][String]$ApplicationName = $null)
-    $Headers = Get-AzureGraphToken 
+    $Headers = Get-AzureToken -Graph 
     $App = Get-AzADApplication -DisplayName $ApplicationName    
-    $Uri = 'https://graph.microsoft.com/beta/applications/' + $App.ObjectId + '/addPassword'
+    $Uri = 'https://graph.microsoft.com/beta/applications/' + $App.id + '/addPassword'
     $Body = [PSCustomObject]@{
         passwordCredential = @{displayName="TestPass"}
     }
     $json = $Body | ConvertTo-Json
     $Req = Invoke-RestMethod -Method POST -Uri $Uri -Body $json -Headers $Headers -ContentType 'application/json'
     $Context = Get-AzContext
-    $f1 = '$ApplicationId = "' + $App.ApplicationId + '"'
+    $f1 = '$ApplicationId = "' + $App.AppId + '"'
     $f2 = '$SecurePassword = "' + $Req.secretText + '"'
     $f3 = '$SecurePassword = ConvertTo-SecureString -String $SecurePassword -AsPlainText -Force'
 	If($Req)
@@ -1630,7 +1634,7 @@ function Add-AzureSPSecret
 	}
 }
 
-function New-AzureUser
+function New-AzureADUser
 {
 <# 
 .SYNOPSIS
@@ -1641,7 +1645,7 @@ function New-AzureUser
 	-Password (Password1234)
 	
 .EXAMPLE
-	New-AzureUser -Username 'test@test.com' -Password Password1234
+	New-AzureADUser -Username 'test@test.com' -Password Password1234
 #>
     [CmdletBinding()]
     Param(
@@ -1714,7 +1718,7 @@ function Get-AzureRole
 			$obj = New-Object -TypeName psobject
             $obj | Add-Member -MemberType NoteProperty -Name RoleName -Value $rolename 	
             $obj | Add-Member -MemberType NoteProperty -Name RoleId -Value $definitions.Id 
-			$obj | Add-Member -MemberType NoteProperty -Name Username -Value $rolelist.SignInName
+			$obj | Add-Member -MemberType NoteProperty -Name Username -Value $rolelist.DisplayName
 			$obj | Add-Member -MemberType NoteProperty -Name UserId -Value $rolelist.ObjectId
 			$obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rolelist.Scope
 			$obj  		
@@ -1728,7 +1732,7 @@ function Get-AzureRole
 		$obj = New-Object -TypeName psobject
         $obj | Add-Member -MemberType NoteProperty -Name RoleName -Value $Role 	
         $obj | Add-Member -MemberType NoteProperty -Name RoleId -Value $definitions.Id 
-		$obj | Add-Member -MemberType NoteProperty -Name Username -Value $rolelist.SignInName
+		$obj | Add-Member -MemberType NoteProperty -Name Username -Value $rolelist.DisplayName
 		$obj | Add-Member -MemberType NoteProperty -Name UserId -Value $rolelist.ObjectId
 		$obj | Add-Member -MemberType NoteProperty -Name Scope -Value $rolelist.Scope
 		$obj  					
@@ -1853,36 +1857,39 @@ function Get-AzureLogicAppConnector
 
 Get-AzResource | Where-Object {$_.ResourceType -eq 'Microsoft.Web/Connections' -and $_.ResourceId -match 'azuread'}
 }
-function Get-AzureDeviceOwner
+
+function Get-AzureADDeviceOwner
 {
 <# 
 .SYNOPSIS
     Lists the owners of devices in AAD. This will only show devices that have an owner.
 	
 .EXAMPLE
-	Get-AzureDeviceOwners
+	Get-AzureADDeviceOwner
 #>
-
-    $AADDevices =  Get-AzureADDevice | ?{$_.DeviceOSType -Match "Windows" -Or $_.DeviceOSType -Match "Mac"}
-	$AADDevices | ForEach-Object {
-
-        $Device = $_
-        $DisplayName = $Device.DisplayName
-        $Owner = Get-AzureADDeviceRegisteredOwner -ObjectID $Device.ObjectID   
-        If($Owner){    
+    $Headers = Get-AzureToken -Graph
+    $req = Invoke-RestMethod -uri https://graph.microsoft.com/v1.0/devices -Headers $Headers
+    $devices = $req.value
+    ForEach($device in $devices){
+        $id = $device.id
+        $ownerreq = Invoke-RestMethod -uri https://graph.microsoft.com/v1.0/devices/$id/registeredOwners -Headers $Headers
+        $ownerid = $ownerreq.value.id
+        If($Ownerid){
+            $ownerDN = $ownerreq.value.displayName
+            $ownerUPN = $ownerreq.value.userPrincipalName
             $AzureDeviceOwner = [PSCustomObject]@{
                 DeviceDisplayname   = $Device.Displayname
-                DeviceID            = $Device.ObjectID
-                DeviceOS            = $Device.DeviceOSType
-                OwnerDisplayName    = $Owner.Displayname
-                OwnerID             = $Owner.ObjectID
-                OwnerType           = $Owner.ObjectType
-                OwnerOnPremID       = $Owner.OnPremisesSecurityIdentifier
-            
+                DeviceID            = $Device.id
+                DeviceOS            = $Device.operatingSystem
+                OSVersion           = $device.operatingSystemVersion
+                OwnerDisplayName    = $ownerDN
+                OwnerID             = $Ownerid
+                OwnerType           = $Ownerreq.value.'@odata.type'
+                OwnerUPN            = $ownerUPN       
             }
             $AzureDeviceOwner
-        }       
-	}
+        }
+    }
 }
 
 function Invoke-AzureMIBackdoor
@@ -1970,6 +1977,7 @@ function Invoke-AzureMIBackdoor
 }
 
 function Connect-AzureJWT
+{
 <# 
 .SYNOPSIS
     Logins to Azure using a JWT access token. Use -Raw to supply an unstructured token from a Managed Identity token request.
@@ -1985,7 +1993,6 @@ function Connect-AzureJWT
 	
 	Connect-AzureJWT -Token $token -AccountId 93f7295a-678e-44d2-b705-1a1fa41560e8 -Raw
 #>	
-{
     [CmdletBinding()]
     Param(
 	[Parameter(Mandatory=$true)][String]$Token = $null,
@@ -2003,33 +2010,16 @@ function Connect-AzureJWT
 	}
 }
 
-function Get-AzureManagedIdentities
+function Get-AzureManagedIdentity
+{
 <# 
 .SYNOPSIS
-    Gathers all Managed Identities and lists their role & scope.
+    Gathers all Managed Identities in AAD
 #>
-{
-	$Headers = Get-AzureGraphToken 
-	$Login = Connect-AADUser
-	$MIs = Get-AzADServicePrincipal | where-object {$_.ServicePrincipalNames -match 'https://identity.azure.net'}
-	ForEach ($MI in $MIs){
-		$id = $MI.id
-		$uri = 'https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?$filter=principalId' +' eq ' + "'" + $id + "'"
-		$user = Invoke-RestMethod -Headers $Headers -Uri $uri
-		$userdata = $user.value
-		$roledefid = $userdata.roleDefinitionId
-		$roledata = Invoke-RestMethod -Headers $Headers -Uri https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions/$roledefid
-		$rolename = $roledata.displayName
-		$RA = Get-AzRoleAssignment -ObjectId $MI.Id
-		$Obj = [PSCustomObject]@{
-		ManagedIdentityName = $MI.Displayname
-		AzRoleAssignment = $RA.RoleDefinitionName
-		AzScope = $RA.Scope
-		AzADRoleAssignment = $rolename
-		AzADScope = $userdata.resourceScope
-		}
-		$Obj | fl
-	}
+	$Headers = Get-AzureToken -Graph 
+    $req = Invoke-RestMethod -Uri 'https://graph.microsoft.com/beta/servicePrincipals' -Headers $Headers
+    $req.value | where-object {$_.ServicePrincipalNames -match 'https://identity.azure.net'} | Select-Object -Property DisplayName, appId, AlternativeNames
+
 }
 
 function Invoke-AzureVMUserDataCommand
@@ -2125,7 +2115,8 @@ rm C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.9\Downloads\*
 	rm $path
 }
 
-function Invoke-AzureCustomScriptExtension {
+function Invoke-AzureCustomScriptExtension
+{
 <# 
 .SYNOPSIS
     Runs a command by updating the CustomScriptExtension extension on an Azure VM
@@ -2144,7 +2135,7 @@ function Invoke-AzureCustomScriptExtension {
     $VMData = Get-AzVM -Name $VM -ResourceGroupName $ResourceGroup
     $id = $VMData.Id
     $Uri = 'https://management.azure.com' + $id + '/extensions/CustomScriptExtension?api-version=2021-07-01'
-    $Headers = Get-AzureRESTToken 
+    $Headers = Get-AzureToken -REST 
     $Body = [PSCustomObject]@{
         location = $VMData.Location
         properties = @{publisher="Microsoft.Compute";autoUpgradeMinorVersion="true";typeHandlerVersion="1.9";type="CustomScriptExtension"}
@@ -2169,7 +2160,7 @@ function Get-AzurePIMAssignment
 .SYNOPSIS
    Gathers the Privileged Identity Management assignments. Currently, only AzureRM roles are returned.
 #>
-    $headers = Get-AzureRESTToken
+    $headers = Get-AzureToken -REST
     $Context = Get-AzContext
     $subid = $Context.Subscription.id   
     $uri = 'https://management.azure.com/providers/Microsoft.Subscription/subscriptions/'+$subid+ '/providers/Microsoft.Authorization/roleEligibilityScheduleRequests?api-version=2020-10-01-preview'
@@ -2198,7 +2189,9 @@ function Get-AzurePIMAssignment
         $Obj | fl
     }
 }
-function Get-AzureTenantId {
+
+function Get-AzureTenantId 
+{
 <# 
 .SYNOPSIS
    Gathers the ID of a tenant from a supplied domain name.
