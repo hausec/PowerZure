@@ -1,10 +1,9 @@
 Operational Usage
 =================
 
-PowerZure comes in .ps1 format which requires it to be imported for each
-new PowerShell session. To import, simply use 
+PowerZure is a PowerShell module. To begin using PowerZure, import the manifest file:
 ::
-	Import-Module C:\Location\to\Powerzure.ps1
+	Import-Module C:\Location\to\Powerzure.psd1
 
 There is zero reason to ever run PowerZure on a victim’s machine.
 Authentication is done by using an existing accesstoken.json file or by
@@ -26,20 +25,20 @@ Once you are signed in to Azure, you can import PowerZure:
 
 ::
 
-   ipmo C:\Path\To\Powerzure.ps1
+   ipmo C:\Path\To\Powerzure.psd1
    
    
 Upon importing, it will list your current role and available subscriptions. If you're in a tenant with multiple subscriptions, you must set a default subscription with
 
 ::
    
-   Set-AzureSubscription -Id [Subscription ID]
+   Set-AzureSubscription
 
 Once set, you can run
 
 ::
 
-   Get-AzureTargets
+   Get-AzureTarget
 
    
-To get a list of resources you have access to and exploit them accordingly.
+To get a list of AzureAD and Azure objects you have access to and exploit them accordingly.

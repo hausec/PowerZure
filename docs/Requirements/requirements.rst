@@ -2,15 +2,12 @@ Requirements
 ============
 The `Azure PowerShell Az <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__  module is the successor to the AzureRM module and is the primary module used in PowerZure, as it is handles the requests interacting with Azure resources.. The Az module interacts using the Azure REST API.
 
-The AzureAD PowerShell module is also required. This module is used to make some AzureAD requests.
-
-
 PowerZure requires an Administrative PowerShell (at least 5.0) session and the `Az PowerShell <https://docs.microsoft.com/en-us/powershell/azure/?view=azps-4.2.0>`__  module.
 
 
 ****
 
-If you are in a tenant with multiple subscriptions, you must set your default subscription with
+The first function you should run is 'Set-AzureSubscription' as this will set the default subscription Azure functions will operate under. You may supply a subscription id via the '-id' option or running 'Set-AzureSubscription' without any options will bring an interactive menu to choose from.
 
 
 Set-AzureSubscription
@@ -27,7 +24,7 @@ subscriptions.
 
 ::
 
-  Set-AzureSubscription -Id [Subscription ID]
+  Set-AzureSubscription
 
 **Description**
 

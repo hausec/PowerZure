@@ -1,18 +1,118 @@
 Information Gathering
 =====================
 
-Get-AzureADRole
-------------------
+Get-AzureADAppOwner
+--------
 
 **Synopsis**
 
-Gets the members of one or all Azure AD role. Roles does not mean groups.
+
+Returns all owners of all Applications in AAD
 
 **Syntax**
 
 ::
 
-  Get-AzureADRole -All
+  Get-AzureADAppOwner
+
+**Description**
+
+Recursively looks through each application in AAD and lists the owners
+
+**Examples**
+
+::
+
+  Get-AzureADAppOwner
+
+**Parameters** 
+
+None
+
+**Output**
+
+Application owners in AAD
+
+Get-AzureADDeviceOwner
+--------
+
+**Synopsis**
+
+
+Lists the owners of devices in AAD. This will only show devices that have an owner.
+
+**Syntax**
+
+::
+
+  Get-AzureADDeviceOwner
+
+**Description**
+
+Lists the owners of devices in AAD. This will only show devices that have an owner.
+
+**Examples**
+
+::
+
+  Get-AzureADDeviceOwner
+
+**Parameters** 
+
+None
+
+**Output**
+
+Device owners from AAD
+
+
+Get-AzureADGroupMember
+-------------
+
+**Synopsis**
+
+
+Gets all the members of a specific group
+
+**Syntax**
+
+::
+
+  Get-AzureADGroupMember -Group '[Name of Group]'
+  
+
+**Description**
+
+Uses Graph API call to gather a group, the group's ID, the member's name, and the member's ID.
+
+**Examples**
+  
+::
+
+  Get-AzureADGroupMember -Group 'Sql Admins'
+
+**Parameters** 
+
+-Group
+
+Name of group to collect
+
+**Output**
+
+Group members and their IDs
+
+Get-AzureADRoleMember
+------------------
+
+**Synopsis**
+
+Lists the members of a given role in AAD
+
+**Syntax**
+
+::
+
+  Get-AzureADRoleMember -All
   
 ::
 
@@ -35,147 +135,235 @@ Due to mismatch in documentation, role names my not be 100% accurate to what the
 
 ::
 
-  Get-AzureADRole -All
-
-::
-
-  Get-AzureADRole -Role '4dda258a-4568-4579-abeb-07709e34e307'
-
-::
-
-  Get-AzureADRole -Role 'Company Administrator'
+  Get-AzureADRoleMember -Role 'Global Administrator'
 
 **Parameters** 
-
--All
-
-
-List all role's members
-
 
 -Role 
 
 
-The role ID or role name of the target role
+The role name of the target role
 
 **Output**
 
 All members of all roles, their IDs, and any Application Service Principal members.
 
-Get-AzureAppOwner
---------
+Get-AzureADUser
+------------
+
 
 **Synopsis**
 
-
-Returns all owners of all Applications in AAD
+Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
 
 **Syntax**
 
 ::
 
-  Get-AzureAppOwner
-
-**Description**
-
-Recursively looks through each application in AAD and lists the owners
-
-**Examples**
-
-::
-
-  Get-AzureAppOwner
-
-**Parameters** 
-
-None
-
-**Output**
-
-Application owners in AAD
-
-
-Get-AzureDeviceOwner
---------
-
-**Synopsis**
-
-
-Lists the owners of devices in AAD. This will only show devices that have an owner.
-
-**Syntax**
-
-::
-
-  Get-AzureDeviceOwner
-
-**Description**
-
-Lists the owners of devices in AAD. This will only show devices that have an owner.
-
-**Examples**
-
-::
-
-  Get-AzureDeviceOwner
-
-**Parameters** 
-
-None
-
-**Output**
-
-Device owners from AAD
-
-
-Get-AzureGroup
--------------
-
-**Synopsis**
-
-
-Gathers a specific group or all groups in AzureAD and lists their members. 
-
-**Syntax**
-
-::
-
-  Get-AzureGroup -Group '[Name of Group]'
+  Get-AzureADUser -Username [Usename]
   
 ::
 
-  Get-AzureGroup -All
+  Get-AzureADUser -All
 
 **Description**
 
-Uses Graph API call to gather a group, the group's ID, the member's name, and the member's ID.
+Gathers a user's Azure role by calling Get-AzRoleAssignment, then uses Graph API calls to gather their Azure AD roles. Uses Graph API call to gather assigned groups.
 
 **Examples**
-  
-::
-
-  Get-AzureGroup -Group 'Sql Admins'
-
 
 ::
 
-  Get-AzureGroup -All 
+  Get-AzureADUser -Username john@contoso.com
+
+::
+
+  Get-AzureADUser -All
 
 **Parameters** 
 
 -All
 
-Switch; Gathers all group's members
+Switch; Gathers all users in AzureAD.
 
+-Username 
 
--Group
-
-Name of group to collect
-
+Full user principal name of the target user in format: name@domain.com
 
 **Output**
 
-Group members and their IDs
+User ID, their AAD roles, their RBAC roles, and the scope of those roles
+
+Get-AzureCurrentUser
+---------------
+
+**Synopsis**
+
+
+Returns the current logged in user name and any owned objects
+
+
+**Syntax**
+
+
+::
+
+  Get-AzureCurrentUser
+
+**Description**
+
+
+Looks at the current logged in username and compares that to the role
+assignment list to determine what objects/resources the user has
+ownership over.
+
+**Examples**
+
+::
+
+  Get-AzureCurrentUser
+
+
+**Parameters** 
+
+None
+
+**Output**
+
+
+Current username and roles of the logged in User
+
+
+Get-AzureIntuneScript
+-------------
+
+**Synopsis**
+
+
+Lists available Intune scripts in Azure Intune
+
+**Syntax**
+
+::
+
+  Get-AzureInTuneScript
+  
+
+**Description**
+
+Uses a Graph API call to get any Intune scripts. This requires credentials in order to request a delegated token on behalf of the 'Office' Application in AAD, which has the correct permissions to access Intune data, where 'Azure PowerShell' Application does not.
+	
+**Examples**
+  
+::
+
+  Get-AzureInTuneScript
+
+**Parameters** 
+
+None
+
+**Output**
+
+List of scripts available in Intune
+
+Get-AzureLogicAppConnector
+-------------
+
+**Synopsis**
+
+
+Lists the connector APIs in Azure
+
+**Syntax**
+
+::
+
+  Get-AzureLogicAppConnector
+  
+
+**Description**
+
+Lists the connector APIs in AzureLists the connector APIs in Azure which may be connected to another resource, subscription, tenant, or service.
+	
+**Examples**
+  
+::
+
+  Get-AzureLogicAppConnector
+
+**Parameters** 
+
+None
+
+**Output**
+
+List of connections established in a Logic App. 
+
+Get-AzureManagedIdentity
+---------------
+
+**Synopsis**
+
+
+Gets a list of all Managed Identities and their roles.
+**Syntax**
+
+::
+
+Get-AzureManagedIdentity
+  
+
+**Description**
+
+Gathers any resources that are using a system assigned managed identity in Azure.
+	
+**Examples**
+  
+::
+
+  Get-AzureManagedIdentity
+
+**Parameters** 
+
+None
+
+**Output**
+
+List of system assigned managed identities.
+
+Get-AzurePIMAssignment
+---------------
+
+**Synopsis**
+
+
+Gathers the Privileged Identity Management assignments.
+
+**Syntax**
+
+::
+
+Get-AzurePIMAssignment
+  
+
+**Description**
+
+Gathers the Privileged Identity Management assignments in Azure resources. 
+
+**Examples**
+  
+::
+
+  Get-AzurePIMAssignment
+
+**Parameters** 
+
+None
+
+**Output**
+
+List of PIM assignments for Azure resources.
 
 Get-AzureRole
 ---------------
@@ -192,8 +380,6 @@ Gets the members of a role.
 ::
 
   Get-AzureRole -All
-
-.. _**Description**-11:
 
 **Description**
 
@@ -228,7 +414,7 @@ Get all roles
 
 Members of specified role, their Ids, and the scope.
 
-Get-AzureRunAsAccounts
+Get-AzureRunAsAccount
 ------------------
 
 **Synopsis**
@@ -240,7 +426,7 @@ Finds any RunAs accounts being used by an Automation Account
 
 ::
 
-  Get-AzureRunAsAccounts
+  Get-AzureRunAsAccount
 
 **Description**
 
@@ -250,7 +436,7 @@ Finds any RunAs accounts being used by an Automation Account by recursively goin
 
 ::
 
-  Get-AzureRunAsAccounts
+  Get-AzureRunAsAccount
 
 **Parameters**
 
@@ -322,7 +508,7 @@ Name of the SQL Server
 
 **Output**
 
-Get-AzureTargets
+Get-AzureTarget
 -----------
 
 **Synopsis**
@@ -335,7 +521,7 @@ and what kind of access it is (Read/write/execute).
 
 ::
 
-  Get-AzureTargets
+  Get-AzureTarget
 
 **Description**
 
@@ -349,7 +535,7 @@ the role definitions are actionable against.
 
 ::
 
-  Get-AzureTargets
+  Get-AzureTarget
 
 **Parameters**
 
@@ -362,90 +548,43 @@ None
 List of resources with what type of access the current user has access
 to.
 
-Get-AzureUser
-------------
-
+Get-AzureTenantId
+-----------
 
 **Synopsis**
 
-Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
+
+Returns the ID of a tenant belonging to a domain
 
 **Syntax**
 
 ::
 
-  Get-AzureUser -Username [Usename]
-  
-::
-
-  Get-AzureUser -All
+  Get-AzureTenantId
 
 **Description**
 
-Gathers a user's Azure role by calling Get-AzRoleAssignment, then uses Graph API calls to gather their Azure AD roles. Uses Graph API call to gather assigned groups.
+
+By looking at the the openid-configuration of a domain, the tenant ID can be retrieved. 
 
 **Examples**
 
 ::
 
-  Get-AzureUser -Username john@contoso.com
+  Get-AzureTenantId -Domain 'testdomain.onmicrosoft.com'
 
-::
-
-  Get-AzureUser -All
-
-**Parameters** 
-
--All
-
-Switch; Gathers all users in AzureAD.
-
--Username 
-
-Full user principal name of the target user in format: name@domain.com
-
-**Output**
-
-User ID, their AAD roles, their RBAC roles, and the scope of those roles
-
-Show-AzureCurrentUser
----------------
-
-**Synopsis**
+**Parameters**
 
 
-Returns the current logged in user name and any owned objects
+-Domain
 
-
-**Syntax**
-
-
-::
-
-  Show-AzureCurrentUser
-
-**Description**
-
-
-Looks at the current logged in username and compares that to the role
-assignment list to determine what objects/resources the user has
-ownership over.
-
-**Examples**
-
-::
-
-  Show-AzureCurrentUser
-
-
-**Parameters** 
-
-None
+Name of the domain
 
 **Output**
 
 
-Current username and roles of the logged in User
+The target domain's tenant ID.
+
 
 Show-AzureKeyVaultContent
 -------------
@@ -463,7 +602,7 @@ Lists all available content in a key vault
   
 ::
 
-  Show-AzureKeyVaultContent -Name ]VaultName]
+  Show-AzureKeyVaultContent -Name [VaultName]
 
 **Description**
 

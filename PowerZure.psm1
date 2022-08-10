@@ -162,10 +162,12 @@ function Invoke-PowerZure
 
 ------------------Info Gathering -------------
 
-Get-AzureADRoleMember -------------- Gets the members of one or all Azure AD role. Roles does not mean groups.
 Get-AzureADAppOwner ---------------- Returns all owners of all Applications in AAD
 Get-AzureADDeviceOwner ------------- Lists the owners of devices in AAD. This will only show devices that have an owner.
 Get-AzureADGroupMember ------------- Gathers a specific group or all groups in AzureAD and lists their members.
+Get-AzureADRoleMember -------------- Lists the members of a given role in AAD
+Get-AzureADUser -------------------- Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
+Get-AzureCurrentUser --------------- Returns the current logged in user name and any owned objects
 Get-AzureIntuneScript -------------- Lists available Intune scripts in Azure Intune
 Get-AzureLogicAppConnector --------- Lists the connector APIs in Azure
 Get-AzureManagedIdentity ----------- Gets a list of all Managed Identities and their roles.
@@ -176,8 +178,6 @@ Get-AzureRolePermission ------------ Finds all roles with a certain permission
 Get-AzureSQLDB --------------------- Lists the available SQL Databases on a server
 Get-AzureTarget -------------------- Compares your role to your scope to determine what you have access to
 Get-AzureTenantId ------------------ Returns the ID of a tenant belonging to a domain
-Get-AzureADUser -------------------- Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
-Get-AzureCurrentUser --------------- Returns the current logged in user name and any owned objects
 Show-AzureKeyVaultContent ---------- Lists all available content in a key vault
 Show-AzureStorageContent ----------- Lists all available storage containers, shares, and tables
 
@@ -188,7 +188,6 @@ Add-AzureADRole -------------------- Assigns a specific Azure AD role to a User
 Add-AzureADSPSecret ---------------- Adds a secret to a service principal
 Add-AzureRole ---------------------- Adds a role to a user in Azure
 Connect-AzureJWT ------------------- Logins to Azure using a JWT access token. 
-New-AzureBackdoor ------------------ Creates a backdoor in Azure via Service Principal
 Export-AzureKeyVaultContent -------- Exports a Key as PEM or Certificate as PFX from the Key Vault
 Get-AzureKeyVaultContent ----------- Get the secrets and certificates from a specific Key Vault or all of them
 Get-AzureRunAsCertificate ---------- Will gather a RunAs accounts certificate if one is being used by an automation account, which can then be used to login as that account. 
@@ -204,6 +203,7 @@ Invoke-AzureRunProgram ------------- Will run a given binary on a specified VM
 Invoke-AzureVMUserDataAgent -------- Deploys the agent used by Invoke-AzureVMUserDataCommand
 Invoke-AzureVMUserDataCommand ------ Executes a command using the userData channel on a specified Azure VM.
 New-AzureADUser -------------------- Creates a user in Azure Active Directory
+New-AzureBackdoor ------------------ Creates a backdoor in Azure via Service Principal
 New-AzureIntuneScript -------------- Uploads a PS script to Intune
 Set-AzureElevatedPrivileges -------- Elevates the user’s privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
 Set-AzureSubscription -------------- Sets default subscription. Necessary if in a tenant with multiple subscriptions.
@@ -1775,21 +1775,21 @@ function Get-AzureIntuneScript
 {
 <# 
 .SYNOPSIS
-    Lists the scripts available in InTune. 
+    Lists the scripts available in InTune. This requires credentials to use.
+
+.DESCRIPTION
+    Uses a Graph API call to get any InTune scripts. This requires credentials in order to request a delegated token on behalf of the 'Office' Application in AAD, which has the correct permissions to access InTune data, where 'Azure PowerShell' Application does not.
 	
 .EXAMPLE
 	Get-AzureInTuneScript
 #>
-$m = Get-Module -Name Microsoft.Graph.Intune -ListAvailable
-if (-not $m)
-{
-    Install-Module NuGet -Force
-    Install-Module Microsoft.Graph.Intune
-}
-Import-Module Microsoft.Graph.Intune -Global
-Connect-MSGraph -AdminConsent | Out-Null
-$req = Invoke-MSGraphRequest -Url "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts" -HttpMethod GET
-$req.value 
+    If(!$GraphToken){
+        Get-AzureToken
+    }
+    $Headers = @{}
+    $Headers.Add("Authorization","Bearer"+ " " + "$($GraphToken)")    
+    $req = Invoke-RestMethod -uri "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts" -Headers $Headers
+    $req.value
 }
 
 function New-AzureIntuneScript
@@ -1847,12 +1847,6 @@ function Get-AzureLogicAppConnector
 <# 
 .SYNOPSIS
     Lists the connectors used in Logic Apps
-
-.PARAMETERS
-	-Script (Full path to script)	
-	
-.EXAMPLE
-	New-AzureIntuneScript -Script 'C:\temp\test.ps1'
 #>
 
 Get-AzResource | Where-Object {$_.ResourceType -eq 'Microsoft.Web/Connections' -and $_.ResourceId -match 'azuread'}

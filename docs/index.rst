@@ -39,7 +39,7 @@ Upon importing, it will list your current role and available subscriptions. From
 
 ::
 
-   Get-AzureTargets
+   Get-AzureTarget
 
    
 To get a list of resources you have access to.

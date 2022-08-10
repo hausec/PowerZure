@@ -1,7 +1,7 @@
 Operational
 ===========
 
-Add-AzureADGroup 
+Add-AzureADGroupMember
 ---------
 
 **Synopsis**
@@ -13,7 +13,7 @@ Adds a user to an Azure AD Group
 
 ::
 
-  Add-AzureADGroup  -User [UPN] -Group [Group name]
+  Add-AzureADGroupMember  -User [UPN] -Group [Group name]
 
 **Description**
 
@@ -25,7 +25,7 @@ name in single quotes.
 
 ::
 
-  Add-AzureADGroup  -User john@contoso.com -Group 'SQL Users' 
+  Add-AzureADGroupMember  -User john@contoso.com -Group 'SQL Users' 
 
 **Parameters** 
 
@@ -103,7 +103,7 @@ ID of the role
 Role successfully applied
 
 
-Add-AzureSPSecret
+Add-AzureADSPSecret
 ------------
 
 
@@ -119,7 +119,7 @@ Adds a secret to a service principal
 
 ::
 
-  Add-AzureSPSecret -ApplicationName [ApplicationName name] -Password [new secret]
+  Add-AzureADSPSecret -ApplicationName [ApplicationName name] -Password [new secret]
 
 
 **Description**
@@ -132,7 +132,7 @@ Adds a secret to a service principal so you can login as that service principal.
 
 ::
 
-   Add-AzureSPSecret -ApplicationName "MyTestApp" -Password password123
+   Add-AzureADSPSecret -ApplicationName "MyTestApp" -Password password123
 
 
 
@@ -154,48 +154,52 @@ New password "secret" for the Service Principal.
 
 Connection string to login as new user if successful
 
-New-AzureBackdoor
----------------
+Connect-AzureJWT
+------------
+
+
 
 **Synopsis**
 
+Logins to Azure using a JWT access token. 
 
-Creates a backdoor in Azure via Service Principal
+
 
 **Syntax**
 
-
 ::
 
-  New-AzureBackdoor -Username [Username] -Password [Password] 
+  Connect-AzureJWT -Token [access token] -AccountId [Account's ID]
 
 **Description**
 
-
-Will create a new Service Principal in Azure and assign it to the Global Administrator/Company Administrator role in AzureAD. This can then be logged into and escalated to User Administrator in Azure RBAC with Set-AzureElevatedPrivileges
+Logins to Azure using a JWT access token. Use -Raw to supply an unstructured token from a Managed Identity token request.
 
 **Examples**
 
 ::
 
-  New-AzureBackdoor -Username 'testserviceprincipal' -Password 'Password!'
-
+	$token = 'eyJ0eXAiOiJKV1QiLC....(snip)'
+	Connect-AzureJWT -Token $token -AccountId 93f7295a-1243-1234-1234-1a1fa41560e8
+	
+::	
+	Connect-AzureJWT -Token $token -AccountId 93f7295a-678e-44d2-b705-1a1fa41560e8 -Raw
 
 **Parameters** 
 
+-Token 
+Access token starting with 'eyJ0'. Easier if stored in variable. 
 
--Username
+-AccountID 
+Account's ID in AzureAD. This will not be the Application ID in the case for Service Principals but the actual account ID.
 
-Desired name of the Service Principal
+-Raw
+This will convert a REST API response to a token when gathering a token from a Managed Identity.
 
--Password
-
-Desired password for the account
 
 **Output**
 
-
-Success message if successful,  error if failure
+Login message
 
 Export-AzureKeyVaultContent
 ------------
@@ -590,6 +594,58 @@ Run an entire script instead of just one command.
 
 Output of command if successfully ran.
 
+Invoke-AzureCustomScriptExtension
+---------------
+
+**Synopsis**
+
+
+Runs a PowerShell script by uploading it as a Custom Script Extension
+
+**Syntax**
+
+
+::
+
+  Invoke-AzureCustomScriptExtension -ResourceGroup [RG name ] -VMName [VM Name] -Command [Command]
+  
+
+**Description**
+
+
+Runs a PowerShell script by uploading it as a Custom Script Extension via REST API which leaves behind less logs.
+
+**Examples**
+
+
+::
+
+  Invoke-AzureCustomScriptExtension -VMName AzureWin10 -Command whoami
+  
+::
+
+  Invoke-AzureCustomScriptExtension -VM 'Windows10' -ResourceGroup 'Defaultresourcegroup-cus' -Command 'powershell.exe -c mkdir C:\test'
+
+**Parameters** 
+
+
+-VMName
+
+Name of the virtual machine to execute the command on
+
+-Command
+
+The command to be executed
+
+-ResourceGroup
+
+Name of the resource group the VM belongs to
+
+**Output**
+
+
+Output of command being run or a failure message if failed
+
 Invoke-AzureRunCommand
 ---------------
 
@@ -757,10 +813,92 @@ Location of executable binary
 there will be no native Output unless the binary is meant to return data
 to stdout.
 
-New-AzureUser
+Invoke-AzureVMUserDataAgent
+---------------
+
+
+**Synopsis**
+
+
+Deploys the agent used by Invoke-AzureVMUserDataCommand
+
+
+**Syntax**
+
+::
+
+  Invoke-AzureVMUserDataAgent -VM [Virtual Machine name] 
+
+
+**Description**
+
+
+Deploys the agent used by Invoke-AzureVMUserDataCommand which is a scheduled task that polls the 'userData' field via IMDS REST API request for a new command every minute. This is uploaded via 'Invoke-AzVMRunCommand'
+https://hausec.com/2021/12/03/abusing-and-detecting-alternative-data-channels-and-managed-identities-on-azure-virtual-machines/ 
+
+**Examples**
+
+
+::
+
+	Invoke-AzureVMUserDataAgent -VM AzureWin10
+
+
+**Parameters** 
+
+-VM
+
+Name of the virtual machine to execute the command on
+
+**Output**
+
+
+“Agent successfully deployed!" output if successful. 
+
+Invoke-AzureVMUserDataCommand
+---------------
+
+
+**Synopsis**
+
+
+Executes a command using the userData channel on a specified Azure VM.
+
+**Syntax**
+
+::
+
+  Invoke-AzureVMUserDataCommand -VM [Virtual Machine name] -Command [command]
+
+
+**Description**
+
+
+Executes a command using the userData channel on a specified Azure VM by uploading the command into the 'userdata' field on a Virtual Machine, which is then polled by the agent and then executed. 
+
+**Examples**
+
+
+::
+
+	Invoke-AzureVMUserDataCommand -VM AzureWin10 -Command ls
+
+
+**Parameters** 
+
+-VM
+
+Name of the virtual machine to execute the command on
+
+-Command
+Command to run (runs as PowerShell).
+
+**Output**
+
+Output of the command is retrieved via the IMDS API 'userdata' field on the VM.
+
+New-AzureADUser
 ------------
-
-
 
 **Synopsis**
 
@@ -773,7 +911,7 @@ Creates a user in Azure Active Directory
 
 ::
 
-   New-AzureUser -Username [User Principal Name] -Password [Password]
+   New-AzureADUser -Username [User Principal Name] -Password [Password]
 
 
 
@@ -787,7 +925,7 @@ Creates a user in Azure Active Directory
 
 ::
 
-   New-AzureUser -Username 'test@test.com' -Password Password1234
+   New-AzureADUser -Username 'test@test.com' -Password Password1234
 
 
 **Parameters** 
@@ -808,17 +946,90 @@ New password for the user
 
 User is created
 
+
+New-AzureBackdoor
+---------------
+
+**Synopsis**
+
+
+Creates a backdoor in Azure via Service Principal
+
+**Syntax**
+
+
+::
+
+  New-AzureBackdoor -Username [Username] -Password [Password] 
+
+**Description**
+
+
+Will create a new Service Principal in Azure and assign it to the Global Administrator/Company Administrator role in AzureAD. This can then be logged into and escalated to User Administrator in Azure RBAC with Set-AzureElevatedPrivileges
+
+**Examples**
+
+::
+
+  New-AzureBackdoor -Username 'testserviceprincipal' -Password 'Password!'
+
+
+**Parameters** 
+
+
+-Username
+
+Desired name of the Service Principal
+
+-Password
+
+Desired password for the account
+
+**Output**
+
+
+Success message if successful,  error if failure
+
+New-AzureIntuneScript
+----------------
+
+**Synopsis**
+
+Creates a new script in Intune by uploading a supplied script
+
+**Syntax**
+
+::
+
+  New-AzureIntuneScript -Script [path/to/script.ps1]
+
+**Description**
+
+Creates a new script in Intune by uploading a supplied script. By default scripts in Intune will automatically run if the script is new to the device or if a new user logs in.
+
+**Examples**
+
+::
+
+  New-AzureIntuneScript -Script 'C:\temp\test.ps1'
+
+**Parameters** 
+
+-Script
+
+Location of the script to upload
+
+**Output**
+
+No output is given 
+
 Set-AzureElevatedPrivileges
 ------------
-
-
 
 **Synopsis**
 
 
 Elevates the user's privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
-
-
 
 
 **Syntax**
@@ -859,10 +1070,13 @@ Set-AzureSubscription
 
 **Synopsis**
 
-Sets default subscription. Necessary if in a tenant with multiple
-subscriptions.
+Sets default subscription. This command must be run for Azure functions to work properly. 
 
 **Syntax**
+
+::
+
+  Set-AzureSubscription
 
 ::
 
@@ -870,9 +1084,13 @@ subscriptions.
 
 **Description**
 
-Sets the default subscription
+Sets the default subscription via interactive menu or by supplying the subscription ID.
 
 **Examples**
+
+::
+
+  Set-AzureSubscription
 
 ::
 
@@ -889,7 +1107,7 @@ Subscription ID
 
 Success message
 
-Set-AzureUserPassword
+Set-AzureADUserPassword
 ------------
 
 **Synopsis**
@@ -902,7 +1120,7 @@ Sets a user's password
 
 ::
 
-  Set-AzureUserPassword -Username [UPN] -Password [new password]
+  Set-AzureADUserPassword -Username [UPN] -Password [new password]
 
 **Description**
 
@@ -914,7 +1132,7 @@ Sets a user’s password.
 
 ::
 
-  Set-AzureUserPassword -Username john@contoso.com -Password newpassw0rd1
+  Set-AzureADUserPassword -Username john@contoso.com -Password newpassw0rd1
 
 
 
