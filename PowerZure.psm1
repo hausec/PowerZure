@@ -531,12 +531,13 @@ function Add-AzureADRole
     }
 
     $body = [PSCustomObject]@{
+            "@odata.type" = "#microsoft.graph.unifiedRoleAssignment"
             roleDefinitionId = $roleid
             principalId = $userid
             directoryScopeId = '/'
             }
     $json = $body | convertto-json
-    Invoke-RestMethod -Headers $Headers -ContentType 'application/json' -Method POST -Body $json -Uri https://graph.microsoft.com/beta/roleManagement/entitlementManagement/roleAssignment  
+    Invoke-RestMethod -Headers $Headers -ContentType 'application/json' -Method POST -Body $json -Uri https://graph.microsoft.com/v1.0/roleManagement/directory/roleAssignments  
 }
 
 function Get-AzureTarget
