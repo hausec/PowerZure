@@ -162,11 +162,11 @@ function Invoke-PowerZure
 
 ------------------Info Gathering -------------
 
-Get-AzureADAppOwner ---------------- Returns all owners of all Applications in AAD
-Get-AzureADDeviceOwner ------------- Lists the owners of devices in AAD. This will only show devices that have an owner.
-Get-AzureADGroupMember ------------- Gathers a specific group or all groups in AzureAD and lists their members.
-Get-AzureADRoleMember -------------- Lists the members of a given role in AAD
-Get-AzureADUser -------------------- Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
+Get-AzureAppOwner ---------------- Returns all owners of all Applications in Entra
+Get-AzureDeviceOwner ------------- Lists the owners of devices in Entra. This will only show devices that have an owner.
+Get-AzureGroupMember ------------- Gathers a specific group or all groups in Entra and lists their members.
+Get-AzureRoleMember -------------- Lists the members of a given role in Entra
+Get-AzureUser -------------------- Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
 Get-AzureCurrentUser --------------- Returns the current logged in user name and any owned objects
 Get-AzureIntuneScript -------------- Lists available Intune scripts in Azure Intune
 Get-AzureLogicAppConnector --------- Lists the connector APIs in Azure
@@ -183,9 +183,9 @@ Show-AzureStorageContent ----------- Lists all available storage containers, sha
 
 ------------------Operational --------------
 
-Add-AzureADGroupMember ------------- Adds a user to an Azure AD Group
-Add-AzureADRole -------------------- Assigns a specific Azure AD role to a User
-Add-AzureADSPSecret ---------------- Adds a secret to a service principal
+Add-AzureGroupMember ------------- Adds a user to an Azure AD Group
+Add-AzureRole -------------------- Assigns a specific Azure AD role to a User
+Add-AzureSPSecret ---------------- Adds a secret to a service principal
 Add-AzureRole ---------------------- Adds a role to a user in Azure
 Connect-AzureJWT ------------------- Logins to Azure using a JWT access token. 
 Export-AzureKeyVaultContent -------- Exports a Key as PEM or Certificate as PFX from the Key Vault
@@ -202,12 +202,12 @@ Invoke-AzureRunMSBuild ------------- Will run a supplied MSBuild payload on a sp
 Invoke-AzureRunProgram ------------- Will run a given binary on a specified VM
 Invoke-AzureVMUserDataAgent -------- Deploys the agent used by Invoke-AzureVMUserDataCommand
 Invoke-AzureVMUserDataCommand ------ Executes a command using the userData channel on a specified Azure VM.
-New-AzureADUser -------------------- Creates a user in Azure Active Directory
+New-AzureUser -------------------- Creates a user in Azure Active Directory
 New-AzureBackdoor ------------------ Creates a backdoor in Azure via Service Principal
 New-AzureIntuneScript -------------- Uploads a PS script to Intune
 Set-AzureElevatedPrivileges -------- Elevates the user’s privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
 Set-AzureSubscription -------------- Sets default subscription. Necessary if in a tenant with multiple subscriptions.
-Set-AzureADUserPassword ------------ Sets a user’s password
+Set-AzureUserPassword ------------ Sets a user’s password
 Start-AzureRunbook ----------------- Starts a Runbook	
 "@
         }
@@ -274,17 +274,17 @@ function Set-AzureSubscription
     Set-AzContext -SubscriptionId $choice.Id
 }
 
-function Get-AzureADRoleMember
+function Get-AzureRoleMember
 {
 <# 
 .SYNOPSIS
-    Lists the members of a given role in AAD
+    Lists the members of a given role in Entra
 
 .PARAMETER Role
     Name of a specific role to gather
 
 .EXAMPLE
-	Get-AzureADRoleMember -Role 'Global Administrator'
+	Get-AzureRoleMember -Role 'Global Administrator'
 #>
     [CmdletBinding()]
     Param(
@@ -299,7 +299,7 @@ function Get-AzureADRoleMember
 
 }
 
-function Get-AzureADUser
+function Get-AzureUser
 {
 <# 
 .SYNOPSIS
@@ -315,9 +315,9 @@ function Get-AzureADUser
     Switch; gathers all users (Warning: May take awhile if in a large tenant)
 
 .EXAMPLE
-    Get-AzureADUser -Username Test@domain.com
-    Get-AzureADUser -Id 8fc3e9a3-3e8e-447a-8bcc-cc33db6b9728
-	Get-AzureADUser -All
+    Get-AzureUser -Username Test@domain.com
+    Get-AzureUser -Id 8fc3e9a3-3e8e-447a-8bcc-cc33db6b9728
+	Get-AzureUser -All
 #>
     [CmdletBinding()]
     Param(
@@ -336,13 +336,13 @@ function Get-AzureADUser
                 $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid/memberOf" 
                 $Memberships = $MembershipsReq.value
                 $Groups = @()
-                $AADRoles = @()
+                $EntraRoles = @()
                 ForEach ($Membership in $Memberships){
                     If($Membership."@odata.type" -eq '#microsoft.graph.group'){
                     $GroupName = $Membership.DisplayName
                     $Groups += $GroupName                  
                     }else{
-                    $AADRoles += $Membership.DisplayName
+                    $EntraRoles += $Membership.DisplayName
                     }
                 } 
 	            $obj | Add-Member -MemberType NoteProperty -Name Username -Value $userdata.UserPrincipalName
@@ -350,8 +350,8 @@ function Get-AzureADUser
                 $obj | Add-Member -MemberType NoteProperty -Name Title -Value $userdata.jobTitle
                 If($userdata.onPremisesDistinguishedName){
                 $obj | Add-Member -MemberType NoteProperty -Name OnPremDN -Value $userdata.onPremisesDistinguishedName}
-                $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
-                $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
+                $obj | Add-Member -MemberType NoteProperty -Name EntraRoles -Value $EntraRoles
+                $obj | Add-Member -MemberType NoteProperty -Name EntraGroups -Value $Groups
                 $obj	
 		}
 	}	
@@ -367,13 +367,13 @@ function Get-AzureADUser
         $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid/memberOf" 
         $Memberships = $MembershipsReq.value
         $Groups = @()
-        $AADRoles = @()
+        $EntraRoles = @()
         ForEach ($Membership in $Memberships){
             If($Membership."@odata.type" -eq '#microsoft.graph.group'){
             $GroupName = $Membership.DisplayName
             $Groups += $GroupName                  
             }else{
-            $AADRoles += $Membership.DisplayName
+            $EntraRoles += $Membership.DisplayName
             }
         } 
 	    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $userdata.UserPrincipalName
@@ -381,8 +381,8 @@ function Get-AzureADUser
         $obj | Add-Member -MemberType NoteProperty -Name Title -Value $userdata.jobTitle
         If($userdata.onPremisesDistinguishedName){
         $obj | Add-Member -MemberType NoteProperty -Name OnPremDN -Value $userdata.onPremisesDistinguishedName}
-        $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
-        $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
+        $obj | Add-Member -MemberType NoteProperty -Name EntraRoles -Value $EntraRoles
+        $obj | Add-Member -MemberType NoteProperty -Name EntraGroups -Value $Groups
         $obj		  
         }
     }
@@ -392,13 +392,13 @@ function Get-AzureADUser
         $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id/memberOf" 
         $Memberships = $MembershipsReq.value
         $Groups = @()
-        $AADRoles = @()
+        $EntraRoles = @()
         ForEach ($Membership in $Memberships){
             If($Membership."@odata.type" -eq '#microsoft.graph.group'){
             $GroupName = $Membership.DisplayName
             $Groups += $GroupName                  
             }else{
-            $AADRoles += $Membership.DisplayName
+            $EntraRoles += $Membership.DisplayName
             }
         } 
 	    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $userdata.UserPrincipalName
@@ -406,8 +406,8 @@ function Get-AzureADUser
         $obj | Add-Member -MemberType NoteProperty -Name Title -Value $userdata.jobTitle
         If($userdata.onPremisesDistinguishedName){
         $obj | Add-Member -MemberType NoteProperty -Name OnPremDN -Value $userdata.onPremisesDistinguishedName}
-        $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
-        $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
+        $obj | Add-Member -MemberType NoteProperty -Name EntraRoles -Value $EntraRoles
+        $obj | Add-Member -MemberType NoteProperty -Name EntraGroups -Value $Groups
         $obj	  
     }  
     else{
@@ -426,13 +426,13 @@ function Get-AzureADUser
         $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id/memberOf" 
         $Memberships = $MembershipsReq.value
         $Groups = @()
-        $AADRoles = @()
+        $EntraRoles = @()
         ForEach ($Membership in $Memberships){
             If($Membership."@odata.type" -eq '#microsoft.graph.group'){
             $GroupName = $Membership.DisplayName
             $Groups += $GroupName                  
             }else{
-            $AADRoles += $Membership.DisplayName
+            $EntraRoles += $Membership.DisplayName
             }
         } 
 	    $obj | Add-Member -MemberType NoteProperty -Name Username -Value $userdata.UserPrincipalName
@@ -440,13 +440,13 @@ function Get-AzureADUser
         $obj | Add-Member -MemberType NoteProperty -Name Title -Value $userdata.jobTitle
         If($userdata.onPremisesDistinguishedName){
         $obj | Add-Member -MemberType NoteProperty -Name OnPremDN -Value $userdata.onPremisesDistinguishedName}
-        $obj | Add-Member -MemberType NoteProperty -Name AADRoles -Value $AADRoles
-        $obj | Add-Member -MemberType NoteProperty -Name AADGroups -Value $Groups
+        $obj | Add-Member -MemberType NoteProperty -Name EntraRoles -Value $EntraRoles
+        $obj | Add-Member -MemberType NoteProperty -Name EntraGroups -Value $Groups
         $obj	  
     }          
 } 
 
-function Get-AzureADGroupMember 
+function Get-AzureGroupMember
 {
 <# 
 .SYNOPSIS
@@ -456,7 +456,7 @@ function Get-AzureADGroupMember
     -Group (Name or Id)
 
 .EXAMPLE
-	Get-AzureADGroupMember -Group 'Sql Admins'
+	Get-AzureGroupMember -Group 'Sql Admins'
 #>
     [CmdletBinding()]
     Param(
@@ -473,7 +473,7 @@ function Get-AzureADGroupMember
     $membersREQ.value
 }
 
-function Add-AzureADGroupMember
+function Add-AzureGroupMember
 {
 <# 
 .SYNOPSIS
@@ -481,10 +481,10 @@ function Add-AzureADGroupMember
 
 .PARAMETER 
     -Username (UPN of the user)
-    -Group (AAD Group name)
+    -Group (Entra Group name)
 
 .EXAMPLE
-    Add-AzureADGroupMember -User john@contoso.com -Group 'SQL Users'
+    Add-AzureGroupMember -User john@contoso.com -Group 'SQL Users'
 #>
     [CmdletBinding()]
     Param(
@@ -546,7 +546,7 @@ function Get-AzureTarget
     Checks your role against the scope of your role to determine what you have access to.
 
 .DESCRIPTION
-    Gathers your AAD roles and ARM roles then lists the resources that pertain to that scope. 
+    Gathers your Entra roles and ARM roles then lists the resources that pertain to that scope. 
      
 .PARAMETER list 
     Switch; List view
@@ -1512,7 +1512,7 @@ Get-AzureSQLDB -Server 'SQLServer01'
     }
 }
 
-function Set-AzureADUserPassword
+function Set-AzureUserPassword
 {
 <#
 .SYNOPSIS 
@@ -1524,7 +1524,7 @@ Username - Name of user
 
 .EXAMPLE
 
-Set-AzureADUserPassword -Username john@contoso.com -Password newpassw0rd1
+Set-AzureUserPassword -Username john@contoso.com -Password newpassw0rd1
 #>
 	[CmdletBinding()]
 	 Param(
@@ -1568,14 +1568,14 @@ Get-AzureRunAsAccounts
     }
 }
 
-function Get-AzureADAppOwner
+function Get-AzureAppOwner
 {
 <#
 .SYNOPSIS 
-Returns all owners of all applications in AAD
+Returns all owners of all applications in Entra
 
 .EXAMPLE
-Get-AzureADAppOwners
+Get-AzureAppOwners
 #>
     $Headers = Get-AzureToken -Graph
 	$Uri = 'https://graph.microsoft.com/beta/applications'
@@ -1601,18 +1601,25 @@ function Add-AzureADSPSecret
 .SYNOPSIS
     Adds a secret to a service principal. The secret is auto generated and will be shown. It is not retrievable after being displayed.
 
-.PARAMETERS
-    -ApplicationName (Name of Application the SP is tied to)
+.PARAMETER
+    -AppName (Name of Application the SP is tied to)
+
+.PARAMETER
+    -AppID (ID of Application the SP is tied to)    
 	
 .EXAMPLE
 	Add-AzureADSPSecret -ApplicationName "ApplicationName"
 #>
     [CmdletBinding()]
     Param(
-    [Parameter(Mandatory=$true)][String]$ApplicationName = $null)
+    [Parameter(Mandatory=$false)][String]$AppName = $null,
+    [Parameter(Mandatory=$false)][String]$AppID = $null)
     $Headers = Get-AzureToken -Graph 
-    $App = Get-AzADApplication -DisplayName $ApplicationName    
-    $Uri = 'https://graph.microsoft.com/beta/applications/' + $App.id + '/addPassword'
+    If(!$AppID){
+    $App = Get-AzADApplication -DisplayName $AppName    
+    $Uri = 'https://graph.microsoft.com/beta/applications/' + $App.id + '/addPassword'}
+    else{
+    $Uri = 'https://graph.microsoft.com/beta/applications/' + $AppID + '/addPassword'}
     $Body = [PSCustomObject]@{
         passwordCredential = @{displayName="TestPass"}
     }
@@ -1778,7 +1785,7 @@ function Get-AzureIntuneScript
     Lists the scripts available in InTune. This requires credentials to use.
 
 .DESCRIPTION
-    Uses a Graph API call to get any InTune scripts. This requires credentials in order to request a delegated token on behalf of the 'Office' Application in AAD, which has the correct permissions to access InTune data, where 'Azure PowerShell' Application does not.
+    Uses a Graph API call to get any InTune scripts. This requires credentials in order to request a delegated token on behalf of the 'Office' Application in Entra, which has the correct permissions to access InTune data, where 'Azure PowerShell' Application does not.
 	
 .EXAMPLE
 	Get-AzureInTuneScript
@@ -1852,14 +1859,14 @@ function Get-AzureLogicAppConnector
 Get-AzResource | Where-Object {$_.ResourceType -eq 'Microsoft.Web/Connections' -and $_.ResourceId -match 'azuread'}
 }
 
-function Get-AzureADDeviceOwner
+function Get-AzureDeviceOwner
 {
 <# 
 .SYNOPSIS
-    Lists the owners of devices in AAD. This will only show devices that have an owner.
+    Lists the owners of devices in Entra. This will only show devices that have an owner.
 	
 .EXAMPLE
-	Get-AzureADDeviceOwner
+	Get-AzureDeviceOwner
 #>
     $Headers = Get-AzureToken -Graph
     $req = Invoke-RestMethod -uri https://graph.microsoft.com/v1.0/devices -Headers $Headers
@@ -2008,7 +2015,7 @@ function Get-AzureManagedIdentity
 {
 <# 
 .SYNOPSIS
-    Gathers all Managed Identities in AAD
+    Gathers all Managed Identities in Entra
 #>
 	$Headers = Get-AzureToken -Graph 
     $req = Invoke-RestMethod -Uri 'https://graph.microsoft.com/beta/servicePrincipals' -Headers $Headers
