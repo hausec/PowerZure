@@ -8,7 +8,7 @@
 
 PowerZure is a PowerShell project created to assess and exploit resources within
 Microsoft’s cloud platform, Azure. PowerZure was created out of the need for a
-framework that can both perform reconnaissance **and** exploitation of Azure, AzureAD, and the associated resources.
+framework that can both perform reconnaissance **and** exploitation of Azure, EntraID, and the associated resources.
 
 ## Requirements
 
@@ -24,7 +24,7 @@ If you have multiple subscriptions, you must set the main subscription with `Set
 
 ## Additional Resources
 
-You can type `Get-AzureCurrentUser` to view the current signed-in user's roles in Azure and Azure AD.
+You can type `Get-AzureCurrentUser` to view the current signed-in user's roles in Azure and EntraID.
 
 You can also type `Get-AzureTarget` to compare your current signed-in user's roles and their scope to resources within Azure. 
 
