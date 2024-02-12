@@ -1,7 +1,7 @@
 Information Gathering
 =====================
 
-Get-AzureADAppOwner
+Get-AzureAppOwner
 --------
 
 **Synopsis**
@@ -13,7 +13,7 @@ Returns all owners of all Applications in AAD
 
 ::
 
-  Get-AzureADAppOwner
+  Get-AzureAppOwner
 
 **Description**
 
@@ -23,7 +23,7 @@ Recursively looks through each application in AAD and lists the owners
 
 ::
 
-  Get-AzureADAppOwner
+  Get-AzureAppOwner
 
 **Parameters** 
 
@@ -33,7 +33,7 @@ None
 
 Application owners in AAD
 
-Get-AzureADDeviceOwner
+Get-AzureDeviceOwner
 --------
 
 **Synopsis**
@@ -45,7 +45,7 @@ Lists the owners of devices in AAD. This will only show devices that have an own
 
 ::
 
-  Get-AzureADDeviceOwner
+  Get-AzureDeviceOwner
 
 **Description**
 
@@ -55,7 +55,7 @@ Lists the owners of devices in AAD. This will only show devices that have an own
 
 ::
 
-  Get-AzureADDeviceOwner
+  Get-AzureDeviceOwner
 
 **Parameters** 
 
@@ -66,7 +66,7 @@ None
 Device owners from AAD
 
 
-Get-AzureADGroupMember
+Get-AzureGroupMember
 -------------
 
 **Synopsis**
@@ -78,7 +78,7 @@ Gets all the members of a specific group
 
 ::
 
-  Get-AzureADGroupMember -Group '[Name of Group]'
+  Get-AzureGroupMember -Group '[Name of Group]'
   
 
 **Description**
@@ -89,7 +89,7 @@ Uses Graph API call to gather a group, the group's ID, the member's name, and th
   
 ::
 
-  Get-AzureADGroupMember -Group 'Sql Admins'
+  Get-AzureGroupMember -Group 'Sql Admins'
 
 **Parameters** 
 
@@ -101,7 +101,7 @@ Name of group to collect
 
 Group members and their IDs
 
-Get-AzureADRoleMember
+Get-AzureRoleMember
 ------------------
 
 **Synopsis**
@@ -112,22 +112,22 @@ Lists the members of a given role in AAD
 
 ::
 
-  Get-AzureADRoleMember -All
+  Get-AzureRoleMember -All
   
 ::
 
-  Get-AzureADRole -Role '[RoleName]'
+  Get-AzureRole -Role '[RoleName]'
   
 ::
 
-  Get-AzureADRole -Role '[RoleId]'
+  Get-AzureRole -Role '[RoleId]'
 
 **Description**
 
 Uses a Graph API call to list the role, roleid, members name, and if there's any application service principal members. Application Service Principals will show up as '$null', as it's a bug within the Graph API output. This property can be expanded to reveal the actual name, e.g. 
 ::
   
-  $a = Get-AzureAdRoleMember; $a.Applicationmembers
+  $a = Get-AzureRoleMember; $a.Applicationmembers
 
 Due to mismatch in documentation, role names my not be 100% accurate to what the API's backend has, e.g. Company Administrator is what the API uses, but it's displayed as Global Administrator. Because of this, using a Role ID is more accurate.
 
@@ -135,7 +135,7 @@ Due to mismatch in documentation, role names my not be 100% accurate to what the
 
 ::
 
-  Get-AzureADRoleMember -Role 'Global Administrator'
+  Get-AzureRoleMember -Role 'Global Administrator'
 
 **Parameters** 
 
@@ -148,23 +148,23 @@ The role name of the target role
 
 All members of all roles, their IDs, and any Application Service Principal members.
 
-Get-AzureADUser
+Get-AzureUser
 ------------
 
 
 **Synopsis**
 
-Gathers info on a specific user or all users including their groups and roles in Azure & AzureAD
+Gathers info on a specific user or all users including their groups and roles in Azure & Entra
 
 **Syntax**
 
 ::
 
-  Get-AzureADUser -Username [Usename]
+  Get-AzureUser -Username [Usename]
   
 ::
 
-  Get-AzureADUser -All
+  Get-AzureUser -All
 
 **Description**
 
@@ -174,17 +174,17 @@ Gathers a user's Azure role by calling Get-AzRoleAssignment, then uses Graph API
 
 ::
 
-  Get-AzureADUser -Username john@contoso.com
+  Get-AzureUser -Username john@contoso.com
 
 ::
 
-  Get-AzureADUser -All
+  Get-AzureUser -All
 
 **Parameters** 
 
 -All
 
-Switch; Gathers all users in AzureAD.
+Switch; Gathers all users in Entra.
 
 -Username 
 

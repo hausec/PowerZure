@@ -1,7 +1,7 @@
 Operational
 ===========
 
-Add-AzureADGroupMember
+Add-AzureGroupMember
 ---------
 
 **Synopsis**
@@ -13,7 +13,7 @@ Adds a user to an Azure AD Group
 
 ::
 
-  Add-AzureADGroupMember  -User [UPN] -Group [Group name]
+  Add-AzureGroupMember  -User [UPN] -Group [Group name]
 
 **Description**
 
@@ -25,7 +25,7 @@ name in single quotes.
 
 ::
 
-  Add-AzureADGroupMember  -User john@contoso.com -Group 'SQL Users' 
+  Add-AzureGroupMember  -User john@contoso.com -Group 'SQL Users' 
 
 **Parameters** 
 
@@ -43,7 +43,7 @@ AAD Group name
 
 User added to group
 
-Add-AzureADRole
+Add-AzureRole
 --------
 
 **Synopsis**
@@ -54,11 +54,11 @@ Assigns a specific Azure AD role to a User
 
 ::
 
-  Add-AzureADRole -Username [User Principal Name] -Role '[Role name]'\
+  Add-AzureRole -Username [User Principal Name] -Role '[Role name]'\
 
 ::
 
-  Add-AzureADRole -UserId [UserId] -RoleId '[Role Id]'
+  Add-AzureRole -UserId [UserId] -RoleId '[Role Id]'
   
 
 **Description**
@@ -72,12 +72,12 @@ Assigns a specific Azure AD role to a User using either the role name or ID and 
 
 ::
 
-  Add-AzureADRole -Username test@test.com -Role 'Company Administrator'
+  Add-AzureRole -Username test@test.com -Role 'Company Administrator'
 
 
 ::
 
-  Add-AzureADRole -UserId 6eca6b85-7a3d-4fcf-b8da-c15a4380d286 -Role '4dda258a-4568-4579-abeb-07709e34e307'
+  Add-AzureRole -UserId 6eca6b85-7a3d-4fcf-b8da-c15a4380d286 -Role '4dda258a-4568-4579-abeb-07709e34e307'
 
 **Parameters** 
 
@@ -103,7 +103,7 @@ ID of the role
 Role successfully applied
 
 
-Add-AzureADSPSecret
+Add-AzureSPSecret
 ------------
 
 
@@ -119,7 +119,7 @@ Adds a secret to a service principal
 
 ::
 
-  Add-AzureADSPSecret -ApplicationName [ApplicationName name] -Password [new secret]
+  Add-AzureSPSecret -ApplicationName [ApplicationName name] -Password [new secret]
 
 
 **Description**
@@ -132,7 +132,7 @@ Adds a secret to a service principal so you can login as that service principal.
 
 ::
 
-   Add-AzureADSPSecret -ApplicationName "MyTestApp" -Password password123
+   Add-AzureSPSecret -ApplicationName "MyTestApp" -Password password123
 
 
 
@@ -191,7 +191,7 @@ Logins to Azure using a JWT access token. Use -Raw to supply an unstructured tok
 Access token starting with 'eyJ0'. Easier if stored in variable. 
 
 -AccountID 
-Account's ID in AzureAD. This will not be the Application ID in the case for Service Principals but the actual account ID.
+Account's ID in Entra. This will not be the Application ID in the case for Service Principals but the actual account ID.
 
 -Raw
 This will convert a REST API response to a token when gathering a token from a Managed Identity.
@@ -897,7 +897,7 @@ Command to run (runs as PowerShell).
 
 Output of the command is retrieved via the IMDS API 'userdata' field on the VM.
 
-New-AzureADUser
+New-AzureUser
 ------------
 
 **Synopsis**
@@ -911,7 +911,7 @@ Creates a user in Azure Active Directory
 
 ::
 
-   New-AzureADUser -Username [User Principal Name] -Password [Password]
+   New-AzureUser -Username [User Principal Name] -Password [Password]
 
 
 
@@ -925,7 +925,7 @@ Creates a user in Azure Active Directory
 
 ::
 
-   New-AzureADUser -Username 'test@test.com' -Password Password1234
+   New-AzureUser -Username 'test@test.com' -Password Password1234
 
 
 **Parameters** 
@@ -965,7 +965,7 @@ Creates a backdoor in Azure via Service Principal
 **Description**
 
 
-Will create a new Service Principal in Azure and assign it to the Global Administrator/Company Administrator role in AzureAD. This can then be logged into and escalated to User Administrator in Azure RBAC with Set-AzureElevatedPrivileges
+Will create a new Service Principal in Azure and assign it to the Global Administrator/Company Administrator role in Entra. This can then be logged into and escalated to User Administrator in Azure RBAC with Set-AzureElevatedPrivileges
 
 **Examples**
 
@@ -1029,7 +1029,7 @@ Set-AzureElevatedPrivileges
 **Synopsis**
 
 
-Elevates the user's privileges from Global Administrator in AzureAD to include User Access Administrator in Azure RBAC.
+Elevates the user's privileges from Global Administrator in Entra to include User Access Administrator in Azure RBAC.
 
 
 **Syntax**
@@ -1107,7 +1107,7 @@ Subscription ID
 
 Success message
 
-Set-AzureADUserPassword
+Set-AzureUserPassword
 ------------
 
 **Synopsis**
@@ -1120,7 +1120,7 @@ Sets a user's password
 
 ::
 
-  Set-AzureADUserPassword -Username [UPN] -Password [new password]
+  Set-AzureUserPassword -Username [UPN] -Password [new password]
 
 **Description**
 
@@ -1132,7 +1132,7 @@ Sets a user’s password.
 
 ::
 
-  Set-AzureADUserPassword -Username john@contoso.com -Password newpassw0rd1
+  Set-AzureUserPassword -Username john@contoso.com -Password newpassw0rd1
 
 
 
