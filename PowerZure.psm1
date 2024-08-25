@@ -496,47 +496,44 @@ function Add-AzureGroupMember
 
 function Add-AzureADRole
 {
- <#
-.SYNOPSIS
-    Adds a role to a user in AzureAD
+    <#
+    .SYNOPSIS
+        Adds a role to a user or service principal in AzureAD/Entra
 
-.PARAMETER
-    -Username (Intended User)
-    -UserID (Intended User or Service Principal by ID)
-    -Role (Intended role)
-    -RoleId (Intended role by Id)
-	-ServicePrincipal (Add a role as a service principal)
+    .PARAMETER
+        -Username (Intended User)
+        -UserID (Intended User or Service Principal by ID)
+        -RoleTemplateId (Intended role by Id)
 
-.EXAMPLE
-    Add-AzureADRole -Username test@test.com -Role 'Company Administrator'
-	Add-AzureADRole -UserId 6eca6b85-7a3d-4fcf-b8da-c15a4380d286 -Role '4dda258a-4568-4579-abeb-07709e34e307'
-#>
+    .EXAMPLE
+        Add-AzureADRole -UserId 6eca6b85-7a3d-4fcf-1234-c15a4380d286 -RoleTemplateId '12345678-4568-4579-abeb-07709e34e307'
+    #>
     [CmdletBinding()]
     Param(
-    [Parameter(Mandatory=$false)][String]$UserId = $null,
-    [Parameter(Mandatory=$false)][String]$Username = $null,
-    [Parameter(Mandatory=$false)][String]$RoleId = $null,
-    [Parameter(Mandatory=$false)][String]$Role = $null)
+        [Parameter(Mandatory=$false)][String]$UserId = $null,
+        [Parameter(Mandatory=$false)][String]$Username = $null,
+        [Parameter(Mandatory=$false)][String]$RoleTemplateId = $null,
+    )
 
     $Headers = Get-AzureToken -Graph
+
     If($Username){
-        If($Username -notmatch '@'){Write-Error "Username must contain the domain, e.g. user@domain.com";break}
-        $userdata = Invoke-RestMethod -Headers $Headers -Uri https://graph.microsoft.com/beta/users/$username
-        $Userid = $userdata.id
-    }
-    If(!$RoleID){
-        $uri = 'https://graph.microsoft.com/beta/directoryRoles?$filter=displayName eq ' +"'"+ $role + "'"
-        $roles = Invoke-RestMethod -Headers $Headers -Uri $uri
-        $roleid = $roles.value.id
+        If($Username -notmatch '@'){
+            Write-Error "Username must contain the domain, e.g. user@domain.com"
+            return
+        }
+        $userdata = Invoke-RestMethod -Headers $Headers -Uri "https://graph.microsoft.com/v1.0/users/$Username"
+        $UserId = $userdata.id
     }
 
     $body = [PSCustomObject]@{
-            roleDefinitionId = $roleid
-            principalId = $userid
-            directoryScopeId = '/'
-            }
-    $json = $body | convertto-json
-    Invoke-RestMethod -Headers $Headers -ContentType 'application/json' -Method POST -Body $json -Uri https://graph.microsoft.com/beta/roleManagement/entitlementManagement/roleAssignment  
+        "@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$UserId"
+    }
+
+    $json = $body | ConvertTo-Json
+    $uri = "https://graph.microsoft.com/beta/directoryRoles/roleTemplateId=$roletemplateid/members/`$ref"
+
+    Invoke-RestMethod -Headers $Headers -ContentType 'application/json' -Method POST -Body $json -Uri $uri
 }
 
 function Get-AzureTarget
