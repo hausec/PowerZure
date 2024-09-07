@@ -512,7 +512,7 @@ function Add-AzureADRole
     Param(
         [Parameter(Mandatory=$false)][String]$UserId = $null,
         [Parameter(Mandatory=$false)][String]$Username = $null,
-        [Parameter(Mandatory=$false)][String]$RoleTemplateId = $null,
+        [Parameter(Mandatory=$false)][String]$RoleTemplateId = $null
     )
 
     $Headers = Get-AzureToken -Graph
