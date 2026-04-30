@@ -28,6 +28,7 @@ FunctionsToExport = @(
 	'Add-AzureADRole',
 	'Get-AzureCurrentUser',
 	'Invoke-PowerZure',
+	'Test-PowerZureDependency',
 	'Get-AzureRoleMember',
 	'Get-AzureAppOwner', 
 	'Get-AzureDeviceOwner', 

